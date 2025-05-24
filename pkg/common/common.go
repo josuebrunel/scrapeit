@@ -10,6 +10,7 @@ import (
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
+	"github.com/multiformats/go-multiaddr"
 )
 
 const (
@@ -47,7 +48,7 @@ type Node struct {
 	TopicName string
 }
 
-func NewNode(ctx context.Context, topicName, address string) *Node {
+func NewNode(ctx context.Context, topicName, address string, bootStrappingPeers []multiaddr.Multiaddr) *Node {
 	host, err := libp2p.New(libp2p.ListenAddrStrings(address))
 	if err != nil {
 		xlog.Error("error while creating host", "err", err)
@@ -62,6 +63,13 @@ func NewNode(ctx context.Context, topicName, address string) *Node {
 	if err != nil {
 		panic(err)
 	}
+	// dht discovery
+	dht, err := NewDHT(ctx, host, bootStrappingPeers)
+	if err != nil {
+		panic(err)
+	}
+	go DHTDiscover(ctx, host, dht, DiscoveryTag)
+	// local discovery
 	xlog.Info("setup local discovery")
 	if err := SetupDiscover(host); err != nil {
 		panic(err)

@@ -3,12 +3,13 @@ package env
 import "os"
 
 const (
-	AppAddrN  = "APP_ADDR"
-	AppAddrV  = ":8080"
-	PubAddrN  = "PUB_ADDR"
-	PubAddrV  = "/ip4/127.0.0.1/tcp/8081"
-	PubTopicN = "PUB_TOPIC"
-	PubTopicV = "scraping"
+	AppAddrN     = "APP_ADDR"
+	AppAddrV     = ":8080"
+	PubAddrN     = "PUB_ADDR"
+	PubAddrV     = "/ip4/0.0.0.0/tcp/7654"
+	PubTopicN    = "PUB_TOPIC"
+	PubTopicV    = "scraping"
+	PubPeersRoot = "PUB_ROOT_PEERS"
 )
 
 var DefaultValues = map[string]string{

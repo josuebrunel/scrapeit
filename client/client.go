@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"scrapeit/pkg/common"
+	"scrapeit/pkg/env"
 	"time"
 
 	"github.com/josuebrunel/gopkg/xlog"
@@ -20,9 +21,9 @@ type Client struct {
 	Node      *common.Node
 }
 
-func New(topic string) *Client {
+func New() *Client {
 	return &Client{
-		TopicName: topic,
+		TopicName: env.Get(env.PubTopicN),
 	}
 }
 
@@ -32,7 +33,7 @@ func (c *Client) SetNode(node *common.Node) {
 
 func (c Client) Run() error {
 	ctx := context.Background()
-	node := common.NewNode(ctx, c.TopicName, "/ip4/0.0.0.0/tcp/0")
+	node := common.NewNode(ctx, c.TopicName, "/ip4/0.0.0.0/tcp/0", common.PeersRoot())
 	c.SetNode(node)
 	defer node.Host.Close()
 
