@@ -1,0 +1,19 @@
+services:
+  server:
+    container_name: scrapeit-server
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    ports:
+      - "7777:7777"
+    volumes:
+      - ./:/go/src/app/
+    networks:
+      - scrapeit
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  scrapeit:
