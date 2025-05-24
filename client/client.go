@@ -53,6 +53,8 @@ func (c Client) Subscribe(ctx context.Context, subscriber *pubsub.Subscription) 
 		if msg.ReceivedFrom == c.Node.ID {
 			continue
 		}
-		xlog.Info("go message", "from", msg.ReceivedFrom, "topic", msg.Topic, "data", string(msg.Data))
+		var data common.Message
+		data.JSONUnmarshal(msg.Data)
+		xlog.Info("go message", "from", msg.ReceivedFrom, "topic", msg.Topic, "data", data)
 	}
 }

@@ -7,7 +7,8 @@ services:
       dockerfile: Dockerfile
       target: build
     ports:
-      - "7777:7777"
+      - "8380:8080"
+      - "8381:8081"
     volumes:
       - ./:/go/src/app/
     networks:

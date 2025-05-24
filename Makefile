@@ -4,6 +4,9 @@ BIN_CLIENT="./bin/${NAME}-client"
 MAIN_SERVER=./cmd/server/main.go
 MAIN_CLIENT=./cmd/client/main.go
 
+deps:
+	go get "github.com/labstack/echo/v5@v5.0.0-20230722203903-ec5b858dab61"
+
 debug.build: build
 	go build -gcflags "all=-N -l" -ldflags="-compressdwarf=false" -o ${BIN} ${MAIN}
 
