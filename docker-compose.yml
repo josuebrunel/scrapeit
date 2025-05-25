@@ -1,11 +1,25 @@
 services:
-  publisher:
-    container_name: scrapeit-publisher
+  redis:
+    container_name: scrapeit-redis
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - scrapeit
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+  dev:
+    container_name: scrapeit-dev
     tty: true
     build:
       context: .
       dockerfile: Dockerfile
-      target: publisher
+      target: build
+    env_file:
+      - .env
     ports:
       - "8380:8080"
       - "8381:8081"
@@ -15,12 +29,37 @@ services:
       - scrapeit
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  publisher:
+    container_name: scrapeit-publisher
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: publisher
+    env_file:
+      - .env
+    ports:
+      - "8380:8080"
+      - "8381:8081"
+    networks:
+      - scrapeit
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_healthy
   subscriber:
     #container_name: scrapeit-client
     build:
       context: .
       dockerfile: Dockerfile
       target: subscriber
+    env_file:
+      - .env
     deploy:
       mode: replicated
       replicas: 2
@@ -28,6 +67,9 @@ services:
       - scrapeit
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_healthy
 
 networks:
   scrapeit:

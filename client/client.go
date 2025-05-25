@@ -4,6 +4,7 @@ import (
 	"context"
 	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
+	"scrapeit/pkg/task"
 	"time"
 
 	"github.com/josuebrunel/gopkg/xlog"
@@ -19,12 +20,14 @@ type Client struct {
 	Address   string
 	TopicName string
 	Node      *common.Node
+	Manager   *task.Manager
 }
 
 func New() *Client {
 	return &Client{
 		Address:   env.Get(env.PubAddrN),
 		TopicName: env.Get(env.PubTopicN),
+		Manager:   task.NewManager(),
 	}
 }
 
@@ -55,8 +58,19 @@ func (c Client) Subscribe(ctx context.Context, subscriber *pubsub.Subscription) 
 		if msg.ReceivedFrom == c.Node.ID {
 			continue
 		}
-		var data common.Message
-		data.JSONUnmarshal(msg.Data)
-		xlog.Info("go message", "from", msg.ReceivedFrom, "topic", msg.Topic, "data", data)
+		var tsk task.Task
+		tsk.JSONUnmarshal(msg.Data)
+		xlog.Info("go message", "from", msg.ReceivedFrom, "topic", msg.Topic, "task", tsk)
+		err = c.Manager.Claim(ctx, tsk.ID, c.Node.ID.String())
+		if err != nil {
+			xlog.Error("Failed to claim task", "err", err, "task", tsk.ID)
+			continue
+		}
+		xlog.Info("Task claimed", "task", tsk.ID, "assignee", c.Node.ID.String())
+		if err := c.Manager.Complete(ctx, tsk.ID, "success by node: "+c.Node.ID.String(), nil); err != nil {
+			xlog.Error("Failed to complete task", "err", err, "task", tsk.ID)
+			continue
+		}
+		xlog.Info("Task completed", "task", tsk.ID)
 	}
 }

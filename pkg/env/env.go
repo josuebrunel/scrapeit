@@ -10,18 +10,21 @@ const (
 	PubTopicN    = "PUB_TOPIC"
 	PubTopicV    = "scraping"
 	PubPeersRoot = "PUB_ROOT_PEERS"
+	RedisAddrN   = "REDIS_ADDR"
+	RedisAddrV   = "localhost:6379"
 )
 
 var DefaultValues = map[string]string{
-	AppAddrN:  AppAddrV,
-	PubAddrN:  PubAddrV,
-	PubTopicN: PubTopicV,
+	AppAddrN:   AppAddrV,
+	PubAddrN:   PubAddrV,
+	PubTopicN:  PubTopicV,
+	RedisAddrN: RedisAddrV,
 }
 
 func Get(key string) string {
-	v, ok := DefaultValues[key]
+	v, ok := os.LookupEnv(key)
 	if !ok {
-		return os.Getenv(key)
+		return DefaultValues[key]
 	}
 	return v
 }

@@ -2,9 +2,10 @@ package server
 
 import (
 	"log"
-	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
+	"scrapeit/pkg/task"
 
+	"github.com/google/uuid"
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
@@ -13,6 +14,7 @@ import (
 type Api struct {
 	ListenAddr string
 	Publisher  *Server
+	Manager    *task.Manager
 }
 
 type Request struct {
@@ -28,6 +30,7 @@ func NewApi() *Api {
 	return &Api{
 		ListenAddr: env.Get(env.AppAddrN),
 		Publisher:  New(),
+		Manager:    task.NewManager(),
 	}
 }
 
@@ -49,7 +52,13 @@ func (a Api) Scrape() echo.HandlerFunc {
 			return c.JSON(400, Response{Error: err.Error()})
 		}
 		xlog.Debug("received request", "url", req.Url)
-		a.Publisher.Publish(c.Request().Context(), common.Message{Data: req.Url})
-		return c.JSON(200, Response{Data: "received"})
+		tskID := uuid.New().String()
+		tsk := task.NewTask(tskID, c.Request().RemoteAddr, req.Url)
+		if err := a.Manager.Create(c.Request().Context(), tsk.ID, tsk); err != nil {
+			xlog.Error("failed to create task", "error", err)
+			return c.JSON(500, Response{Error: err.Error()})
+		}
+		a.Publisher.Publish(c.Request().Context(), &tsk)
+		return c.JSON(200, Response{Data: tskID})
 	}
 }
