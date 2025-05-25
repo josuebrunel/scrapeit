@@ -13,6 +13,7 @@ RUN     go get github.com/labstack/echo/v5@v5.0.0-20230722203903-ec5b858dab61
 #RUN     make deps
 RUN     make build
 EXPOSE  8080 
+EXPOSE  7654
 
 # Publisher
 FROM alpine:latest AS publisher
@@ -20,6 +21,7 @@ RUN  mkdir /opt/scrapeit/
 WORKDIR /opt/scrapeit/
 COPY --from=build  /go/src/app/bin/scrapeit-server /opt/scrapeit/scrapeit-server
 EXPOSE 8080
+EXPOSE 7654
 CMD [ "./scrapeit-server" ]
 
 # Subscriber
