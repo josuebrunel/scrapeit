@@ -23,6 +23,7 @@ type Client struct {
 
 func New() *Client {
 	return &Client{
+		Address:   env.Get(env.PubAddrN),
 		TopicName: env.Get(env.PubTopicN),
 	}
 }
@@ -33,7 +34,7 @@ func (c *Client) SetNode(node *common.Node) {
 
 func (c Client) Run() error {
 	ctx := context.Background()
-	node := common.NewNode(ctx, c.TopicName, "/ip4/0.0.0.0/tcp/0", common.PeersRoot())
+	node := common.NewNode(ctx, c.TopicName, "/ip4/0.0.0.0/tcp/0", common.PeersRoot(), false)
 	c.SetNode(node)
 	defer node.Host.Close()
 

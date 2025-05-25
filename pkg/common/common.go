@@ -48,7 +48,7 @@ type Node struct {
 	TopicName string
 }
 
-func NewNode(ctx context.Context, topicName, address string, bootStrappingPeers []multiaddr.Multiaddr) *Node {
+func NewNode(ctx context.Context, topicName, address string, bootStrappingPeers []multiaddr.Multiaddr, serverMode bool) *Node {
 	host, err := libp2p.New(libp2p.ListenAddrStrings(address))
 	if err != nil {
 		xlog.Error("error while creating host", "err", err)
@@ -64,7 +64,7 @@ func NewNode(ctx context.Context, topicName, address string, bootStrappingPeers 
 		panic(err)
 	}
 	// dht discovery
-	dht, err := NewDHT(ctx, host, bootStrappingPeers)
+	dht, err := NewDHT(ctx, host, bootStrappingPeers, serverMode)
 	if err != nil {
 		panic(err)
 	}

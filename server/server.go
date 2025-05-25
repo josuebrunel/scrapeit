@@ -20,7 +20,7 @@ func New() *Server {
 		TopicName: env.Get(env.PubTopicN),
 	}
 	ctx := context.Background()
-	node := common.NewNode(ctx, s.TopicName, s.Address, common.PeersRootNil)
+	node := common.NewNode(ctx, s.TopicName, s.Address, common.PeersRootNil, true)
 	s.SetNode(node)
 	return s
 }

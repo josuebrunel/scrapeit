@@ -15,10 +15,10 @@ import (
 	"github.com/multiformats/go-multiaddr"
 )
 
-func NewDHT(ctx context.Context, host host.Host, bootstrappedPeers []multiaddr.Multiaddr) (*dht.IpfsDHT, error) {
+func NewDHT(ctx context.Context, host host.Host, bootstrappedPeers []multiaddr.Multiaddr, serverMode bool) (*dht.IpfsDHT, error) {
 	var options []dht.Option
 
-	if len(bootstrappedPeers) == 0 {
+	if serverMode {
 		options = append(options, dht.Mode(dht.ModeAutoServer))
 	}
 

@@ -1,16 +1,29 @@
 services:
-  server:
-    container_name: scrapeit-server
+  publisher:
+    container_name: scrapeit-publisher
     tty: true
     build:
       context: .
       dockerfile: Dockerfile
-      target: build
+      target: publisher
     ports:
       - "8380:8080"
       - "8381:8081"
     volumes:
       - ./:/go/src/app/
+    networks:
+      - scrapeit
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  subscriber:
+    #container_name: scrapeit-client
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: subscriber
+    deploy:
+      mode: replicated
+      replicas: 2
     networks:
       - scrapeit
     extra_hosts:
