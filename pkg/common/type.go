@@ -19,6 +19,9 @@ var (
 	PeersRoot    = func() []multiaddr.Multiaddr {
 		var peers []multiaddr.Multiaddr
 		peersEnv := env.Get(env.PubPeersRoot)
+		if peersEnv == "" {
+			return PeersRootNil
+		}
 		for _, peer := range strings.Split(peersEnv, ",") {
 			addr, err := multiaddr.NewMultiaddr(peer)
 			if err != nil {
