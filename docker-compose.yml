@@ -11,6 +11,20 @@ services:
       interval: 1s
       timeout: 3s
       retries: 5
+  browser:
+      container_name: headless-shell
+      image: chromedp/headless-shell
+      ports:
+        - "9222:9222"
+      networks:
+        - scrapeit
+      healthcheck:
+        test: ["CMD", "wget", "--no-verbose", "--tries=3", "--spider", "http://localhost:9222/json/version"]
+        interval: 30s
+        timeout: 5s
+        retries: 3
+      restart: unless-stopped
+
   dev:
     container_name: scrapeit-dev
     tty: true

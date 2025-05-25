@@ -19,7 +19,9 @@ tidy:
 build: 
 	go build -o ${BIN_SERVER} ${MAIN_SERVER}
 	go build -o ${BIN_CLIENT} ${MAIN_CLIENT}
-	
+
+test.int:
+	python3 test-int.py
 
 run: build
 	./${BIN_SERVER} "scraper"

@@ -152,7 +152,6 @@ func (m Manager) Complete(ctx context.Context, key string, output string, jobErr
 	if jobErr != nil {
 		task.Status = Failed
 		task.Output = jobErr.Error()
-		task.Assignee = ""
 		task.UpdatedAt = time.Now()
 	} else {
 		task.Status = Completed

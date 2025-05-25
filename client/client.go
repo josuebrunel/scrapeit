@@ -5,6 +5,7 @@ import (
 	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
 	"scrapeit/pkg/task"
+	"scrapeit/scraper"
 	"time"
 
 	"github.com/josuebrunel/gopkg/xlog"
@@ -67,7 +68,9 @@ func (c Client) Subscribe(ctx context.Context, subscriber *pubsub.Subscription) 
 			continue
 		}
 		xlog.Info("Task claimed", "task", tsk.ID, "assignee", c.Node.ID.String())
-		if err := c.Manager.Complete(ctx, tsk.ID, "success by node: "+c.Node.ID.String(), nil); err != nil {
+
+		scrpErr := scraper.Scrape(ctx, &tsk)
+		if err := c.Manager.Complete(ctx, tsk.ID, tsk.Output, scrpErr); err != nil {
 			xlog.Error("Failed to complete task", "err", err, "task", tsk.ID)
 			continue
 		}

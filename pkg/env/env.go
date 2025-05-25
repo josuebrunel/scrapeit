@@ -12,6 +12,7 @@ const (
 	PubPeersRoot = "PUB_ROOT_PEERS"
 	RedisAddrN   = "REDIS_ADDR"
 	RedisAddrV   = "localhost:6379"
+	CDPRemoteN   = "CDP_REMOTE"
 )
 
 var DefaultValues = map[string]string{
