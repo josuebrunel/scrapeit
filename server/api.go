@@ -22,8 +22,8 @@ type Request struct {
 }
 
 type Response struct {
-	Data  string `json:"data"`
-	Error string `json:"error"`
+	Task  task.Task `json:"task"`
+	Error string    `json:"error"`
 }
 
 func NewApi() *Api {
@@ -39,6 +39,7 @@ func (api *Api) Start() error {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.POST("/v1/scrape", api.Scrape())
+	e.GET("/v1/result/:id", api.Result())
 	xlog.Info("starting server", "addr", api.ListenAddr)
 	log.Fatal(e.Start(api.ListenAddr))
 	return nil
@@ -59,6 +60,21 @@ func (a Api) Scrape() echo.HandlerFunc {
 			return c.JSON(500, Response{Error: err.Error()})
 		}
 		a.Publisher.Publish(c.Request().Context(), &tsk)
-		return c.JSON(200, Response{Data: tskID})
+		return c.JSON(200, Response{Task: tsk})
+	}
+}
+
+func (a Api) Result() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id := c.PathParam("id")
+		tsk, err := a.Manager.Get(c.Request().Context(), id)
+		if err != nil {
+			xlog.Error("failed to get task", "error", err)
+			return c.JSON(500, Response{Error: err.Error()})
+		}
+		if tsk.Status != task.Completed {
+			return c.JSON(200, Response{Task: tsk})
+		}
+		return c.JSON(200, Response{Task: tsk})
 	}
 }
