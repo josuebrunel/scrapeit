@@ -16,6 +16,14 @@ debug: debug.build
 tidy:
 	go mod tidy
 
+build.osx:
+	GOOS=darwin GOARCH=amd64 go build -o "./bin/scrapeit-client-darwin-amd64" ${MAIN_CLIENT}
+
+build.windows:
+	GOOS=windows GOARCH=amd64 go build -o "./bin/scrapeit-client-windows-amd64.exe" ${MAIN_CLIENT}
+
+build.others: build.osx build.windows
+
 build: 
 	go build -o ${BIN_SERVER} ${MAIN_SERVER}
 	go build -o ${BIN_CLIENT} ${MAIN_CLIENT}
