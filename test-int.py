@@ -8,7 +8,10 @@ TARGET_ENDPOINT = "http://localhost:8380/v1/scrape" # Change this if your endpoi
 URLS_TO_SUBMIT = [
     "https://promptrefiner.me",
     "https://propcopy.ai",
-    "https://reddit.com"
+    "https://reddit.com",
+    "https://delta.com",
+    "https://nasdaq.com",
+    "https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html"
 ]
 
 async def post_url(client: httpx.AsyncClient, url_to_submit: str, target_endpoint: str):
