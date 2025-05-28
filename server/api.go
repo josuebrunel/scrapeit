@@ -2,6 +2,7 @@ package server
 
 import (
 	"log"
+	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
 	"scrapeit/pkg/task"
 
@@ -66,8 +67,11 @@ func (a Api) Scrape() echo.HandlerFunc {
 
 func (a Api) Result() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id := c.PathParam("id")
-		tsk, err := a.Manager.Get(c.Request().Context(), id)
+		var (
+			ctx = c.Request().Context()
+			id  = c.PathParam("id")
+		)
+		tsk, err := a.Manager.Get(ctx, id)
 		if err != nil {
 			xlog.Error("failed to get task", "error", err)
 			return c.JSON(500, Response{Error: err.Error()})
@@ -75,6 +79,12 @@ func (a Api) Result() echo.HandlerFunc {
 		if tsk.Status != task.Completed {
 			return c.JSON(200, Response{Task: tsk})
 		}
+		content, err := common.IPFSClient.DownloadFile(ctx, tsk.Output)
+		if err != nil {
+			xlog.Error("failed to download file", "error", err)
+			return c.JSON(500, Response{Error: err.Error()})
+		}
+		tsk.Output = content
 		return c.JSON(200, Response{Task: tsk})
 	}
 }

@@ -24,6 +24,19 @@ services:
         timeout: 5s
         retries: 3
       restart: unless-stopped
+  ipfs:
+    container_name: scrapeit-ipfs
+    image: ipfs/go-ipfs
+    ports:
+      - 4001:4001/tcp
+      - 4001:4001/udp
+      - "8383:8080"
+      - "127.0.0.1:8384:5001"
+    environment:
+      - IPFS_PATH=/data/ipfs
+    networks:
+      - scrapeit
+
 
   dev:
     container_name: scrapeit-dev

@@ -13,6 +13,7 @@ const (
 	RedisAddrN   = "REDIS_ADDR"
 	RedisAddrV   = "localhost:6379"
 	CDPRemoteN   = "CDP_REMOTE"
+	IpfsAddrN    = "IPFS_ADDR"
 )
 
 var DefaultValues = map[string]string{
