@@ -10,8 +10,8 @@ import (
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
-	routingdiscovery "github.com/libp2p/go-libp2p/p2p/discovery/routing"
-	discoveryutil "github.com/libp2p/go-libp2p/p2p/discovery/util"
+	"github.com/libp2p/go-libp2p/p2p/discovery/routing"
+	"github.com/libp2p/go-libp2p/p2p/discovery/util"
 	"github.com/multiformats/go-multiaddr"
 )
 
@@ -51,7 +51,7 @@ func NewDHT(ctx context.Context, host host.Host, bootstrappedPeers []multiaddr.M
 }
 
 func DHTDiscover(ctx context.Context, h host.Host, dht *dht.IpfsDHT, rendezvous string) {
-	var routingDiscover = routingdiscovery.NewRoutingDiscovery(dht)
+	var routingDiscover = routing.NewRoutingDiscovery(dht)
 	ticker := time.NewTicker(time.Second * 10)
 	defer ticker.Stop()
 	for {
@@ -59,7 +59,7 @@ func DHTDiscover(ctx context.Context, h host.Host, dht *dht.IpfsDHT, rendezvous 
 		case <-ctx.Done():
 			return
 		case <-ticker.C: // Periodically discover peers
-			peers, err := discoveryutil.FindPeers(ctx, routingDiscover, rendezvous)
+			peers, err := util.FindPeers(ctx, routingDiscover, rendezvous)
 			if err != nil {
 				xlog.Error("Error while discovering peers:", err)
 			}
