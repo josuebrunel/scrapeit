@@ -53,10 +53,10 @@ func NewDHT(ctx context.Context, host host.Host, bootstrappedPeers []multiaddr.M
 func DHTDiscover(ctx context.Context, h host.Host, dht *dht.IpfsDHT, rendezvous string) {
 	var routingDiscover = routing.NewRoutingDiscovery(dht)
 	ticker := time.NewTicker(time.Second * 10)
-	defer ticker.Stop()
 	for {
 		select {
 		case <-ctx.Done():
+			ticker.Stop()
 			return
 		case <-ticker.C: // Periodically discover peers
 			peers, err := util.FindPeers(ctx, routingDiscover, rendezvous)
