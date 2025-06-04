@@ -72,6 +72,7 @@ func (c Client) Subscribe(ctx context.Context, subscriber *pubsub.Subscription) 
 				xlog.Error("Failed to upload file", "err", err, "task", tsk.ID)
 				scrpErr = err
 			}
+			xlog.Debug("Task result uploaded", "task", tsk.ID, "cid", tsk.Output)
 		}
 
 		if err := c.Manager.Complete(ctx, tsk.ID, tsk.Output, scrpErr); err != nil {
