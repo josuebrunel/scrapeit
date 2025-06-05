@@ -7,6 +7,7 @@ import (
 	"scrapeit/pkg/task"
 
 	"github.com/josuebrunel/gopkg/xlog"
+	"github.com/multiformats/go-multiaddr"
 )
 
 type Server struct {
@@ -21,13 +22,13 @@ func New() *Server {
 		TopicName: env.Get(env.PubTopicN),
 	}
 	ctx := context.Background()
-	node := common.NewNode(ctx, s.TopicName, s.Address, common.PeersRootNil, true)
+	node := common.NewNode(ctx, s.TopicName, s.Address, []multiaddr.Multiaddr{}, true)
 	s.SetNode(node)
 	return s
 }
 
 func (s Server) Publish(ctx context.Context, tsk *task.Task) {
-	xlog.Info("publishing task", "task", *tsk)
+	xlog.Info("publishing task", "task", *tsk, "topic", s.Node.TopicName)
 	s.Node.Topic.Publish(ctx, tsk.JSONMarshal())
 	xlog.Info("task published")
 }

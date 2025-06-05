@@ -30,7 +30,7 @@ type Manager interface {
 type Task struct {
 	ID        string     `json:"id"`
 	Assignee  string     `json:"assignee"`
-	Client    string     `json:"client"`
+	Submitter string     `json:"submitter"`
 	Input     string     `json:"input"`
 	Output    string     `json:"output"`
 	Status    TaskStatus `json:"status"`
@@ -41,7 +41,7 @@ type Task struct {
 func NewTask(id string, client string, input string) Task {
 	return Task{
 		ID:        id,
-		Client:    client,
+		Submitter: client,
 		Input:     input,
 		Status:    Pending,
 		CreatedAt: time.Now(),

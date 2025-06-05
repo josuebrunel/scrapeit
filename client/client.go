@@ -13,19 +13,21 @@ import (
 )
 
 type Client struct {
-	Address    string
 	TopicName  string
 	Node       *common.Node
 	Manager    *task.EtherManager
 	PrivateKey string
+	Settings   env.Settings
 }
 
 func New() *Client {
+	settings := env.NewSetting()
+	xlog.Debug("settings from root peer", "settings", settings)
 	return &Client{
-		Address:    env.Get(env.PubAddrN),
-		TopicName:  env.Get(env.PubTopicN),
-		Manager:    task.NewEtherManager(),
+		TopicName:  settings.Peer.Topic,
+		Manager:    task.NewEtherManager(settings.Ethereum.Network, settings.Ethereum.Contract),
 		PrivateKey: env.Get(env.EtherPrivateKeyN),
+		Settings:   settings,
 	}
 }
 
@@ -35,7 +37,8 @@ func (c *Client) SetNode(node *common.Node) {
 
 func (c Client) Run() error {
 	ctx := context.Background()
-	node := common.NewNode(ctx, c.TopicName, "/ip4/0.0.0.0/tcp/0", common.PeersRoot(), false)
+	peersRoot := common.MultiAddrFromStrings(c.Settings.Peer.Addrs)
+	node := common.NewNode(ctx, c.TopicName, "/ip4/0.0.0.0/tcp/0", peersRoot, false)
 	c.SetNode(node)
 	defer node.Host.Close()
 
@@ -49,6 +52,11 @@ func (c Client) Run() error {
 
 func (c Client) Subscribe(ctx context.Context, subscriber *pubsub.Subscription) {
 	pk := etherutil.MustPrivateKeyFromHex(c.PrivateKey)
+	ipfsCli, err := common.NewIPFSClient(c.Settings.Peer.Ipfs)
+	if err != nil {
+		panic(err)
+	}
+	xlog.Info("subscribing to topic", "topic", c.TopicName)
 	for {
 		msg, err := subscriber.Next(ctx)
 		if err != nil {
@@ -71,7 +79,7 @@ func (c Client) Subscribe(ctx context.Context, subscriber *pubsub.Subscription) 
 			xlog.Error("Failed to scrape", "err", scrpErr, "task", tsk.ID)
 			tsk.Output = scrpErr.Error()
 		} else {
-			tsk.Output, err = common.IPFSClient.UploadFile(ctx, content)
+			tsk.Output, err = ipfsCli.UploadFile(ctx, content)
 			if err != nil {
 				xlog.Error("Failed to upload file", "err", err, "task", tsk.ID)
 				scrpErr = err
