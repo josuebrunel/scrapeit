@@ -4,6 +4,7 @@ import (
 	"context"
 	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
+	"scrapeit/pkg/etherutil"
 	"scrapeit/pkg/task"
 	"scrapeit/scraper"
 
@@ -12,17 +13,19 @@ import (
 )
 
 type Client struct {
-	Address   string
-	TopicName string
-	Node      *common.Node
-	Manager   *task.Manager
+	Address    string
+	TopicName  string
+	Node       *common.Node
+	Manager    *task.EtherManager
+	PrivateKey string
 }
 
 func New() *Client {
 	return &Client{
-		Address:   env.Get(env.PubAddrN),
-		TopicName: env.Get(env.PubTopicN),
-		Manager:   task.NewManager(),
+		Address:    env.Get(env.PubAddrN),
+		TopicName:  env.Get(env.PubTopicN),
+		Manager:    task.NewEtherManager(),
+		PrivateKey: env.Get(env.EtherPrivateKeyN),
 	}
 }
 
@@ -45,6 +48,7 @@ func (c Client) Run() error {
 }
 
 func (c Client) Subscribe(ctx context.Context, subscriber *pubsub.Subscription) {
+	pk := etherutil.MustPrivateKeyFromHex(c.PrivateKey)
 	for {
 		msg, err := subscriber.Next(ctx)
 		if err != nil {
@@ -56,7 +60,7 @@ func (c Client) Subscribe(ctx context.Context, subscriber *pubsub.Subscription) 
 		var tsk task.Task
 		tsk.JSONUnmarshal(msg.Data)
 		xlog.Info("go message", "from", msg.ReceivedFrom, "topic", msg.Topic, "task", tsk)
-		err = c.Manager.Claim(ctx, tsk.ID, c.Node.ID.String())
+		err = c.Manager.Claim(ctx, tsk.ID, pk)
 		if err != nil {
 			xlog.Error("Failed to claim task", "err", err, "task", tsk.ID)
 			continue
@@ -74,8 +78,13 @@ func (c Client) Subscribe(ctx context.Context, subscriber *pubsub.Subscription) 
 			}
 			xlog.Debug("Task result uploaded", "task", tsk.ID, "cid", tsk.Output)
 		}
-
-		if err := c.Manager.Complete(ctx, tsk.ID, tsk.Output, scrpErr); err != nil {
+		if scrpErr != nil {
+			if err := c.Manager.Fail(ctx, tsk.ID, pk); err != nil {
+				xlog.Error("Failed to fail task", "err", err, "task", tsk.ID)
+				continue
+			}
+		}
+		if err := c.Manager.Complete(ctx, tsk.ID, tsk.Output, pk); err != nil {
 			xlog.Error("Failed to complete task", "err", err, "task", tsk.ID)
 			continue
 		}

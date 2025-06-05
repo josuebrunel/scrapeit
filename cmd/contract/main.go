@@ -9,6 +9,8 @@ import (
 	"scrapeit/pkg/env"
 	"scrapeit/pkg/etherutil"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind/v2"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/josuebrunel/gopkg/xlog"
 )
@@ -60,6 +62,26 @@ func deploy(ctx context.Context, pk *ecdsa.PrivateKey) error {
 		xlog.Error("Failed to deploy contract", "error", err)
 		return err
 	}
-	xlog.Info("Contract deployed", "address", ctAddr.Hex(), "transaction", ctTrx.Hash().Hex(), "contract", ct)
+	xlog.Info("Waiting for transaction to be mined", "transaction", ctTrx.Hash().Hex())
+	receipt, err := bind.WaitMined(ctx, client, ctTrx.Hash())
+	if err != nil {
+		xlog.Error("Failed to mine transaction", "error", err)
+		return err
+	}
+
+	if receipt.Status != types.ReceiptStatusSuccessful {
+		xlog.Error("Transaction failed",
+			"error", err,
+			"transaction", ctTrx.Hash().Hex(),
+			"status", receipt.Status,
+			"gasUser", receipt.GasUsed,
+		)
+		return err
+	}
+
+	xlog.Info("Contract deployed", "address",
+		ctAddr.Hex(), "transaction", ctTrx.Hash().Hex(), "contract", ct,
+		"status", receipt.Status, "gasUser", receipt.GasUsed,
+	)
 	return nil
 }

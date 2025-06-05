@@ -24,6 +24,14 @@ func PrivateKeyFromHex(hexKey string) (*ecdsa.PrivateKey, error) {
 	return privateKey, nil
 }
 
+func MustPrivateKeyFromHex(hexKey string) *ecdsa.PrivateKey {
+	privateKey, err := PrivateKeyFromHex(hexKey)
+	if err != nil {
+		panic(err)
+	}
+	return privateKey
+}
+
 func GetNonce(ctx context.Context, cli *ethclient.Client, pk *ecdsa.PrivateKey) (uint64, error) {
 	address := crypto.PubkeyToAddress(pk.PublicKey)
 	nonce, err := cli.PendingNonceAt(ctx, address)
@@ -31,6 +39,7 @@ func GetNonce(ctx context.Context, cli *ethclient.Client, pk *ecdsa.PrivateKey) 
 		xlog.Error("Failed to get nonce", "error", err)
 		return uint64(0), err
 	}
+	xlog.Debug("Nonce", "nonce", nonce)
 	return nonce, nil
 }
 
@@ -48,6 +57,7 @@ func GetGasPrice(ctx context.Context, cli *ethclient.Client) (*big.Int, error) {
 		xlog.Error("Failed to get gas price", "error", err)
 		return nil, err
 	}
+	xlog.Debug("Gas price", "gasPrice", gasPrice)
 	return gasPrice, nil
 }
 
@@ -65,6 +75,7 @@ func GetChainID(ctx context.Context, cli *ethclient.Client) (*big.Int, error) {
 		xlog.Error("Failed to get chain ID", "error", err)
 		return nil, err
 	}
+	xlog.Debug("Chain ID", "chainID", chainID)
 	return chainID, nil
 }
 
@@ -80,7 +91,8 @@ func GetAuth(ctx context.Context, cli *ethclient.Client, pk *ecdsa.PrivateKey) (
 	}
 	auth.GasPrice = MustGetGasPrice(ctx, cli)
 	auth.Nonce = big.NewInt(int64(MustGetNonce(ctx, cli, pk)))
-	auth.GasLimit = uint64(300000)
+	auth.GasLimit = uint64(3000000)
+	auth.Value = big.NewInt(0)
 	return auth, nil
 }
 
