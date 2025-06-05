@@ -9,7 +9,7 @@ URLS_TO_SUBMIT = [
     "https://promptrefiner.me",
     "https://propcopy.ai",
     "https://reddit.com",
-    "https://delta.com",
+    "https://wwww.delta.com",
     "https://nasdaq.com",
     "https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html"
 ]

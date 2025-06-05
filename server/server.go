@@ -13,14 +13,12 @@ type Server struct {
 	Address   string
 	TopicName string
 	Node      *common.Node
-	Manager   *task.Manager
 }
 
 func New() *Server {
 	s := &Server{
 		Address:   env.Get(env.PubAddrN),
 		TopicName: env.Get(env.PubTopicN),
-		Manager:   task.NewManager(),
 	}
 	ctx := context.Background()
 	node := common.NewNode(ctx, s.TopicName, s.Address, common.PeersRootNil, true)

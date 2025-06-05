@@ -1,9 +1,11 @@
 package server
 
 import (
+	"crypto/ecdsa"
 	"log"
 	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
+	"scrapeit/pkg/etherutil"
 	"scrapeit/pkg/task"
 
 	"github.com/google/uuid"
@@ -15,11 +17,13 @@ import (
 type Api struct {
 	ListenAddr string
 	Publisher  *Server
-	Manager    *task.Manager
+	Manager    *task.EtherManager
+	privateKey *ecdsa.PrivateKey
 }
 
 type Request struct {
-	Url string `json:"url"`
+	Url        string `json:"url"`
+	PrivateKey string `json:"private_key"`
 }
 
 type Response struct {
@@ -31,7 +35,8 @@ func NewApi() *Api {
 	return &Api{
 		ListenAddr: env.Get(env.AppAddrN),
 		Publisher:  New(),
-		Manager:    task.NewManager(),
+		Manager:    task.NewEtherManager(),
+		privateKey: etherutil.MustPrivateKeyFromHex(env.Get(env.EtherPrivateKeyN)),
 	}
 }
 
@@ -56,7 +61,7 @@ func (a Api) Scrape() echo.HandlerFunc {
 		xlog.Debug("received request", "url", req.Url)
 		tskID := uuid.New().String()
 		tsk := task.NewTask(tskID, c.Request().RemoteAddr, req.Url)
-		if err := a.Manager.Create(c.Request().Context(), tsk.ID, tsk); err != nil {
+		if err := a.Manager.Create(c.Request().Context(), etherutil.MustPrivateKeyFromHex(req.PrivateKey), tsk); err != nil {
 			xlog.Error("failed to create task", "error", err)
 			return c.JSON(500, Response{Error: err.Error()})
 		}
@@ -71,7 +76,7 @@ func (a Api) Result() echo.HandlerFunc {
 			ctx = c.Request().Context()
 			id  = c.PathParam("id")
 		)
-		tsk, err := a.Manager.Get(ctx, id)
+		tsk, err := a.Manager.Get(ctx, id, a.privateKey)
 		if err != nil {
 			xlog.Error("failed to get task", "error", err)
 			return c.JSON(500, Response{Error: err.Error()})

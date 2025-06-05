@@ -31,12 +31,30 @@ services:
       - 4001:4001/tcp
       - 4001:4001/udp
       - "8383:8080"
-      - "127.0.0.1:8384:5001"
+      - "8384:5001"
     environment:
       - IPFS_PATH=/data/ipfs
     networks:
       - scrapeit
 
+  blockchain:
+    container_name: scrapeit-blockchain
+    image: romangzz/anvil
+    ports:
+      - "8385:8545"
+    environment:
+      - CHAIN_ID=42
+      - BLOCK_TIME=30
+      - ACCOUNTS=15
+      - BALANCE=2000000
+      - HOST=0.0.0.0
+      - DISABLE_CODE_SIZE_LIMIT=true 
+      # - GAS_LIMIT=3000000000000000
+      #- DISABLE_BLOCK_GAS_LIMIT=true
+    volumes:
+      - ./contract:/contract
+    networks:
+      - scrapeit
 
   dev:
     container_name: scrapeit-dev
