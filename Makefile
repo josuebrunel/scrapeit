@@ -1,8 +1,10 @@
 NAME=scrapeit
 BIN_SERVER="./bin/${NAME}-server"
 BIN_CLIENT="./bin/${NAME}-client"
+BIN_CONTRACT="./bin/${NAME}-contract"
 MAIN_SERVER=./cmd/server/main.go
 MAIN_CLIENT=./cmd/client/main.go
+MAIN_CONTRACT=./cmd/contract/main.go
 
 deps:
 	apt update && apt upgrade -y && apt install protobuf-compiler -y
@@ -30,6 +32,7 @@ build.others: build.osx build.windows
 build:
 	go build -o ${BIN_SERVER} ${MAIN_SERVER}
 	go build -o ${BIN_CLIENT} ${MAIN_CLIENT}
+	go build -o ${BIN_CONTRACT} ${MAIN_CONTRACT}
 
 build.contract:
 	solc --bin --abi --overwrite contract/contract.sol -o contract/
