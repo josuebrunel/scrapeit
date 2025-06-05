@@ -32,6 +32,21 @@ func MustPrivateKeyFromHex(hexKey string) *ecdsa.PrivateKey {
 	return privateKey
 }
 
+func GetAddress(pk *ecdsa.PrivateKey) string {
+	address := crypto.PubkeyToAddress(pk.PublicKey)
+	xlog.Debug("Address", "address", address.Hex())
+	return address.Hex()
+}
+
+func GetAddressFromHexKey(hexKey string) string {
+	pk, err := PrivateKeyFromHex(hexKey)
+	if err != nil {
+		xlog.Error("Failed to get address from hex key", "error", err)
+		return ""
+	}
+	return GetAddress(pk)
+}
+
 func GetNonce(ctx context.Context, cli *ethclient.Client, pk *ecdsa.PrivateKey) (uint64, error) {
 	address := crypto.PubkeyToAddress(pk.PublicKey)
 	nonce, err := cli.PendingNonceAt(ctx, address)

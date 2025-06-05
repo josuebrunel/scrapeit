@@ -3,6 +3,7 @@ pragma solidity >=0.8.2 <0.9.0;
 
 contract Scraper {
     address public owner;
+    bool public paused;
     enum Status {
         Pending,
         Claimed,
@@ -14,11 +15,11 @@ contract Scraper {
 
     struct Task {
         string uuid;
+        Status status;
+        address assignee;
         address submitter;
         string input;
         string output;
-        Status status;
-        address assignee;
         uint256 amount;
         uint256 created_at;
         uint256 updated_at;
@@ -41,6 +42,16 @@ contract Scraper {
         _;
     }
 
+    modifier isOwner() {
+        require(msg.sender == owner, "Caller is not owner");
+        _;
+    }
+
+    modifier isPaused() {
+        require(!paused, "Contract is paused");
+        _;
+    }
+
     event TaskCreated(
         string uuid,
         address indexed submitter,
@@ -51,13 +62,17 @@ contract Scraper {
     event TaskCompleted(string uuid, address indexed assignee, string output);
     event TaskFailed(string uuid, address indexed assigneeWhoFailed); // Task returned to pool by assignee
 
-    function create(string memory _uuid, string memory _input) public payable {
+    function create(
+        string memory _uuid,
+        string memory _input
+    ) public payable isPaused {
         require(bytes(_uuid).length > 0, "UUID cannot be empty");
         require(msg.value > 0, "Invalid amount");
         require(
             tasks[_uuid].submitter == address(0),
             "Task with this UUID already exists"
         );
+        require(tasks[_uuid].status == Status.Pending);
 
         Task memory tsk = Task({
             uuid: _uuid,
@@ -75,7 +90,7 @@ contract Scraper {
         emit TaskCreated(tsk.uuid, msg.sender, tsk.input, msg.value);
     }
 
-    function claim(string memory _uuid) external {
+    function claim(string memory _uuid) external isPaused {
         require(bytes(_uuid).length > 0, "UUID cannot be empty");
         Task storage tsk = tasks[_uuid];
         require(
@@ -96,7 +111,7 @@ contract Scraper {
     function complete(
         string memory _uuid,
         string memory _output
-    ) external isTaskOwner(_uuid) {
+    ) external isTaskOwner(_uuid) isPaused {
         require(bytes(_uuid).length > 0, "UUID cannot be empty");
         Task storage tsk = tasks[_uuid];
 
@@ -110,7 +125,7 @@ contract Scraper {
         require(success, "Transfer failed");
     }
 
-    function fail(string memory _uuid) external isTaskOwner(_uuid) {
+    function fail(string memory _uuid) external isTaskOwner(_uuid) isPaused {
         require(bytes(_uuid).length > 0, "UUID cannot be empty");
         Task storage tsk = tasks[_uuid];
 
@@ -118,5 +133,9 @@ contract Scraper {
         tsk.assignee = address(0); // Reset assignee so task can be claimed again
         tsk.updated_at = block.timestamp;
         emit TaskFailed(_uuid, msg.sender);
+    }
+
+    function setPaused(bool _paused) public isOwner {
+        paused = _paused;
     }
 }

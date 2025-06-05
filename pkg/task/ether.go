@@ -6,7 +6,6 @@ import (
 	"errors"
 	"math/big"
 	"scrapeit/contract"
-	"scrapeit/pkg/env"
 	"scrapeit/pkg/etherutil"
 	"time"
 
@@ -29,8 +28,8 @@ type EtherManager struct {
 	contractAddr common.Address
 }
 
-func NewEtherManager() *EtherManager {
-	cli, err := ethclient.Dial(env.Get(env.EtherAddrN))
+func NewEtherManager(network, contractAddr string) *EtherManager {
+	cli, err := ethclient.Dial(network)
 	if err != nil {
 		xlog.Error("Error while connecting to Ethereum node", "error", err)
 		panic(err)
@@ -43,7 +42,7 @@ func NewEtherManager() *EtherManager {
 	return &EtherManager{
 		client:       cli,
 		chainID:      chainID,
-		contractAddr: common.HexToAddress(env.Get(env.EtherContractAddrN)),
+		contractAddr: common.HexToAddress(contractAddr),
 	}
 }
 
@@ -102,7 +101,7 @@ func (e EtherManager) Get(ctx context.Context, id string, pk *ecdsa.PrivateKey) 
 	tsk = Task{
 		ID:        tx.Uuid,
 		Assignee:  tx.Assignee.String(),
-		Client:    tx.Submitter.String(),
+		Submitter: tx.Submitter.String(),
 		Input:     tx.Input,
 		Output:    tx.Output,
 		Status:    TaskStatus(Status[tx.Status]),
