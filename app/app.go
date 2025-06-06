@@ -1,16 +1,22 @@
 package app
 
 import (
+	"context"
 	"crypto/ecdsa"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
+	"scrapeit/account"
 	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
 	"scrapeit/pkg/etherutil"
 	"scrapeit/pkg/task"
 	"scrapeit/pkg/view"
 	"scrapeit/server"
+
+	_ "github.com/lib/pq"
+	"github.com/supabase-community/auth-go"
 
 	"github.com/google/uuid"
 	"github.com/josuebrunel/gopkg/xlog"
@@ -19,10 +25,12 @@ import (
 )
 
 type App struct {
-	ListenAddr string
-	Publisher  *server.Server
-	Manager    *task.EtherManager
-	privateKey *ecdsa.PrivateKey
+	ListenAddr  string
+	Publisher   *server.Server
+	Manager     *task.EtherManager
+	privateKey  *ecdsa.PrivateKey
+	AuthBackend string
+	Database    string
 }
 
 type Request struct {
@@ -37,17 +45,30 @@ type Response[T any] struct {
 
 func NewApp() *App {
 	return &App{
-		ListenAddr: env.Get(env.AppAddrN),
-		Publisher:  server.New(),
+		AuthBackend: env.Get(env.AppAuthBackendN),
+		Database:    env.Get(env.AppDatabaseN),
+		Publisher:   server.New(),
+		privateKey:  etherutil.MustPrivateKeyFromHex(env.Get(env.EtherPrivateKeyN)),
 		Manager: task.NewEtherManager(
 			env.Get(env.EtherAddrN),
 			env.Get(env.EtherContractAddrN),
 		),
-		privateKey: etherutil.MustPrivateKeyFromHex(env.Get(env.EtherPrivateKeyN)),
+		ListenAddr: env.Get(env.AppAddrN),
 	}
 }
 
+func getDBConnection(dsn string) *sql.DB {
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		log.Fatal(err)
+
+	}
+	return db
+}
+
 func (api *App) Start() error {
+	ctx := context.Background()
+	db := getDBConnection(api.Database)
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -55,6 +76,10 @@ func (api *App) Start() error {
 	e.POST("/v1/task", api.Scrape())
 	e.GET("/v1/task/:id", api.Result())
 	e.GET("/settings", api.Settings())
+	// get Auth backend client
+	authCli := auth.New("scrapeit", "").WithCustomAuthURL(api.AuthBackend)
+	// mount account
+	account.Mount(ctx, e, db, authCli)
 	xlog.Info("starting server", "addr", api.ListenAddr)
 	log.Fatal(e.Start(api.ListenAddr))
 	return nil

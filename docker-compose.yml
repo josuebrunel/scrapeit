@@ -1,21 +1,9 @@
 services:
-  redis:
-    container_name: scrapeit-redis
-    image: redis
-    ports:
-      - "8382:6379"
-    networks:
-      - scrapeit
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 5
   browser:
-      container_name: headless-shell
+      container_name: scrapeit-browser
       image: chromedp/headless-shell
       ports:
-        - "9222:9222"
+        - "8387:9222"
       networks:
         - scrapeit
       healthcheck:
@@ -48,13 +36,57 @@ services:
       - ACCOUNTS=15
       - BALANCE=2000000
       - HOST=0.0.0.0
-      - DISABLE_CODE_SIZE_LIMIT=true 
+      - DISABLE_CODE_SIZE_LIMIT=true
       # - GAS_LIMIT=3000000000000000
       #- DISABLE_BLOCK_GAS_LIMIT=true
     volumes:
       - ./contract:/contract
     networks:
       - scrapeit
+  db:
+    image: postgres
+    container_name: scrapeit-db
+    env_file:
+      - .env/db.env
+    volumes:
+      - scrapeit_db:/var/lib/postgresql/data
+      - ./init-scripts/db:/docker-entrypoint-initdb.d
+    ports:
+      - "8382:5432"
+    networks:
+      - scrapeit
+    healthcheck:
+      test: pg_isready -U postgres -h localhost
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  auth:
+    image: supabase/auth:v2.170.0
+    container_name: scrapeit-auth
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env/auth.env
+    ports:
+      - "8386:9999"
+    networks:
+      - scrapeit
+    post_start:
+      - command: ["gotrue", "admin", "createuser",  "--admin",  "--confirm", "${APP_ADMIN_EMAIL}",  "${APP_ADMIN_PASSWORD}", "service_role"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${PORT}/health"
+        ]
+      timeout: 5s
+      interval: 5s
+      retries: 3
 
   dev:
     container_name: scrapeit-dev
@@ -64,7 +96,7 @@ services:
       dockerfile: Dockerfile
       target: build
     env_file:
-      - .env
+      - .env/server.env
     ports:
       - "8380:8080"
       - "8381:7654"
@@ -75,7 +107,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
-      redis:
+      db:
+        condition: service_healthy
+      auth:
         condition: service_healthy
 
   publisher:
@@ -86,7 +120,7 @@ services:
       dockerfile: Dockerfile
       target: publisher
     env_file:
-      - .env
+      - .env/server.env
     ports:
       - "8380:8080"
       - "8381:7654"
@@ -95,8 +129,11 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
-      redis:
+      db:
         condition: service_healthy
+      auth:
+        condition: service_healthy
+
   subscriber:
     #container_name: scrapeit-client
     build:
@@ -115,9 +152,8 @@ services:
       - scrapeit
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    depends_on:
-      redis:
-        condition: service_healthy
-
 networks:
   scrapeit:
+
+volumes:
+  scrapeit_db:

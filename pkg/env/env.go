@@ -14,13 +14,14 @@ import (
 const (
 	AppAddrN           = "APP_ADDR"
 	AppAddrV           = ":8080"
+	AppAuthBackendN    = "APP_AUTH_BACKEND"
+	AppAuthBackendV    = "http://auth:9999"
+	AppDatabaseN       = "APP_DATABASE"
 	PubAddrN           = "PUB_ADDR"
 	PubAddrV           = "/ip4/0.0.0.0/tcp/7654"
 	PubTopicN          = "PUB_TOPIC"
 	PubTopicV          = "scraping"
 	PubPeersRoot       = "PUB_ROOT_PEERS"
-	RedisAddrN         = "REDIS_ADDR"
-	RedisAddrV         = "localhost:6379"
 	CDPRemoteN         = "CDP_REMOTE"
 	IpfsAddrN          = "IPFS_ADDR"
 	EtherAddrN         = "ETH_NETWORK"
@@ -29,10 +30,10 @@ const (
 )
 
 var DefaultValues = map[string]string{
-	AppAddrN:   AppAddrV,
-	PubAddrN:   PubAddrV,
-	PubTopicN:  PubTopicV,
-	RedisAddrN: RedisAddrV,
+	AppAddrN:        AppAddrV,
+	AppAuthBackendN: AppAuthBackendV,
+	PubAddrN:        PubAddrV,
+	PubTopicN:       PubTopicV,
 }
 
 func Get(key string) string {
