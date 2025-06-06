@@ -1,0 +1,143 @@
+package app
+
+import "scrapeit/pkg/view"
+
+templ Hero() {
+	<div class="hero min-h-[80vh]">
+		<div class="hero-content text-center">
+			<div class="max-w-3xl">
+				<h1 class="text-5xl font-bold mb-6">
+					Welcome to <span class="text-primary">Scrapions</span>
+				</h1>
+				<p class="text-xl mb-8">
+					The decentralized web scraping platform that works like a swarm of
+					digital minions, collecting data efficiently across distributed nodes.
+				</p>
+				<div class="flex flex-col md:flex-row gap-4 justify-center">
+					<button class="btn btn-primary btn-lg" onclick="showPage('auth-page', 'signup')">
+						<i class="fas fa-rocket mr-2"></i> Get Started
+					</button>
+					<button class="btn btn-outline btn-lg" onclick="showPage('auth-page')">
+						<i class="fas fa-sign-in-alt mr-2"></i> Login
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ HowItWorks() {
+	<div class="my-20">
+		<h2 class="text-3xl font-bold text-center mb-12">How Scrapions Works</h2>
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body items-center text-center">
+					<div
+						class="w-16 h-16 rounded-full bg-primary text-primary-content flex items-center justify-center mb-4"
+					>
+						<i class="fas fa-key text-2xl"></i>
+					</div>
+					<h3 class="card-title mb-2">Create Tasks with ETH</h3>
+					<p>
+						Fund tasks using Ethereum. Our smart contract manages payments to node operators when
+						they complete your scraping jobs.
+					</p>
+				</div>
+			</div>
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body items-center text-center">
+					<div
+						class="w-16 h-16 rounded-full bg-secondary text-secondary-content flex items-center justify-center mb-4"
+					>
+						<i class="fas fa-code text-2xl"></i>
+					</div>
+					<h3 class="card-title mb-2">Make API Calls</h3>
+					<p>
+						Send your scraping requests through our simple REST API. Our swarm of scrapers will
+						handle all the complexity.
+					</p>
+				</div>
+			</div>
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body items-center text-center">
+					<div
+						class="w-16 h-16 rounded-full bg-accent text-accent-content flex items-center justify-center mb-4"
+					>
+						<i class="fas fa-database text-2xl"></i>
+					</div>
+					<h3 class="card-title mb-2">Get Your Data</h3>
+					<p>
+						Retrieve structured data from our decentralized storage. Monitor progress and history
+						through your dashboard.
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ CTA() {
+	<div class="my-20 bg-primary/10 p-8 rounded-2xl">
+		<h2 class="text-3xl font-bold text-center mb-8">Why Choose Scrapions?</h2>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+			<div class="flex gap-4">
+				<div class="text-primary mt-1">
+					<i class="fas fa-shield-alt text-2xl"></i>
+				</div>
+				<div>
+					<h3 class="text-xl font-bold mb-2">Blockchain-Powered</h3>
+					<p class="text-base-content/80">
+						Built on Ethereum with automated payments via smart
+						contract for verifiable, trustless task execution.
+					</p>
+				</div>
+			</div>
+			<div class="flex gap-4">
+				<div class="text-primary mt-1">
+					<i class="fas fa-bolt text-2xl"></i>
+				</div>
+				<div>
+					<h3 class="text-xl font-bold mb-2">Fast Results</h3>
+					<p class="text-base-content/80">
+						Parallel scraping across multiple nodes means you get
+						your data faster than traditional services.
+					</p>
+				</div>
+			</div>
+			<div class="flex gap-4">
+				<div class="text-primary mt-1">
+					<i class="fas fa-lock text-2xl"></i>
+				</div>
+				<div>
+					<h3 class="text-xl font-bold mb-2">Private & Secure</h3>
+					<p class="text-base-content/80">
+						Your data is encrypted and only accessible to you. We
+						never store or sell your scraped data.
+					</p>
+				</div>
+			</div>
+			<div class="flex gap-4">
+				<div class="text-primary mt-1">
+					<i class="fas fa-chart-line text-2xl"></i>
+				</div>
+				<div>
+					<h3 class="text-xl font-bold mb-2">Scalable Infrastructure</h3>
+					<p class="text-base-content/80">
+						Our network automatically scales to handle your scraping
+						load, from small jobs to enterprise-level tasks.
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ Index() {
+	@view.Layout("Scrapions") {
+		<div id="landing-page" class="page-transition">
+			@Hero()
+			@HowItWorks()
+			@CTA()
+		</div>
+	}
+}

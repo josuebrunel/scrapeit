@@ -1,0 +1,146 @@
+package view
+
+import "github.com/josuebrunel/gopkg/component"
+
+templ Head(title string) {
+	@component.Head() {
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>Scrapions - Decentralized Web Scraping Platform</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css"/>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+		<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        scrapions: {
+                            primary: '#4F46E5',
+                            secondary: '#10B981',
+                            accent: '#F59E0B',
+                            neutral: '#1F2937',
+                            'base-100': '#FFFFFF',
+                            info: '#3B82F6',
+                            success: '#10B981',
+                            warning: '#F59E0B',
+                            error: '#EF4444',
+                        },
+                    }
+                }
+            }
+        }
+   		</script>
+		@component.LinkStyle("/static/css/style.css", templ.Attributes{})
+	}
+}
+
+templ Notification() {
+	<!-- Notification container -->
+	<div id="notification-container" class="notification"></div>
+}
+
+templ App() {
+	<div id="app">
+		{ children... }
+	</div>
+}
+
+templ NavigationBar() {
+	<!-- Navigation bar -->
+	<nav class="navbar bg-primary text-primary-content shadow-lg">
+		<div class="flex-1">
+			<button class="btn btn-ghost normal-case text-xl" onclick="showPage('landing-page')">
+				<i class="fas fa-spider mr-2"></i>
+				Scrapions
+			</button>
+		</div>
+		<div class="flex-none">
+			<ul class="menu menu-horizontal px-1" id="nav-menu">
+				<li class="hidden" id="nav-docs"><a onclick="showPage('landing-page')">Home</a></li>
+				<li class="hidden" id="nav-features"><a onclick="showPage('landing-page')">Features</a></li>
+				<li class="hidden" id="nav-dashboard">
+					<button
+						onclick="showPage('dashboard-page')"
+					>Dashboard</button>
+				</li>
+				<li class="hidden" id="nav-history"><button onclick="showPage('history-page')">History</button></li>
+				<li class="hidden" id="nav-login"><button onclick="showPage('auth-page')">Login</button></li>
+				<li class="hidden" id="nav-signup">
+					<button
+						class="btn btn-accent"
+						onclick="showPage('auth-page', 'signup')"
+					>Sign Up</button>
+				</li>
+				<li class="hidden" id="nav-profile">
+					<div class="dropdown dropdown-end">
+						<label tabindex="0" class="btn btn-ghost btn-circle avatar">
+							<div
+								class="w-10 rounded-full bg-accent text-accent-content flex items-center justify-center"
+							>
+								<i class="fas fa-user text-xl"></i>
+							</div>
+						</label>
+						<ul
+							tabindex="0"
+							class="mt-3 p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52 text-base-content"
+						>
+							<li><a onclick="showPage('dashboard-page')">Dashboard</a></li>
+							<li><a onclick="showPage('history-page')">Task History</a></li>
+							<li><a onclick="logout()">Logout</a></li>
+						</ul>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</nav>
+}
+
+templ Main() {
+	<main class="p-4 md:p-8">
+		{ children... }
+	</main>
+}
+
+templ Footer() {
+	<!-- Footer -->
+	<footer class="footer p-10 bg-neutral text-neutral-content">
+		<div>
+			<span class="footer-title">
+				<i class="fas fa-spider mr-2"></i> Scrapions
+			</span>
+			<a class="link link-hover">About</a>
+			<a class="link link-hover">Documentation</a>
+			<a class="link link-hover">API Reference</a>
+			<a class="link link-hover">Pricing</a>
+		</div>
+		<div>
+			<span class="footer-title">Legal</span>
+			<a class="link link-hover">Terms of use</a>
+			<a class="link link-hover">Privacy policy</a>
+			<a class="link link-hover">Cookie policy</a>
+		</div>
+		<div>
+			<span class="footer-title">Contact</span>
+			<a class="link link-hover">Twitter</a>
+			<a class="link link-hover">Discord</a>
+			<a class="link link-hover">support@scrapions.io</a>
+		</div>
+	</footer>
+}
+
+templ Layout(title string) {
+	@component.HTML(templ.Attributes{"data-theme": "scrapions"}) {
+		@Head(title)
+		@component.Body(templ.Attributes{}) {
+			@App() {
+				@Notification()
+				@NavigationBar()
+				@Main() {
+					{ children... }
+				}
+				@Footer()
+			}
+		}
+	}
+}

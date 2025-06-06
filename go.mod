@@ -3,12 +3,14 @@ module scrapeit
 go 1.24.0
 
 require (
+	github.com/a-h/templ v0.3.898
 	github.com/chromedp/cdproto v0.0.0-20250403032234-65de8f5d025b
 	github.com/chromedp/chromedp v0.13.6
 	github.com/ethereum/go-ethereum v1.15.11
 	github.com/go-rod/stealth v0.4.9
 	github.com/google/uuid v1.6.0
 	github.com/ipfs/go-ipfs-api v0.7.0
+	github.com/josuebrunel/gopkg/component v0.0.5
 	github.com/josuebrunel/gopkg/xlog v0.0.1
 	github.com/labstack/echo/v5 v5.0.0-20230722203903-ec5b858dab61
 	github.com/libp2p/go-libp2p v0.41.1
@@ -44,7 +46,7 @@ require (
 	github.com/ethereum/go-verkle v0.2.2 // indirect
 	github.com/flynn/noise v1.1.0 // indirect
 	github.com/francoispqt/gojay v1.2.13 // indirect
-	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-json-experiment/json v0.0.0-20250211171154-1ae217ad3535 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

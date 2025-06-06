@@ -1,13 +1,16 @@
-package server
+package app
 
 import (
 	"crypto/ecdsa"
 	"fmt"
 	"log"
+	"net/http"
 	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
 	"scrapeit/pkg/etherutil"
 	"scrapeit/pkg/task"
+	"scrapeit/pkg/view"
+	"scrapeit/server"
 
 	"github.com/google/uuid"
 	"github.com/josuebrunel/gopkg/xlog"
@@ -15,9 +18,9 @@ import (
 	"github.com/labstack/echo/v5/middleware"
 )
 
-type Api struct {
+type App struct {
 	ListenAddr string
-	Publisher  *Server
+	Publisher  *server.Server
 	Manager    *task.EtherManager
 	privateKey *ecdsa.PrivateKey
 }
@@ -32,10 +35,10 @@ type Response[T any] struct {
 	Error string `json:"error"`
 }
 
-func NewApi() *Api {
-	return &Api{
+func NewApp() *App {
+	return &App{
 		ListenAddr: env.Get(env.AppAddrN),
-		Publisher:  New(),
+		Publisher:  server.New(),
 		Manager: task.NewEtherManager(
 			env.Get(env.EtherAddrN),
 			env.Get(env.EtherContractAddrN),
@@ -44,10 +47,11 @@ func NewApi() *Api {
 	}
 }
 
-func (api *Api) Start() error {
+func (api *App) Start() error {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.GET("/", func(c echo.Context) error { return view.Render(c, http.StatusOK, Index(), nil) })
 	e.POST("/v1/task", api.Scrape())
 	e.GET("/v1/task/:id", api.Result())
 	e.GET("/settings", api.Settings())
@@ -56,7 +60,7 @@ func (api *Api) Start() error {
 	return nil
 }
 
-func (a Api) Scrape() echo.HandlerFunc {
+func (a App) Scrape() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var (
 			req Request
@@ -80,7 +84,7 @@ func (a Api) Scrape() echo.HandlerFunc {
 	}
 }
 
-func (a Api) Result() echo.HandlerFunc {
+func (a App) Result() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var (
 			ctx = c.Request().Context()
@@ -109,7 +113,7 @@ func (a Api) Result() echo.HandlerFunc {
 	}
 }
 
-func (a Api) Settings() echo.HandlerFunc {
+func (a App) Settings() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		peerID := a.Publisher.Node.ID.String()
 		addr := func() []string {

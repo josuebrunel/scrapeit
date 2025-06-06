@@ -1,10 +1,8 @@
 package main
 
-import (
-	"scrapeit/server"
-)
+import "scrapeit/app"
 
 func main() {
-	a := server.NewApi()
+	a := app.NewApp()
 	a.Start()
 }
