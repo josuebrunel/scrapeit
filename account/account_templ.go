@@ -9,9 +9,28 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/josuebrunel/gopkg/component"
 	"github.com/josuebrunel/gopkg/xsession"
 	"scrapeit/pkg/view"
 )
+
+type AuthType struct {
+	Type string `json:"type"`
+	Link string `json:"link"`
+}
+
+func getAuthType(signUp bool) AuthType {
+	if !signUp {
+		return AuthType{
+			Type: "Sign Up",
+			Link: "/account/signup",
+		}
+	}
+	return AuthType{
+		Type: "Sign In",
+		Link: "/account/signin",
+	}
+}
 
 func SignInAndUpView(title string, attr templ.Attributes, signup bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -46,7 +65,57 @@ func SignInAndUpView(title string, attr templ.Attributes, signup bool) templ.Com
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"auth-page\" class=\"page-transition hidden\"><div class=\"hero min-h-[80vh]\"><div class=\"hero-content flex-col md:flex-row gap-12\"><div class=\"text-center md:text-left md:w-1/2\"><h1 class=\"text-5xl font-bold mb-6\"><span id=\"auth-title\">Login</span> to <span class=\"text-primary\">Scrapions</span></h1><p class=\"text-lg mb-8\"><span id=\"auth-subtitle\">Sign in to access your dashboard, manage your API keys, and view your scraping history.</span></p><div class=\"hidden md:block\"><img src=\"https://illustrations.popsy.co/amber/developer-activity.svg\" alt=\"Authentication illustration\" class=\"w-full max-w-md mx-auto\"></div></div><div class=\"card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100\"><div class=\"card-body\"><div class=\"tabs tabs-boxed bg-base-200 mb-6\"><a class=\"tab w-1/2\" id=\"login-tab\" onclick=\"switchAuthTab('login')\">Login</a> <a class=\"tab w-1/2\" id=\"signup-tab\" onclick=\"switchAuthTab('signup')\">Sign Up</a></div><form id=\"auth-form\" onsubmit=\"handleAuthSubmit(event)\"><div class=\"form-control\"><label class=\"label\"><span class=\"label-text\">Email</span></label> <input id=\"auth-email\" type=\"email\" placeholder=\"your@email.com\" class=\"input input-bordered\" required></div><div class=\"form-control\"><label class=\"label\"><span class=\"label-text\">Password</span></label> <input id=\"auth-password\" type=\"password\" placeholder=\"••••••••\" class=\"input input-bordered\" required></div><div id=\"signup-fields\" class=\"hidden\"><div class=\"form-control\"><label class=\"label\"><span class=\"label-text\">Name</span></label> <input id=\"auth-name\" type=\"text\" placeholder=\"John Doe\" class=\"input input-bordered\"></div></div><div class=\"form-control mt-6\"><button id=\"auth-submit\" type=\"submit\" class=\"btn btn-primary\"><span id=\"auth-submit-text\">Login</span></button></div><div class=\"text-center mt-4\"><a href=\"#\" class=\"link link-accent text-sm\" onclick=\"notify('Info', 'Feature coming soon!', 'info')\">Forgot password?</a></div></form></div></div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"auth-page\" class=\"page-transition \"><div class=\"hero min-h-[80vh]\"><div class=\"hero-content flex-col md:flex-row gap-12\"><div class=\"text-center md:text-left md:w-1/2\"><h1 class=\"text-5xl font-bold mb-6\"><span id=\"auth-title\">Login</span> to <span class=\"text-primary\">Scrapions</span></h1><p class=\"text-lg mb-8\"><span id=\"auth-subtitle\">Sign in to access your dashboard, manage your API keys, and view your scraping history.</span></p><div class=\" md:block\"><img src=\"https://illustrations.popsy.co/amber/developer-activity.svg\" alt=\"Authentication illustration\" class=\"w-full max-w-md mx-auto\"></div></div><div class=\"card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100\"><div class=\"card-body\"><form id=\"auth-form\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, attr)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = component.InputCSRF(view.GetCSRF(ctx)).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"form-control\"><label class=\"label\"><span class=\"label-text\">Email</span></label> <input id=\"auth-email\" name=\"email\" type=\"email\" placeholder=\"your@email.com\" class=\"input input-bordered\" required></div><div class=\"form-control\"><label class=\"label\"><span class=\"label-text\">Password</span></label> <input id=\"auth-password\" name=\"password\" type=\"password\" placeholder=\"••••••••\" class=\"input input-bordered\" required></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			authType := getAuthType(signup)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"form-control mt-6\"><button id=\"auth-submit\" type=\"submit\" class=\"btn btn-primary\"><span id=\"auth-submit-text\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(authType.Type)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `account/account.templ`, Line: 88, Col: 26}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span></button></div><div class=\"text-center mt-4\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = component.Link("Forgot Password?", "#", templ.Attributes{"class": "link link-primary text-sm"}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><div class=\"text-center mt-4\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = component.Link(authType.Type, authType.Link, templ.Attributes{"class": "link link-primary text-sm"}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></form></div></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -76,12 +145,12 @@ func DashboardView(user xsession.XUser, attr templ.Attributes) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var3 == nil {
-			templ_7745c5c3_Var3 = templ.NopComponent
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var4 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var5 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -93,13 +162,13 @@ func DashboardView(user xsession.XUser, attr templ.Attributes) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div id=\"dashboard-page\" class=\"page-transition hidden\"><div class=\"flex flex-col md:flex-row gap-8\"><div class=\"md:w-1/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><div class=\"flex items-center gap-4 mb-4\"><div class=\"avatar\"><div class=\"w-16 rounded-full bg-accent text-accent-content flex items-center justify-center\"><i class=\"fas fa-user text-2xl\"></i></div></div><div><h2 class=\"card-title\" id=\"user-name\">Loading...</h2><p class=\"text-sm opacity-70\">Premium Member</p></div></div><div class=\"stats shadow bg-base-200\"><div class=\"stat\"><div class=\"stat-figure text-secondary\"><i class=\"fas fa-tasks text-2xl\"></i></div><div class=\"stat-title\">Active Tasks</div><div class=\"stat-value\" id=\"active-tasks\">0</div><div class=\"stat-desc\">running now</div></div></div></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Your API Key</h2><div class=\"alert mb-4\"><i class=\"fas fa-key text-lg\"></i> <span>Keep this key secret!</span></div><div class=\"form-control\"><div class=\"input-group\"><input id=\"api-key\" type=\"text\" class=\"input input-bordered w-full\" value=\"Loading...\" readonly> <button class=\"btn btn-square\" onclick=\"copyApiKey()\"><i class=\"fas fa-copy\"></i></button></div></div><div class=\"mt-4\"><button class=\"btn btn-outline btn-sm\" onclick=\"regenerateApiKey()\"><i class=\"fas fa-redo mr-2\"></i> Regenerate Key</button></div></div></div></div><div class=\"md:w-2/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Quick Start</h2><div class=\"grid grid-cols-1 md:grid-cols-2 gap-4 mb-6\"><button class=\"btn btn-outline\" onclick=\"showPage('history-page')\"><i class=\"fas fa-history mr-2\"></i> View Task History</button> <button class=\"btn btn-primary\" onclick=\"showCreateTaskModal()\"><i class=\"fas fa-plus mr-2\"></i> Create New Task</button></div><div class=\"divider\">OR</div><h3 class=\"text-lg font-medium mb-2\">Sample API Request</h3><div class=\"mockup-code mb-4\"><pre><code>piece of code here</code></pre></div><div class=\"collapse collapse-plus bg-base-200 mb-2\"><input type=\"checkbox\"><div class=\"collapse-title text-md font-medium\">Node.js Example</div><div class=\"collapse-content\"><pre><code class=\"language-javascript\">code example</code></pre></div></div></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Recent Activity</h2><div class=\"overflow-x-auto\"><table class=\"table table-zebra\"><thead><tr><th>Task ID</th><th>Status</th><th>Created</th></tr></thead> <tbody id=\"recent-tasks\"><!-- Recent tasks will be populated here --><tr><td colspan=\"3\" class=\"text-center\">Loading...</td></tr></tbody></table></div><div class=\"card-actions justify-end mt-4\"><button class=\"btn btn-ghost btn-sm\" onclick=\"showPage('history-page')\">View All <i class=\"fas fa-arrow-right ml-2\"></i></button></div></div></div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div id=\"dashboard-page\" class=\"page-transition \"><div class=\"flex flex-col md:flex-row gap-8\"><div class=\"md:w-1/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><div class=\"flex items-center gap-4 mb-4\"><div class=\"avatar\"><div class=\"w-16 rounded-full bg-accent text-accent-content flex items-center justify-center\"><i class=\"fas fa-user text-2xl\"></i></div></div><div><h2 class=\"card-title\" id=\"user-name\">Loading...</h2><p class=\"text-sm opacity-70\">Premium Member</p></div></div><div class=\"stats shadow bg-base-200\"><div class=\"stat\"><div class=\"stat-figure text-secondary\"><i class=\"fas fa-tasks text-2xl\"></i></div><div class=\"stat-title\">Active Tasks</div><div class=\"stat-value\" id=\"active-tasks\">0</div><div class=\"stat-desc\">running now</div></div></div></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Your API Key</h2><div class=\"alert mb-4\"><i class=\"fas fa-key text-lg\"></i> <span>Keep this key secret!</span></div><div class=\"form-control\"><div class=\"input-group\"><input id=\"api-key\" type=\"text\" class=\"input input-bordered w-full\" value=\"Loading...\" readonly> <button class=\"btn btn-square\" onclick=\"copyApiKey()\"><i class=\"fas fa-copy\"></i></button></div></div><div class=\"mt-4\"><button class=\"btn btn-outline btn-sm\" onclick=\"regenerateApiKey()\"><i class=\"fas fa-redo mr-2\"></i> Regenerate Key</button></div></div></div></div><div class=\"md:w-2/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Quick Start</h2><div class=\"grid grid-cols-1 md:grid-cols-2 gap-4 mb-6\"><button class=\"btn btn-outline\" onclick=\"showPage('history-page')\"><i class=\"fas fa-history mr-2\"></i> View Task History</button> <button class=\"btn btn-primary\" onclick=\"showCreateTaskModal()\"><i class=\"fas fa-plus mr-2\"></i> Create New Task</button></div><div class=\"divider\">OR</div><h3 class=\"text-lg font-medium mb-2\">Sample API Request</h3><div class=\"mockup-code mb-4\"><pre><code>piece of code here</code></pre></div><div class=\"collapse collapse-plus bg-base-200 mb-2\"><input type=\"checkbox\"><div class=\"collapse-title text-md font-medium\">Node.js Example</div><div class=\"collapse-content\"><pre><code class=\"language-javascript\">code example</code></pre></div></div></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Recent Activity</h2><div class=\"overflow-x-auto\"><table class=\"table table-zebra\"><thead><tr><th>Task ID</th><th>Status</th><th>Created</th></tr></thead> <tbody id=\"recent-tasks\"><!-- Recent tasks will be populated here --><tr><td colspan=\"3\" class=\"text-center\">Loading...</td></tr></tbody></table></div><div class=\"card-actions justify-end mt-4\"><button class=\"btn btn-ghost btn-sm\" onclick=\"showPage('history-page')\">View All <i class=\"fas fa-arrow-right ml-2\"></i></button></div></div></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = view.Layout("Dashboard").Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = view.Layout("Dashboard").Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

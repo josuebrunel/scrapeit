@@ -14,12 +14,12 @@ templ Hero() {
 					digital minions, collecting data efficiently across distributed nodes.
 				</p>
 				<div class="flex flex-col md:flex-row gap-4 justify-center">
-					<button class="btn btn-primary btn-lg" onclick="showPage('auth-page', 'signup')">
+					<a class="btn btn-primary btn-lg" href={ templ.SafeURL("/account/signup") }>
 						<i class="fas fa-rocket mr-2"></i> Get Started
-					</button>
-					<button class="btn btn-outline btn-lg" onclick="showPage('auth-page')">
+					</a>
+					<a class="btn btn-outline btn-lg" href={ templ.SafeURL("/account/signin") }>
 						<i class="fas fa-sign-in-alt mr-2"></i> Login
-					</button>
+					</a>
 				</div>
 			</div>
 		</div>

@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"crypto/ecdsa"
 	"database/sql"
 	"fmt"
@@ -20,6 +19,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/josuebrunel/gopkg/xlog"
+	"github.com/josuebrunel/gopkg/xsession"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
@@ -66,22 +66,24 @@ func getDBConnection(dsn string) *sql.DB {
 	return db
 }
 
-func (api *App) Start() error {
-	ctx := context.Background()
-	db := getDBConnection(api.Database)
+func (a *App) Start() error {
+	db := getDBConnection(a.Database)
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORS())
+	e.Use(xsession.LoadAndSave(xsession.SessionManager))
+	e.Static("/static", "static")
 	e.GET("/", func(c echo.Context) error { return view.Render(c, http.StatusOK, Index(), nil) })
-	e.POST("/v1/task", api.Scrape())
-	e.GET("/v1/task/:id", api.Result())
-	e.GET("/settings", api.Settings())
+	e.POST("/v1/task", a.Scrape())
+	e.GET("/v1/task/:id", a.Result())
+	e.GET("/settings", a.Settings())
 	// get Auth backend client
-	authCli := auth.New("scrapeit", "").WithCustomAuthURL(api.AuthBackend)
+	authCli := auth.New("scrapeit", "").WithCustomAuthURL(a.AuthBackend)
 	// mount account
-	account.Mount(ctx, e, db, authCli)
-	xlog.Info("starting server", "addr", api.ListenAddr)
-	log.Fatal(e.Start(api.ListenAddr))
+	account.Mount(e, db, authCli)
+	xlog.Info("starting server", "addr", a.ListenAddr)
+	log.Fatal(e.Start(a.ListenAddr))
 	return nil
 }
 

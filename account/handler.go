@@ -1,7 +1,6 @@
 package account
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -65,23 +64,21 @@ type Handler struct {
 	db    bob.DB
 }
 
-func Mount(ctx context.Context, e *echo.Echo, db *sql.DB, gtc auth.Client) {
+func Mount(e *echo.Echo, db *sql.DB, gtc auth.Client) {
 	h := New(db, gtc)
 	g := e.Group("/account")
 	g.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		TokenLookup: "form:csrf,header:csrf",
 	}))
-	g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/signup", Handler: h.SignUp(ctx), Name: HandlerNameSignUp})
-	g.AddRoute(echo.Route{Method: http.MethodPost, Path: "/signup", Handler: h.SignUp(ctx), Name: HandlerNameSignUp})
-	g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/signin", Handler: h.SignIn(ctx), Name: HandlerNameSignIn})
-	g.AddRoute(echo.Route{Method: http.MethodPost, Path: "/signin", Handler: h.SignIn(ctx), Name: HandlerNameSignIn})
+	g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/signup", Handler: h.SignUp(), Name: HandlerNameSignUp})
+	g.AddRoute(echo.Route{Method: http.MethodPost, Path: "/signup", Handler: h.SignUp(), Name: HandlerNameSignUp})
+	g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/signin", Handler: h.SignIn(), Name: HandlerNameSignIn})
+	g.AddRoute(echo.Route{Method: http.MethodPost, Path: "/signin", Handler: h.SignIn(), Name: HandlerNameSignIn})
 	loginRequired := xsession.LoginRequired("/account/signin")
-	g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/", Handler: h.Dashboard(ctx), Name: HandlerNameDashboard,
+	g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/", Handler: h.Dashboard(), Name: HandlerNameDashboard,
 		Middlewares: []echo.MiddlewareFunc{loginRequired}})
-	g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/signout", Handler: h.SignOut(ctx), Name: HandlerNameSignOut,
+	g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/signout", Handler: h.SignOut(), Name: HandlerNameSignOut,
 		Middlewares: []echo.MiddlewareFunc{loginRequired}})
-	// g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/info", Handler: h.Info(ctx), Name: HandlerNameInfo,
-	// 	Middlewares: []echo.MiddlewareFunc{loginRequired}})
 }
 
 func New(db *sql.DB, gtc auth.Client) Handler {
@@ -99,7 +96,7 @@ func (h Handler) SudoAdmin() auth.Client {
 	return h.gtc.WithToken(user.AccessToken)
 }
 
-func (h Handler) SignUp(ctx context.Context) echo.HandlerFunc {
+func (h Handler) SignUp() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if c.Request().Method == http.MethodGet {
 			return view.Render(c, http.StatusOK, renderSignUp(c), nil)
@@ -121,7 +118,7 @@ func (h Handler) SignUp(ctx context.Context) echo.HandlerFunc {
 	}
 }
 
-func (h Handler) SignIn(ctx context.Context) echo.HandlerFunc {
+func (h Handler) SignIn() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if c.Request().Method == http.MethodGet {
 			if xsession.IsAuthenticated(c.Request().Context()) {
@@ -150,7 +147,7 @@ func (h Handler) SignIn(ctx context.Context) echo.HandlerFunc {
 	}
 }
 
-func (h Handler) SignOut(ctx context.Context) echo.HandlerFunc {
+func (h Handler) SignOut() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if c.Request().Method != http.MethodGet {
 			return view.Render(c, http.StatusOK, renderSignIn(c), nil)
@@ -167,7 +164,7 @@ func (h Handler) SignOut(ctx context.Context) echo.HandlerFunc {
 	}
 }
 
-func (h Handler) Dashboard(ctx context.Context) echo.HandlerFunc {
+func (h Handler) Dashboard() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var planName string
 		user := xsession.GetUser(c.Request().Context())
