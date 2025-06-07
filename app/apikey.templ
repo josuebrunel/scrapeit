@@ -1,0 +1,32 @@
+package app
+
+import "scrapeit/pkg/models"
+
+templ ApiKeyView(key models.APIKey) {
+	<div class="card-body">
+		<h2 class="card-title mb-4">Your API Key</h2>
+		<div class="alert mb-4">
+			<i class="fas fa-key text-lg"></i>
+			<span>Keep this key secret!</span>
+		</div>
+		<div class="form-control">
+			<div class="input-group">
+				<input
+					id="api-key"
+					type="text"
+					class="input input-bordered w-full"
+					value={ key.APIKey }
+					readonly
+				/>
+				<button class="btn btn-square" onclick="copyApiKey()">
+					<i class="fas fa-copy"></i>
+				</button>
+			</div>
+		</div>
+		<div class="mt-4">
+			<button class="btn btn-outline btn-sm" hx-put="/account/apikey" hx-target="#apiKey">
+				<i class="fas fa-redo mr-2"></i> Regenerate Key
+			</button>
+		</div>
+	</div>
+}

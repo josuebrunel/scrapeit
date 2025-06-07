@@ -17,6 +17,7 @@ import (
 type AuthType struct {
 	Type string `json:"type"`
 	Link string `json:"link"`
+	Alt  string `json:"alt"`
 }
 
 func getAuthType(signUp bool) AuthType {
@@ -24,11 +25,13 @@ func getAuthType(signUp bool) AuthType {
 		return AuthType{
 			Type: "Sign Up",
 			Link: "/account/signup",
+			Alt:  "Sign In",
 		}
 	}
 	return AuthType{
 		Type: "Sign In",
 		Link: "/account/signin",
+		Alt:  "Sign Up",
 	}
 }
 
@@ -91,9 +94,9 @@ func SignInAndUpView(title string, attr templ.Attributes, signup bool) templ.Com
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(authType.Type)
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(authType.Alt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `account/account.templ`, Line: 88, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `account/account.templ`, Line: 91, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -162,7 +165,7 @@ func DashboardView(user xsession.XUser, attr templ.Attributes) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div id=\"dashboard-page\" class=\"page-transition \"><div class=\"flex flex-col md:flex-row gap-8\"><div class=\"md:w-1/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><div class=\"flex items-center gap-4 mb-4\"><div class=\"avatar\"><div class=\"w-16 rounded-full bg-accent text-accent-content flex items-center justify-center\"><i class=\"fas fa-user text-2xl\"></i></div></div><div><h2 class=\"card-title\" id=\"user-name\">Loading...</h2><p class=\"text-sm opacity-70\">Premium Member</p></div></div><div class=\"stats shadow bg-base-200\"><div class=\"stat\"><div class=\"stat-figure text-secondary\"><i class=\"fas fa-tasks text-2xl\"></i></div><div class=\"stat-title\">Active Tasks</div><div class=\"stat-value\" id=\"active-tasks\">0</div><div class=\"stat-desc\">running now</div></div></div></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Your API Key</h2><div class=\"alert mb-4\"><i class=\"fas fa-key text-lg\"></i> <span>Keep this key secret!</span></div><div class=\"form-control\"><div class=\"input-group\"><input id=\"api-key\" type=\"text\" class=\"input input-bordered w-full\" value=\"Loading...\" readonly> <button class=\"btn btn-square\" onclick=\"copyApiKey()\"><i class=\"fas fa-copy\"></i></button></div></div><div class=\"mt-4\"><button class=\"btn btn-outline btn-sm\" onclick=\"regenerateApiKey()\"><i class=\"fas fa-redo mr-2\"></i> Regenerate Key</button></div></div></div></div><div class=\"md:w-2/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Quick Start</h2><div class=\"grid grid-cols-1 md:grid-cols-2 gap-4 mb-6\"><button class=\"btn btn-outline\" onclick=\"showPage('history-page')\"><i class=\"fas fa-history mr-2\"></i> View Task History</button> <button class=\"btn btn-primary\" onclick=\"showCreateTaskModal()\"><i class=\"fas fa-plus mr-2\"></i> Create New Task</button></div><div class=\"divider\">OR</div><h3 class=\"text-lg font-medium mb-2\">Sample API Request</h3><div class=\"mockup-code mb-4\"><pre><code>piece of code here</code></pre></div><div class=\"collapse collapse-plus bg-base-200 mb-2\"><input type=\"checkbox\"><div class=\"collapse-title text-md font-medium\">Node.js Example</div><div class=\"collapse-content\"><pre><code class=\"language-javascript\">code example</code></pre></div></div></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Recent Activity</h2><div class=\"overflow-x-auto\"><table class=\"table table-zebra\"><thead><tr><th>Task ID</th><th>Status</th><th>Created</th></tr></thead> <tbody id=\"recent-tasks\"><!-- Recent tasks will be populated here --><tr><td colspan=\"3\" class=\"text-center\">Loading...</td></tr></tbody></table></div><div class=\"card-actions justify-end mt-4\"><button class=\"btn btn-ghost btn-sm\" onclick=\"showPage('history-page')\">View All <i class=\"fas fa-arrow-right ml-2\"></i></button></div></div></div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div id=\"dashboard-page\" class=\"page-transition \"><div class=\"flex flex-col md:flex-row gap-8\"><div class=\"md:w-1/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><div class=\"flex items-center gap-4 mb-4\"><div class=\"avatar\"><div class=\"w-16 rounded-full bg-accent text-accent-content flex items-center justify-center\"><i class=\"fas fa-user text-2xl\"></i></div></div><div><h2 class=\"card-title\" id=\"user-name\">Loading...</h2><p class=\"text-sm opacity-70\">Premium Member</p></div></div><div class=\"stats shadow bg-base-200\"><div class=\"stat\"><div class=\"stat-figure text-secondary\"><i class=\"fas fa-tasks text-2xl\"></i></div><div class=\"stat-title\">Active Tasks</div><div class=\"stat-value\" id=\"active-tasks\">0</div><div class=\"stat-desc\">running now</div></div></div></div></div><div id=\"apiKey\" class=\"card bg-base-100 shadow-xl\" hx-get=\"/account/apikey\" hx-target=\"#apiKey\" hx-trigger=\"load\"></div></div><div class=\"md:w-2/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Quick Start</h2><div class=\"grid grid-cols-1 md:grid-cols-2 gap-4 mb-6\"><button class=\"btn btn-outline\" onclick=\"showPage('history-page')\"><i class=\"fas fa-history mr-2\"></i> View Task History</button> <button class=\"btn btn-primary\" onclick=\"showCreateTaskModal()\"><i class=\"fas fa-plus mr-2\"></i> Create New Task</button></div><div class=\"divider\">OR</div><h3 class=\"text-lg font-medium mb-2\">Sample API Request</h3><div class=\"mockup-code mb-4\"><pre><code>piece of code here</code></pre></div><div class=\"collapse collapse-plus bg-base-200 mb-2\"><input type=\"checkbox\"><div class=\"collapse-title text-md font-medium\">Node.js Example</div><div class=\"collapse-content\"><pre><code class=\"language-javascript\">code example</code></pre></div></div></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Recent Activity</h2><div class=\"overflow-x-auto\"><table class=\"table table-zebra\"><thead><tr><th>Task ID</th><th>Status</th><th>Created</th></tr></thead> <tbody id=\"recent-tasks\"><!-- Recent tasks will be populated here --><tr><td colspan=\"3\" class=\"text-center\">Loading...</td></tr></tbody></table></div><div class=\"card-actions justify-end mt-4\"><button class=\"btn btn-ghost btn-sm\" onclick=\"showPage('history-page')\">View All <i class=\"fas fa-arrow-right ml-2\"></i></button></div></div></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

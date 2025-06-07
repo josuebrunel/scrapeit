@@ -6,6 +6,11 @@ MAIN_SERVER=./cmd/server/main.go
 MAIN_CLIENT=./cmd/client/main.go
 MAIN_CONTRACT=./cmd/contract/main.go
 
+GOOSE_DRIVER=postgres
+GOOSE_DBSTRING=postgres://postgres:postgres@db:5432/${NAME}?sslmode=disable
+
+GOOSE_MIGRATION_DIR=app/migrations
+
 deps:
 	apt update && apt upgrade -y && apt install protobuf-compiler -y
 	go get "github.com/labstack/echo/v5@v5.0.0-20230722203903-ec5b858dab61"
@@ -15,6 +20,18 @@ deps:
 	go install github.com/stephenafamo/bob/gen/bobgen-psql@latest
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 	go get "github.com/ethereum/go-ethereum"
+
+bobgen:
+	DBDSN=${GOOSE_DBSTRING} bobgen-psql -c bobgen.yaml
+
+migrate-up:
+	goose -dir ${GOOSE_MIGRATION_DIR} postgres ${GOOSE_DBSTRING} up
+migrate-down:
+	goose -dir ${GOOSE_MIGRATION_DIR} postgres ${GOOSE_DBSTRING} down
+migrate-status:
+	goose -dir ${GOOSE_MIGRATION_DIR} postgres ${GOOSE_DBSTRING} status
+migrate-create:
+	goose -dir ${GOOSE_MIGRATION_DIR} postgres ${GOOSE_DBSTRING} create ${MNAME} sql
 
 debug.build: build
 	go build -gcflags "all=-N -l" -ldflags="-compressdwarf=false" -o ${BIN} ${MAIN}

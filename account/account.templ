@@ -9,6 +9,7 @@ import (
 type AuthType struct {
 	Type string `json:"type"`
 	Link string `json:"link"`
+	Alt  string `json:"alt"`
 }
 
 func getAuthType(signUp bool) AuthType {
@@ -16,11 +17,13 @@ func getAuthType(signUp bool) AuthType {
 		return AuthType{
 			Type: "Sign Up",
 			Link: "/account/signup",
+			Alt:  "Sign In",
 		}
 	}
 	return AuthType{
 		Type: "Sign In",
 		Link: "/account/signin",
+		Alt:  "Sign Up",
 	}
 }
 
@@ -85,7 +88,7 @@ templ SignInAndUpView(title string, attr templ.Attributes, signup bool) {
 								<div class="form-control mt-6">
 									<button id="auth-submit" type="submit" class="btn btn-primary">
 										<span id="auth-submit-text">
-											{ authType.Type }
+											{ authType.Alt }
 										</span>
 									</button>
 								</div>
@@ -136,34 +139,8 @@ templ DashboardView(user xsession.XUser, attr templ.Attributes) {
 							</div>
 						</div>
 					</div>
-					<div class="card bg-base-100 shadow-xl">
-						<div class="card-body">
-							<h2 class="card-title mb-4">Your API Key</h2>
-							<div class="alert mb-4">
-								<i class="fas fa-key text-lg"></i>
-								<span>Keep this key secret!</span>
-							</div>
-							<div class="form-control">
-								<div class="input-group">
-									<input
-										id="api-key"
-										type="text"
-										class="input input-bordered w-full"
-										value="Loading..."
-										readonly
-									/>
-									<button class="btn btn-square" onclick="copyApiKey()">
-										<i class="fas fa-copy"></i>
-									</button>
-								</div>
-							</div>
-							<div class="mt-4">
-								<button class="btn btn-outline btn-sm" onclick="regenerateApiKey()">
-									<i class="fas fa-redo mr-2"></i> Regenerate Key
-								</button>
-							</div>
-						</div>
-					</div>
+					// apiKey component
+					<div id="apiKey" class="card bg-base-100 shadow-xl" hx-get="/account/apikey" hx-target="#apiKey" hx-trigger="load"></div>
 				</div>
 				<div class="md:w-2/3">
 					<div class="card bg-base-100 shadow-xl mb-6">

@@ -8,8 +8,10 @@ require (
 	github.com/chromedp/chromedp v0.13.6
 	github.com/ethereum/go-ethereum v1.15.11
 	github.com/go-rod/stealth v0.4.9
+	github.com/gofrs/uuid/v5 v5.3.2
 	github.com/google/uuid v1.6.0
 	github.com/ipfs/go-ipfs-api v0.7.0
+	github.com/jaswdr/faker/v2 v2.5.0
 	github.com/josuebrunel/gopkg/component v0.0.5
 	github.com/josuebrunel/gopkg/xlog v0.0.1
 	github.com/josuebrunel/gopkg/xsession v0.0.3
@@ -26,6 +28,8 @@ require (
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
+	github.com/aarondl/json v0.0.0-20221020222930-8b0db17ef1bf // indirect
+	github.com/aarondl/opt v0.0.0-20230114172057-b91f370c41f0 // indirect
 	github.com/alexedwards/scs/v2 v2.8.0 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect

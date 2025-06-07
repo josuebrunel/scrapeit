@@ -15,6 +15,7 @@ import (
 	"scrapeit/server"
 
 	_ "github.com/lib/pq"
+	"github.com/stephenafamo/bob"
 	"github.com/supabase-community/auth-go"
 
 	"github.com/google/uuid"
@@ -31,6 +32,7 @@ type App struct {
 	privateKey  *ecdsa.PrivateKey
 	AuthBackend string
 	Database    string
+	bob         bob.DB
 }
 
 type Request struct {
@@ -58,6 +60,7 @@ func NewApp() *App {
 }
 
 func getDBConnection(dsn string) *sql.DB {
+	xlog.Debug("connecting to database", "dsn", dsn)
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Fatal(err)
@@ -68,6 +71,9 @@ func getDBConnection(dsn string) *sql.DB {
 
 func (a *App) Start() error {
 	db := getDBConnection(a.Database)
+	defer db.Close()
+	a.bob = bob.NewDB(db)
+	defer a.bob.Close()
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -82,6 +88,8 @@ func (a *App) Start() error {
 	authCli := auth.New("scrapeit", "").WithCustomAuthURL(a.AuthBackend)
 	// mount account
 	account.Mount(e, db, authCli)
+	e.GET("/account/apikey", a.GenerateApiKey(), xsession.LoginRequired("/account/signin"))
+	e.PUT("/account/apikey", a.GenerateApiKey(), xsession.LoginRequired("/account/signin"))
 	xlog.Info("starting server", "addr", a.ListenAddr)
 	log.Fatal(e.Start(a.ListenAddr))
 	return nil
