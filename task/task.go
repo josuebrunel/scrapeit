@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
+
+	"github.com/gofrs/uuid/v5"
 )
 
 type TaskStatus string
@@ -28,20 +30,24 @@ type Manager interface {
 }
 
 type Task struct {
-	ID        string     `json:"id"`
-	Assignee  string     `json:"assignee"`
-	Submitter string     `json:"submitter"`
-	Input     string     `json:"input"`
-	Output    string     `json:"output"`
-	Status    TaskStatus `json:"status"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
+	ID          string     `json:"id"`
+	UserID      string     `json:"user_id"`
+	Assignee    string     `json:"assignee"`
+	Input       string     `json:"input"`
+	Output      string     `json:"output"`
+	Status      TaskStatus `json:"status"`
+	Submitter   string     `json:"submitter"`
+	Transaction string     `json:"transaction"`
+	Contract    string     `json:"contract"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
 }
 
-func NewTask(id string, client string, input string) Task {
+func NewTask(client, submitter, input string) Task {
 	return Task{
-		ID:        id,
-		Submitter: client,
+		ID:        uuid.Must(uuid.NewV4()).String(),
+		UserID:    client,
+		Submitter: submitter,
 		Input:     input,
 		Status:    Pending,
 		CreatedAt: time.Now(),

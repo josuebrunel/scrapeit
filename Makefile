@@ -16,6 +16,7 @@ deps:
 	go get "github.com/labstack/echo/v5@v5.0.0-20230722203903-ec5b858dab61"
 	go install github.com/a-h/templ/cmd/templ@latest
 	go get github.com/a-h/templ@latest
+	go get github.com/stephenafamo/bob@latest
 	go install github.com/pressly/goose/v3/cmd/goose@latest
 	go install github.com/stephenafamo/bob/gen/bobgen-psql@latest
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest

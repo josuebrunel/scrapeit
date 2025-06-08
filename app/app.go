@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"database/sql"
 	"fmt"
@@ -10,15 +11,14 @@ import (
 	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
 	"scrapeit/pkg/etherutil"
-	"scrapeit/pkg/task"
 	"scrapeit/pkg/view"
 	"scrapeit/server"
+	"scrapeit/task"
 
 	_ "github.com/lib/pq"
 	"github.com/stephenafamo/bob"
 	"github.com/supabase-community/auth-go"
 
-	"github.com/google/uuid"
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/josuebrunel/gopkg/xsession"
 	"github.com/labstack/echo/v5"
@@ -31,7 +31,8 @@ type App struct {
 	Manager     *task.EtherManager
 	privateKey  *ecdsa.PrivateKey
 	AuthBackend string
-	Database    string
+	DatabaseURL string
+	db          *sql.DB
 	bob         bob.DB
 }
 
@@ -46,16 +47,22 @@ type Response[T any] struct {
 }
 
 func NewApp() *App {
+	db := getDBConnection(env.Get(env.AppDatabaseN))
+	bdb := bob.NewDB(db)
+	m := task.NewEtherManager(
+		env.Get(env.EtherAddrN),
+		env.Get(env.EtherContractAddrN),
+	)
+	m.SetDB(bdb)
 	return &App{
+		db:          db,
+		bob:         bdb,
 		AuthBackend: env.Get(env.AppAuthBackendN),
-		Database:    env.Get(env.AppDatabaseN),
-		Publisher:   server.New(),
+		DatabaseURL: env.Get(env.AppDatabaseN),
+		Publisher:   server.New(*m),
 		privateKey:  etherutil.MustPrivateKeyFromHex(env.Get(env.EtherPrivateKeyN)),
-		Manager: task.NewEtherManager(
-			env.Get(env.EtherAddrN),
-			env.Get(env.EtherContractAddrN),
-		),
-		ListenAddr: env.Get(env.AppAddrN),
+		Manager:     m,
+		ListenAddr:  env.Get(env.AppAddrN),
 	}
 }
 
@@ -69,11 +76,13 @@ func getDBConnection(dsn string) *sql.DB {
 	return db
 }
 
+func (a *App) Close() {
+	a.db.Close()
+	a.bob.Close()
+	a.Manager.Close()
+}
+
 func (a *App) Start() error {
-	db := getDBConnection(a.Database)
-	defer db.Close()
-	a.bob = bob.NewDB(db)
-	defer a.bob.Close()
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -81,16 +90,17 @@ func (a *App) Start() error {
 	e.Use(xsession.LoadAndSave(xsession.SessionManager))
 	e.Static("/static", "static")
 	e.GET("/", func(c echo.Context) error { return view.Render(c, http.StatusOK, Index(), nil) })
-	e.POST("/v1/task", a.Scrape())
-	e.GET("/v1/task/:id", a.Result())
+	e.POST("/v1/task", a.Scrape(), ApiKeyAuthMiddleware(a.bob))
+	e.GET("/v1/task/:id", a.Result(), ApiKeyAuthMiddleware(a.bob))
 	e.GET("/settings", a.Settings())
 	// get Auth backend client
 	authCli := auth.New("scrapeit", "").WithCustomAuthURL(a.AuthBackend)
 	// mount account
-	account.Mount(e, db, authCli)
+	account.Mount(e, a.db, authCli)
 	e.GET("/account/apikey", a.GenerateApiKey(), xsession.LoginRequired("/account/signin"))
 	e.PUT("/account/apikey", a.GenerateApiKey(), xsession.LoginRequired("/account/signin"))
 	xlog.Info("starting server", "addr", a.ListenAddr)
+	go a.Publisher.ListenContractEvents(context.Background())
 	log.Fatal(e.Start(a.ListenAddr))
 	return nil
 }
@@ -107,14 +117,21 @@ func (a App) Scrape() echo.HandlerFunc {
 			return c.JSON(400, Response[task.Task]{Error: err.Error()})
 		}
 		xlog.Debug("received request", "url", req.Url)
-		pk := etherutil.MustPrivateKeyFromHex(req.PrivateKey)
-		tskID := uuid.New().String()
-		tsk := task.NewTask(tskID, etherutil.GetAddress(pk), req.Url)
+		var (
+			pk       = etherutil.MustPrivateKeyFromHex(req.PrivateKey)
+			userID   = c.Get(RequestContextUserID).(string)
+			contract = env.Get(env.EtherContractAddrN)
+			tsk      = task.NewTask(userID, etherutil.GetAddress(pk), req.Url)
+		)
+		tsk.Contract = contract
+		if err := a.Manager.Upsert(ctx, tsk); err != nil {
+			xlog.Error("failed to upsert task", "error", err)
+			return c.JSON(500, Response[task.Task]{Error: err.Error()})
+		}
 		if err := a.Manager.Create(ctx, pk, tsk); err != nil {
 			xlog.Error("failed to create task", "error", err)
 			return c.JSON(500, Response[task.Task]{Error: err.Error()})
 		}
-		a.Publisher.Publish(ctx, &tsk)
 		return c.JSON(200, Response[task.Task]{Data: tsk})
 	}
 }

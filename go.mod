@@ -9,7 +9,6 @@ require (
 	github.com/ethereum/go-ethereum v1.15.11
 	github.com/go-rod/stealth v0.4.9
 	github.com/gofrs/uuid/v5 v5.3.2
-	github.com/google/uuid v1.6.0
 	github.com/ipfs/go-ipfs-api v0.7.0
 	github.com/jaswdr/faker/v2 v2.5.0
 	github.com/josuebrunel/gopkg/component v0.0.5
@@ -67,6 +66,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/gopacket v1.1.19 // indirect
 	github.com/google/pprof v0.0.0-20250208200701-d0013a598941 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect

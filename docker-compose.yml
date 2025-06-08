@@ -135,19 +135,14 @@ services:
         condition: service_healthy
 
   subscriber:
-    #container_name: scrapeit-client
+    container_name: scrapeit-subscriber
     build:
       context: .
       dockerfile: Dockerfile
       target: subscriber
-    # env_file:
-    #   - .env
     environment:
       - PUB_ROOT_PEERS=http://dev:8080/settings
       - ETH_PRIVATE_KEY=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
-    deploy:
-      mode: replicated
-      replicas: 1
     networks:
       - scrapeit
     extra_hosts:

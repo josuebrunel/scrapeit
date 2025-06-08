@@ -5,8 +5,8 @@ import (
 	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
 	"scrapeit/pkg/etherutil"
-	"scrapeit/pkg/task"
 	"scrapeit/scraper"
+	"scrapeit/task"
 
 	"github.com/josuebrunel/gopkg/xlog"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"

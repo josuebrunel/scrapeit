@@ -7,6 +7,7 @@ import "context"
 
 type Factory struct {
 	baseAPIKeyMods APIKeyModSlice
+	baseTaskMods   TaskModSlice
 }
 
 func New() *Factory {
@@ -25,10 +26,30 @@ func (f *Factory) NewAPIKey(ctx context.Context, mods ...APIKeyMod) *APIKeyTempl
 	return o
 }
 
+func (f *Factory) NewTask(ctx context.Context, mods ...TaskMod) *TaskTemplate {
+	o := &TaskTemplate{f: f}
+
+	if f != nil {
+		f.baseTaskMods.Apply(ctx, o)
+	}
+
+	TaskModSlice(mods).Apply(ctx, o)
+
+	return o
+}
+
 func (f *Factory) ClearBaseAPIKeyMods() {
 	f.baseAPIKeyMods = nil
 }
 
 func (f *Factory) AddBaseAPIKeyMod(mods ...APIKeyMod) {
 	f.baseAPIKeyMods = append(f.baseAPIKeyMods, mods...)
+}
+
+func (f *Factory) ClearBaseTaskMods() {
+	f.baseTaskMods = nil
+}
+
+func (f *Factory) AddBaseTaskMod(mods ...TaskMod) {
+	f.baseTaskMods = append(f.baseTaskMods, mods...)
 }

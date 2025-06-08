@@ -25,6 +25,7 @@ const (
 	CDPRemoteN         = "CDP_REMOTE"
 	IpfsAddrN          = "IPFS_ADDR"
 	EtherAddrN         = "ETH_NETWORK"
+	EtherWSAddrN       = "ETH_NETWORK_WS"
 	EtherContractAddrN = "ETH_CONTRACT_ADDR"
 	EtherPrivateKeyN   = "ETH_PRIVATE_KEY"
 )

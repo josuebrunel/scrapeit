@@ -4,7 +4,7 @@ import (
 	"context"
 	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
-	"scrapeit/pkg/task"
+	"scrapeit/task"
 
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/multiformats/go-multiaddr"
@@ -12,14 +12,17 @@ import (
 
 type Server struct {
 	Address   string
+	Contract  string
 	TopicName string
 	Node      *common.Node
+	Manager   task.EtherManager
 }
 
-func New() *Server {
+func New(m task.EtherManager) *Server {
 	s := &Server{
 		Address:   env.Get(env.PubAddrN),
 		TopicName: env.Get(env.PubTopicN),
+		Manager:   m,
 	}
 	ctx := context.Background()
 	node := common.NewNode(ctx, s.TopicName, s.Address, []multiaddr.Multiaddr{}, true)

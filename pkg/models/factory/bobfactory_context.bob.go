@@ -15,9 +15,13 @@ var (
 	// Table context
 
 	apiKeyCtx = newContextual[*models.APIKey]("apiKey")
+	taskCtx   = newContextual[*models.Task]("task")
 
 	// Relationship Contexts for api_keys
 	apiKeyWithParentsCascadingCtx = newContextual[bool]("apiKeyWithParentsCascading")
+
+	// Relationship Contexts for tasks
+	taskWithParentsCascadingCtx = newContextual[bool]("taskWithParentsCascading")
 )
 
 // Contextual is a convienience wrapper around context.WithValue and context.Value

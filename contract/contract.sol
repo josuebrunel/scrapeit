@@ -15,6 +15,7 @@ contract Scraper {
 
     struct Task {
         string uuid;
+        string user_id;
         Status status;
         address assignee;
         address submitter;
@@ -54,16 +55,22 @@ contract Scraper {
 
     event TaskCreated(
         string uuid,
+        string user_id,
         address indexed submitter,
         string input,
         uint256 amount
     );
     event TaskClaimed(string uuid, address indexed assignee);
-    event TaskCompleted(string uuid, address indexed assignee, string output);
-    event TaskFailed(string uuid, address indexed assigneeWhoFailed); // Task returned to pool by assignee
+    event TaskProcessed(
+        string uuid,
+        address indexed assignee,
+        Status status,
+        string output
+    );
 
     function create(
         string memory _uuid,
+        string memory _user_id,
         string memory _input
     ) public payable isPaused {
         require(bytes(_uuid).length > 0, "UUID cannot be empty");
@@ -76,6 +83,7 @@ contract Scraper {
 
         Task memory tsk = Task({
             uuid: _uuid,
+            user_id: _user_id,
             submitter: msg.sender,
             input: _input,
             output: "",
@@ -87,7 +95,13 @@ contract Scraper {
         });
 
         tasks[tsk.uuid] = tsk;
-        emit TaskCreated(tsk.uuid, msg.sender, tsk.input, msg.value);
+        emit TaskCreated(
+            tsk.uuid,
+            tsk.user_id,
+            msg.sender,
+            tsk.input,
+            msg.value
+        );
     }
 
     function claim(string memory _uuid) external isPaused {
@@ -118,7 +132,7 @@ contract Scraper {
         tsk.status = Status.Completed;
         tsk.output = _output;
         tsk.updated_at = block.timestamp;
-        emit TaskCompleted(_uuid, msg.sender, _output);
+        emit TaskProcessed(_uuid, msg.sender, Status.Completed, _output);
 
         // Transfer payment to the assignee
         (bool success, ) = tsk.assignee.call{value: tsk.amount}("");
@@ -132,7 +146,7 @@ contract Scraper {
         tsk.status = Status.Failed;
         tsk.assignee = address(0); // Reset assignee so task can be claimed again
         tsk.updated_at = block.timestamp;
-        emit TaskFailed(_uuid, msg.sender);
+        emit TaskProcessed(_uuid, msg.sender, Status.Failed, "");
     }
 
     function setPaused(bool _paused) public isOwner {

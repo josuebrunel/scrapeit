@@ -13,6 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/josuebrunel/gopkg/xlog"
+	"github.com/stephenafamo/bob"
 )
 
 var Status = map[uint8]TaskStatus{
@@ -26,6 +27,7 @@ type EtherManager struct {
 	client       *ethclient.Client
 	chainID      *big.Int
 	contractAddr common.Address
+	db           bob.DB
 }
 
 func NewEtherManager(network, contractAddr string) *EtherManager {
@@ -44,6 +46,10 @@ func NewEtherManager(network, contractAddr string) *EtherManager {
 		chainID:      chainID,
 		contractAddr: common.HexToAddress(contractAddr),
 	}
+}
+
+func (e *EtherManager) SetDB(db bob.DB) {
+	e.db = db
 }
 
 func (e *EtherManager) Close() {
@@ -73,7 +79,7 @@ func (e EtherManager) Create(ctx context.Context, pk *ecdsa.PrivateKey, tsk Task
 		xlog.Error("Failed to instantiate a Token contract", "error", err)
 		return err
 	}
-	tx, err := instance.Create(auth, tsk.ID, tsk.Input)
+	tx, err := instance.Create(auth, tsk.ID, tsk.UserID, tsk.Input)
 	if err != nil {
 		xlog.Error("Failed to create task", "error", err)
 		return err

@@ -20,17 +20,33 @@ import (
 
 var TableNames = struct {
 	APIKeys string
+	Tasks   string
 }{
 	APIKeys: "api_keys",
+	Tasks:   "tasks",
 }
 
 var ColumnNames = struct {
 	APIKeys apiKeyColumnNames
+	Tasks   taskColumnNames
 }{
 	APIKeys: apiKeyColumnNames{
 		APIKey:    "api_key",
 		UserID:    "user_id",
 		CreatedAt: "created_at",
+	},
+	Tasks: taskColumnNames{
+		ID:          "id",
+		UserID:      "user_id",
+		CreatedAt:   "created_at",
+		UpdatedAt:   "updated_at",
+		Assignee:    "assignee",
+		Contract:    "contract",
+		Input:       "input",
+		Output:      "output",
+		Status:      "status",
+		Submitter:   "submitter",
+		Transaction: "transaction",
 	},
 }
 
@@ -43,11 +59,14 @@ var (
 
 func Where[Q psql.Filterable]() struct {
 	APIKeys apiKeyWhere[Q]
+	Tasks   taskWhere[Q]
 } {
 	return struct {
 		APIKeys apiKeyWhere[Q]
+		Tasks   taskWhere[Q]
 	}{
 		APIKeys: buildAPIKeyWhere[Q](APIKeyColumns),
+		Tasks:   buildTaskWhere[Q](TaskColumns),
 	}
 }
 

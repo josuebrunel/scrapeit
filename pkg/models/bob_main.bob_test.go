@@ -18,6 +18,9 @@ var testDB bob.Transactor
 // Make sure the type APIKey runs hooks after queries
 var _ bob.HookableType = &models.APIKey{}
 
+// Make sure the type Task runs hooks after queries
+var _ bob.HookableType = &models.Task{}
+
 // Make sure the type uuid.UUID satisfies database/sql.Scanner
 var _ sql.Scanner = (*uuid.UUID)(nil)
 
