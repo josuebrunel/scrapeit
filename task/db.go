@@ -9,6 +9,26 @@ import (
 	"github.com/stephenafamo/bob/dialect/psql/im"
 )
 
+func (m EtherManager) DBGet(ctx context.Context, id string) (Task, error) {
+	tsk, err := models.FindTask(ctx, m.db, uuid.Must(uuid.FromString(id)))
+	if err != nil {
+		xlog.Error("Failed to find task", "error", err)
+		return Task{}, err
+	}
+	return Task{
+		ID:          tsk.ID.String(),
+		Assignee:    tsk.Assignee.V,
+		Submitter:   tsk.Submitter.V,
+		Contract:    tsk.Contract.V,
+		Transaction: tsk.Transaction.V,
+		Input:       tsk.Input.V,
+		Output:      tsk.Output.V,
+		Status:      TaskStatus(tsk.Status.V),
+		CreatedAt:   tsk.CreatedAt.V,
+		UpdatedAt:   tsk.UpdatedAt.V,
+	}, nil
+}
+
 func (m EtherManager) Upsert(ctx context.Context, tsk Task) error {
 	var (
 		id  = uuid.Must(uuid.FromString(tsk.ID))

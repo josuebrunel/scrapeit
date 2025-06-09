@@ -16,7 +16,7 @@ var ResponseUnauthorized = Response[string]{Error: "Unauthorized"}
 func ApiKeyAuthMiddleware(db bob.DB) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			ak := c.Request().Header.Get("X-API-KEY")
+			ak := c.Request().Header.Get("Authorization")
 			if ak == "" {
 				xlog.Debug("No API key provided")
 				return c.JSON(http.StatusUnauthorized, ResponseUnauthorized)

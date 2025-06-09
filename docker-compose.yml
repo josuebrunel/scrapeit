@@ -32,7 +32,7 @@ services:
       - "8385:8545"
     environment:
       - CHAIN_ID=42
-      - BLOCK_TIME=30
+      - BLOCK_TIME=60
       - ACCOUNTS=15
       - BALANCE=2000000
       - HOST=0.0.0.0

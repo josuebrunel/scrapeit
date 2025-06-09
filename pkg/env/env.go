@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -28,6 +29,7 @@ const (
 	EtherWSAddrN       = "ETH_NETWORK_WS"
 	EtherContractAddrN = "ETH_CONTRACT_ADDR"
 	EtherPrivateKeyN   = "ETH_PRIVATE_KEY"
+	ApiKey             = "API_KEY"
 )
 
 var DefaultValues = map[string]string{
@@ -65,7 +67,7 @@ type Ethereum struct {
 func NewSetting() Settings {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	url := Get(PubPeersRoot)
+	url, _ := url.JoinPath(Get(PubPeersRoot), "settings")
 	xlog.Info("getting settings from root peer", "url", url)
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {

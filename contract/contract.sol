@@ -30,14 +30,10 @@ contract Scraper {
         owner = msg.sender;
     }
 
-    modifier isTaskOwner(string memory _uuid) {
+    modifier isTaskClaimed(string memory _uuid) {
         Task memory tsk = tasks[_uuid];
         require(
-            tasks[_uuid].assignee == msg.sender,
-            "Caller is not task assignee"
-        );
-        require(
-            tasks[_uuid].status == Status.Claimed,
+            tasks[_uuid].status != Status.Completed,
             "Task not in Claimed state"
         );
         _;
@@ -125,7 +121,7 @@ contract Scraper {
     function complete(
         string memory _uuid,
         string memory _output
-    ) external isTaskOwner(_uuid) isPaused {
+    ) external isTaskClaimed(_uuid) isPaused {
         require(bytes(_uuid).length > 0, "UUID cannot be empty");
         Task storage tsk = tasks[_uuid];
 
@@ -139,7 +135,7 @@ contract Scraper {
         require(success, "Transfer failed");
     }
 
-    function fail(string memory _uuid) external isTaskOwner(_uuid) isPaused {
+    function fail(string memory _uuid) external isTaskClaimed(_uuid) isPaused {
         require(bytes(_uuid).length > 0, "UUID cannot be empty");
         Task storage tsk = tasks[_uuid];
 

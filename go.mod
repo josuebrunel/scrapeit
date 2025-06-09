@@ -6,6 +6,7 @@ require (
 	github.com/a-h/templ v0.3.898
 	github.com/chromedp/cdproto v0.0.0-20250403032234-65de8f5d025b
 	github.com/chromedp/chromedp v0.13.6
+	github.com/davesavic/clink v1.0.2
 	github.com/ethereum/go-ethereum v1.15.11
 	github.com/go-rod/stealth v0.4.9
 	github.com/gofrs/uuid/v5 v5.3.2

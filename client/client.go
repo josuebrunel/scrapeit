@@ -15,7 +15,7 @@ import (
 type Client struct {
 	TopicName  string
 	Node       *common.Node
-	Manager    *task.EtherManager
+	Manager    Manager
 	PrivateKey string
 	Settings   env.Settings
 }
@@ -24,8 +24,12 @@ func New() *Client {
 	settings := env.NewSetting()
 	xlog.Debug("settings from root peer", "settings", settings)
 	return &Client{
-		TopicName:  settings.Peer.Topic,
-		Manager:    task.NewEtherManager(settings.Ethereum.Network, settings.Ethereum.Contract),
+		TopicName: settings.Peer.Topic,
+		Manager: NewManager(
+			env.Get(env.PubPeersRoot),
+			etherutil.GetAddressFromHexKey(env.Get(env.EtherPrivateKeyN)),
+			env.Get(env.ApiKey),
+		),
 		PrivateKey: env.Get(env.EtherPrivateKeyN),
 		Settings:   settings,
 	}
@@ -51,7 +55,6 @@ func (c Client) Run() error {
 }
 
 func (c Client) Subscribe(ctx context.Context, subscriber *pubsub.Subscription) {
-	pk := etherutil.MustPrivateKeyFromHex(c.PrivateKey)
 	ipfsCli, err := common.NewIPFSClient(c.Settings.Peer.Ipfs)
 	if err != nil {
 		panic(err)
@@ -68,31 +71,24 @@ func (c Client) Subscribe(ctx context.Context, subscriber *pubsub.Subscription) 
 		var tsk task.Task
 		tsk.JSONUnmarshal(msg.Data)
 		xlog.Info("go message", "from", msg.ReceivedFrom, "topic", msg.Topic, "task", tsk)
-		err = c.Manager.Claim(ctx, tsk.ID, pk)
-		if err != nil {
+		if err = c.Manager.Claim(ctx, tsk); err != nil {
 			xlog.Error("Failed to claim task", "err", err, "task", tsk.ID)
 			continue
 		}
 		xlog.Info("Task claimed", "task", tsk.ID, "assignee", c.Node.ID.String())
-		content, scrpErr := scraper.Scrape(ctx, tsk.Input)
-		if scrpErr != nil {
-			xlog.Error("Failed to scrape", "err", scrpErr, "task", tsk.ID)
-			tsk.Output = scrpErr.Error()
+		content, err := scraper.Scrape(ctx, tsk.Input)
+		if err != nil {
+			xlog.Error("Failed to scrape", "err", err, "task", tsk.ID)
+			tsk.Output = err.Error()
 		} else {
 			tsk.Output, err = ipfsCli.UploadFile(ctx, content)
 			if err != nil {
 				xlog.Error("Failed to upload file", "err", err, "task", tsk.ID)
-				scrpErr = err
+				err = err
 			}
 			xlog.Debug("Task result uploaded", "task", tsk.ID, "cid", tsk.Output)
 		}
-		if scrpErr != nil {
-			if err := c.Manager.Fail(ctx, tsk.ID, pk); err != nil {
-				xlog.Error("Failed to fail task", "err", err, "task", tsk.ID)
-				continue
-			}
-		}
-		if err := c.Manager.Complete(ctx, tsk.ID, tsk.Output, pk); err != nil {
+		if err := c.Manager.Complete(ctx, tsk, err); err != nil {
 			xlog.Error("Failed to complete task", "err", err, "task", tsk.ID)
 			continue
 		}

@@ -4,11 +4,9 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"scrapeit/account"
-	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
 	"scrapeit/pkg/etherutil"
 	"scrapeit/pkg/view"
@@ -90,8 +88,12 @@ func (a *App) Start() error {
 	e.Use(xsession.LoadAndSave(xsession.SessionManager))
 	e.Static("/static", "static")
 	e.GET("/", func(c echo.Context) error { return view.Render(c, http.StatusOK, Index(), nil) })
-	e.POST("/v1/task", a.Scrape(), ApiKeyAuthMiddleware(a.bob))
-	e.GET("/v1/task/:id", a.Result(), ApiKeyAuthMiddleware(a.bob))
+	// TaskV1
+	taskV1 := e.Group("/v1/task", ApiKeyAuthMiddleware(a.bob))
+	taskV1.POST("", a.Scrape())
+	taskV1.PATCH("/:id/claim", a.Claim())
+	taskV1.PATCH("/:id/complete", a.Complete())
+	taskV1.GET("/:id", a.Result())
 	e.GET("/settings", a.Settings())
 	// get Auth backend client
 	authCli := auth.New("scrapeit", "").WithCustomAuthURL(a.AuthBackend)
@@ -103,89 +105,4 @@ func (a *App) Start() error {
 	go a.Publisher.ListenContractEvents(context.Background())
 	log.Fatal(e.Start(a.ListenAddr))
 	return nil
-}
-
-func (a App) Scrape() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		var (
-			req Request
-			ctx = c.Request().Context()
-		)
-
-		if err := c.Bind(&req); err != nil {
-			xlog.Error("failed to bind request", "error", err)
-			return c.JSON(400, Response[task.Task]{Error: err.Error()})
-		}
-		xlog.Debug("received request", "url", req.Url)
-		var (
-			pk       = etherutil.MustPrivateKeyFromHex(req.PrivateKey)
-			userID   = c.Get(RequestContextUserID).(string)
-			contract = env.Get(env.EtherContractAddrN)
-			tsk      = task.NewTask(userID, etherutil.GetAddress(pk), req.Url)
-		)
-		tsk.Contract = contract
-		if err := a.Manager.Upsert(ctx, tsk); err != nil {
-			xlog.Error("failed to upsert task", "error", err)
-			return c.JSON(500, Response[task.Task]{Error: err.Error()})
-		}
-		if err := a.Manager.Create(ctx, pk, tsk); err != nil {
-			xlog.Error("failed to create task", "error", err)
-			return c.JSON(500, Response[task.Task]{Error: err.Error()})
-		}
-		return c.JSON(200, Response[task.Task]{Data: tsk})
-	}
-}
-
-func (a App) Result() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		var (
-			ctx = c.Request().Context()
-			id  = c.PathParam("id")
-		)
-		tsk, err := a.Manager.Get(ctx, id, a.privateKey)
-		if err != nil {
-			xlog.Error("failed to get task", "error", err)
-			return c.JSON(500, Response[task.Task]{Error: err.Error()})
-		}
-		if tsk.Status != task.Completed {
-			return c.JSON(200, Response[task.Task]{Data: tsk})
-		}
-		ipfsCli, err := common.NewIPFSClient(env.Get(env.IpfsAddrN))
-		if err != nil {
-			xlog.Error("failed to create ipfs client", "error", err)
-			return c.JSON(500, Response[task.Task]{Error: err.Error()})
-		}
-		content, err := ipfsCli.DownloadFile(ctx, tsk.Output)
-		if err != nil {
-			xlog.Error("failed to download file", "error", err)
-			return c.JSON(500, Response[task.Task]{Error: err.Error()})
-		}
-		tsk.Output = content
-		return c.JSON(200, Response[task.Task]{Data: tsk})
-	}
-}
-
-func (a App) Settings() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		peerID := a.Publisher.Node.ID.String()
-		addr := func() []string {
-			var r = []string{}
-			for _, a := range a.Publisher.Node.Host.Addrs() {
-				r = append(r, fmt.Sprintf("%s/p2p/%s", a.String(), peerID))
-			}
-			return r
-		}
-		return c.JSON(200, Response[env.Settings]{Data: env.Settings{
-			Peer: env.Peer{
-				ID:    peerID,
-				Addrs: addr(),
-				Ipfs:  env.Get(env.IpfsAddrN),
-				Topic: env.Get(env.PubTopicN),
-			},
-			Ethereum: env.Ethereum{
-				Network:  env.Get(env.EtherAddrN),
-				Contract: env.Get(env.EtherContractAddrN),
-			},
-		}})
-	}
 }
