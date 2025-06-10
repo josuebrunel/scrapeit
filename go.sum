@@ -272,8 +272,8 @@ github.com/josuebrunel/gopkg/component v0.0.5 h1:3+I89aeDB7DQjdfrGPQFYek31cVjVQQ
 github.com/josuebrunel/gopkg/component v0.0.5/go.mod h1:0DPiilXmhpJtRMEr/Mx7DxtwSItVC1NAZqtvReopk1E=
 github.com/josuebrunel/gopkg/xlog v0.0.1 h1:APAqBOCgZn2ec94JuiCs4ovtpHTNVhVQbQuXdevlI9U=
 github.com/josuebrunel/gopkg/xlog v0.0.1/go.mod h1:LnzPLDqCG0wdgCZUL1J/xP9DSey9DWXqThO8kPVu/ec=
-github.com/josuebrunel/gopkg/xsession v0.0.3 h1:65oFvYc1OoZ15DHiMva7I5GgqxzoUYr03rg3ahFiy2s=
-github.com/josuebrunel/gopkg/xsession v0.0.3/go.mod h1:jM4kKtPXDXDg2PpuJmgaxojrR08RZlfyIHCZMz9S7sQ=
+github.com/josuebrunel/gopkg/xsession v0.0.4 h1:x2GVlmvYI9OiqXBInwwYczYAwnVkH6AjstFI/pk4Lds=
+github.com/josuebrunel/gopkg/xsession v0.0.4/go.mod h1:jM4kKtPXDXDg2PpuJmgaxojrR08RZlfyIHCZMz9S7sQ=
 github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jtolds/gls v4.20.0+incompatible h1:xdiiI2gbIgH/gLH7ADydsJ1uDOEzR8yvV7C0MuV77Wo=

@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"scrapeit/pkg/etherutil"
 	"scrapeit/pkg/toast"
 	"scrapeit/pkg/view"
 	"strings"
 
 	"github.com/a-h/templ"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/josuebrunel/gopkg/xsession"
 	"github.com/labstack/echo/v5"
@@ -21,16 +23,18 @@ import (
 )
 
 const (
-	HandlerNameDashboard         = "account.dashboard"
-	HandlerNameInfo              = "account.info"
-	HandlerNamePasswordUpdate    = "account.password.update"
-	HandlerNameProviderAuthorize = "account.authorize"
-	HandlerNameProviderCallback  = "account.callback"
-	HandlerNameReset             = "account.reset"
-	HandlerNameSignIn            = "account.signin"
-	HandlerNameSignOut           = "account.signout"
-	HandlerNameSignUp            = "account.signup"
-	HandlerNameVerify            = "account.verify"
+	// Handler
+	HandlerNameDashboard      = "account.dashboard"
+	HandlerNameInfo           = "account.info"
+	HandlerNamePasswordUpdate = "account.password.update"
+	HandlerNameSignIn         = "account.signin"
+	HandlerNameSignOut        = "account.signout"
+	HandlerNameSignUp         = "account.signup"
+	HandlerNameUpdateData     = "account.update.data"
+
+	// Other
+	DataKeyEthereumAddress = "ethAddress"
+	DataKeyEthereumBalance = "ethBalance"
 )
 
 var (
@@ -58,14 +62,15 @@ type AuthRequest struct {
 }
 
 type Handler struct {
-	name  string
-	param string
-	gtc   auth.Client
-	db    bob.DB
+	name   string
+	param  string
+	gtc    auth.Client
+	db     bob.DB
+	ethCli *ethclient.Client
 }
 
-func Mount(e *echo.Echo, db *sql.DB, gtc auth.Client) {
-	h := New(db, gtc)
+func Mount(e *echo.Echo, db *sql.DB, gtc auth.Client, ethCli *ethclient.Client) {
+	h := New(db, gtc, ethCli)
 	g := e.Group("/account")
 	g.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		TokenLookup: "form:csrf,header:csrf",
@@ -79,10 +84,12 @@ func Mount(e *echo.Echo, db *sql.DB, gtc auth.Client) {
 		Middlewares: []echo.MiddlewareFunc{loginRequired}})
 	g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/signout", Handler: h.SignOut(), Name: HandlerNameSignOut,
 		Middlewares: []echo.MiddlewareFunc{loginRequired}})
+	g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/update-data", Handler: h.UpdateData(), Name: HandlerNameUpdateData})
+	g.AddRoute(echo.Route{Method: http.MethodPatch, Path: "/update-data", Handler: h.UpdateData(), Name: HandlerNameUpdateData})
 }
 
-func New(db *sql.DB, gtc auth.Client) Handler {
-	return Handler{name: "users", param: "uid", gtc: gtc, db: bob.NewDB(db)}
+func New(db *sql.DB, gtc auth.Client, ethCli *ethclient.Client) Handler {
+	return Handler{name: "users", param: "uid", gtc: gtc, db: bob.NewDB(db), ethCli: ethCli}
 }
 
 func (h Handler) SudoAdmin() auth.Client {
@@ -140,8 +147,15 @@ func (h Handler) SignIn() echo.HandlerFunc {
 			return view.Render(c, http.StatusOK, renderSignIn(c), nil)
 		}
 		user := resp.User
+		xData := map[string]string{
+			DataKeyEthereumAddress: user.UserMetadata[DataKeyEthereumAddress].(string),
+		}
 		xlog.Debug("user authenticated", "user", user, "token", resp.AccessToken)
-		xsession.SetUser(c.Request().Context(), xsession.XUser{ID: user.ID.String(), Token: resp.AccessToken, Email: user.Email})
+		xsession.SetUser(c.Request().Context(), xsession.XUser{
+			ID:    user.ID.String(),
+			Token: resp.AccessToken, Email: user.Email,
+			Data: xData,
+		})
 		toast.NotifySuccess(c, "Signed in successfully")
 		return c.Redirect(http.StatusSeeOther, view.ReverseX(c, HandlerNameDashboard))
 	}
@@ -164,11 +178,60 @@ func (h Handler) SignOut() echo.HandlerFunc {
 	}
 }
 
+type RequestUserData struct {
+	EthereumAddress string `json:"ethAddress" form:"ethAddress"`
+}
+
+func (h Handler) UpdateData() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var (
+			ctx   = c.Request().Context()
+			xuser = xsession.GetUser(ctx)
+			req   RequestUserData
+		)
+		xlog.Debug("updating user data", "user", xuser)
+		if c.Request().Method == http.MethodGet {
+			return view.Render(c, http.StatusOK, EthAddressView(xuser, templ.Attributes{}), nil)
+		}
+		if err := c.Bind(&req); err != nil {
+			xlog.Error("failed to bind request", "error", err)
+			return view.Render(c, http.StatusOK, EthAddressView(xuser, templ.Attributes{}), nil)
+		}
+		data := map[string]any{DataKeyEthereumAddress: req.EthereumAddress}
+		xlog.Debug("updating user data", "data", data)
+		cli := h.gtc.WithToken(xuser.Token)
+		_, err := cli.UpdateUser(types.UpdateUserRequest{Data: data})
+		if err != nil {
+			xlog.Error("failed to update user", "error", err)
+			return view.Render(c, http.StatusOK, EthAddressView(xuser, templ.Attributes{}), nil)
+		}
+		xuser.Set(DataKeyEthereumAddress, req.EthereumAddress)
+		xsession.SetUser(c.Request().Context(), xuser)
+		return view.Render(c, http.StatusOK, EthAddressView(xuser, templ.Attributes{}), nil)
+	}
+}
+
 func (h Handler) Dashboard() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var planName string
-		user := xsession.GetUser(c.Request().Context())
-		return view.Render(c, http.StatusOK, DashboardView(user, templ.Attributes{}), planName)
+		var (
+			ctx      = c.Request().Context()
+			xuser    = xsession.GetUser(ctx)
+			planName string
+		)
+		cli := h.gtc.WithToken(xuser.Token)
+		user, err := cli.GetUser()
+		if err != nil {
+			xlog.Error("failed to get user", "error", err)
+			return view.Render(c, http.StatusOK, DashboardView(xuser, templ.Attributes{}), planName)
+		}
+		if v, ok := user.UserMetadata[DataKeyEthereumAddress]; ok {
+			address := v.(string)
+			xuser.Set(DataKeyEthereumAddress, address)
+			balance, _ := etherutil.GetAccountBalance(ctx, h.ethCli, address)
+			xuser.Set(DataKeyEthereumBalance, balance.String())
+		}
+		xsession.SetUser(c.Request().Context(), xuser)
+		return view.Render(c, http.StatusOK, DashboardView(xuser, templ.Attributes{}), planName)
 	}
 }
 

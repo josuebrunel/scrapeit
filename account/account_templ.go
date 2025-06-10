@@ -132,7 +132,7 @@ func SignInAndUpView(title string, attr templ.Attributes, signup bool) templ.Com
 	})
 }
 
-func DashboardView(user xsession.XUser, attr templ.Attributes) templ.Component {
+func BalanceView(user xsession.XUser) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -153,7 +153,53 @@ func DashboardView(user xsession.XUser, attr templ.Attributes) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var5 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"stat\"><div class=\"stat-figure text-primary\"><i class=\"fab fa-ethereum text-2xl\"></i></div><div class=\"stat-title\">Balance</div><div class=\"stat-value\" id=\"user-balance\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(user.Get("ethBalance"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `account/account.templ`, Line: 116, Col: 68}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><div class=\"stat-desc\">ETH</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func EthAddressView(user xsession.XUser, attr templ.Attributes) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"card-body\"><h2 class=\"card-title mb-4\">Your Wallet</h2>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var7 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -165,13 +211,89 @@ func DashboardView(user xsession.XUser, attr templ.Attributes) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div id=\"dashboard-page\" class=\"page-transition \"><div class=\"flex flex-col md:flex-row gap-8\"><div class=\"md:w-1/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><div class=\"flex items-center gap-4 mb-4\"><div class=\"avatar\"><div class=\"w-16 rounded-full bg-accent text-accent-content flex items-center justify-center\"><i class=\"fas fa-user text-2xl\"></i></div></div><div><h2 class=\"card-title\" id=\"user-name\">Loading...</h2><p class=\"text-sm opacity-70\">Premium Member</p></div></div><div class=\"stats shadow bg-base-200\"><div class=\"stat\"><div class=\"stat-figure text-secondary\"><i class=\"fas fa-tasks text-2xl\"></i></div><div class=\"stat-title\">Active Tasks</div><div class=\"stat-value\" id=\"active-tasks\">0</div><div class=\"stat-desc\">running now</div></div></div></div></div><div id=\"apiKey\" class=\"card bg-base-100 shadow-xl\" hx-get=\"/account/apikey\" hx-target=\"#apiKey\" hx-trigger=\"load\"></div></div><div class=\"md:w-2/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Quick Start</h2><div class=\"grid grid-cols-1 md:grid-cols-2 gap-4 mb-6\"><button class=\"btn btn-outline\" onclick=\"showPage('history-page')\"><i class=\"fas fa-history mr-2\"></i> View Task History</button> <button class=\"btn btn-primary\" onclick=\"showCreateTaskModal()\"><i class=\"fas fa-plus mr-2\"></i> Create New Task</button></div><div class=\"divider\">OR</div><h3 class=\"text-lg font-medium mb-2\">Sample API Request</h3><div class=\"mockup-code mb-4\"><pre><code>piece of code here</code></pre></div><div class=\"collapse collapse-plus bg-base-200 mb-2\"><input type=\"checkbox\"><div class=\"collapse-title text-md font-medium\">Node.js Example</div><div class=\"collapse-content\"><pre><code class=\"language-javascript\">code example</code></pre></div></div></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Recent Activity</h2><div class=\"overflow-x-auto\"><table class=\"table table-zebra\"><thead><tr><th>Task ID</th><th>Status</th><th>Created</th></tr></thead> <tbody id=\"recent-tasks\"><!-- Recent tasks will be populated here --><tr><td colspan=\"3\" class=\"text-center\">Loading...</td></tr></tbody></table></div><div class=\"card-actions justify-end mt-4\"><button class=\"btn btn-ghost btn-sm\" onclick=\"showPage('history-page')\">View All <i class=\"fas fa-arrow-right ml-2\"></i></button></div></div></div></div></div></div>")
+			templ_7745c5c3_Err = component.InputCSRF(view.GetCSRF(ctx)).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " <div class=\"form-control mb-4\"><label class=\"label\"><span class=\"label-text\">Ethereum Address</span></label><div class=\"input-group\"><input id=\"eth-address\" name=\"ethAddress\" type=\"text\" placeholder=\"0x...\" class=\"input input-bordered w-full\" value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(user.Get("ethAddress"))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `account/account.templ`, Line: 137, Col: 36}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"> <button class=\"btn btn-square\" onclick=\"copyEthAddress()\"><i class=\"fas fa-copy\"></i></button></div><div class=\"label-text-alt mt-1\"><button class=\"btn btn-outline btn-sm\" hx-target=\"#ethAddress\" hx-patch=\"/account/update-data\"><i class=\"fas fa-save mr-1\"></i> Save</button></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = view.Layout("Dashboard").Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = component.Form(templ.Attributes{}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func DashboardView(user xsession.XUser, attr templ.Attributes) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Var10 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div id=\"dashboard-page\" class=\"page-transition \"><div class=\"flex flex-col md:flex-row gap-8\"><div class=\"md:w-1/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><div class=\"flex items-center gap-4 mb-4\"><div class=\"avatar\"><div class=\"w-16 rounded-full bg-accent text-accent-content flex items-center justify-center\"><i class=\"fas fa-user text-2xl\"></i></div></div><div><h2 class=\"card-title\" id=\"user-name\">Loading...</h2><p class=\"text-sm opacity-70\">Premium Member</p></div></div><div class=\"stats shadow bg-base-200\"><div class=\"stat\"><div class=\"stat-figure text-secondary\"><i class=\"fas fa-tasks text-2xl\"></i></div><div class=\"stat-title\">Active Tasks</div><div class=\"stat-value\" id=\"active-tasks\">0</div><div class=\"stat-desc\">running now</div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = BalanceView(user).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div></div><div id=\"ethAddress\" class=\"card bg-base-100 shadow-xl mb-6\" hx-get=\"/account/update-data\" hx-target=\"#ethAddress\" hx-trigger=\"load\"></div><div id=\"apiKey\" class=\"card bg-base-100 shadow-xl\" hx-get=\"/account/apikey\" hx-target=\"#apiKey\" hx-trigger=\"load\"></div></div><div class=\"md:w-2/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Quick Start</h2><div class=\"grid grid-cols-1 md:grid-cols-2 gap-4 mb-6\"><button class=\"btn btn-outline\" onclick=\"showPage('history-page')\"><i class=\"fas fa-history mr-2\"></i> View Task History</button> <button class=\"btn btn-primary\" onclick=\"showCreateTaskModal()\"><i class=\"fas fa-plus mr-2\"></i> Create New Task</button></div><div class=\"divider\">OR</div><h3 class=\"text-lg font-medium mb-2\">Sample API Request</h3><div class=\"mockup-code mb-4\"><pre><code>piece of code here</code></pre></div><div class=\"collapse collapse-plus bg-base-200 mb-2\"><input type=\"checkbox\"><div class=\"collapse-title text-md font-medium\">Node.js Example</div><div class=\"collapse-content\"><pre><code class=\"language-javascript\">code example</code></pre></div></div></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Recent Activity</h2><div class=\"overflow-x-auto\"><table class=\"table table-zebra\"><thead><tr><th>Task ID</th><th>Status</th><th>Created</th></tr></thead> <tbody id=\"recent-tasks\"><!-- Recent tasks will be populated here --><tr><td colspan=\"3\" class=\"text-center\">Loading...</td></tr></tbody></table></div><div class=\"card-actions justify-end mt-4\"><button class=\"btn btn-ghost btn-sm\" onclick=\"showPage('history-page')\">View All <i class=\"fas fa-arrow-right ml-2\"></i></button></div></div></div></div></div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = view.Layout("Dashboard").Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

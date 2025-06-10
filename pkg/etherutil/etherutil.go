@@ -3,9 +3,11 @@ package etherutil
 import (
 	"context"
 	"crypto/ecdsa"
+	"math"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -45,6 +47,20 @@ func GetAddressFromHexKey(hexKey string) string {
 		return ""
 	}
 	return GetAddress(pk)
+}
+
+func GetAccountBalance(ctx context.Context, cli *ethclient.Client, address string) (*big.Float, error) {
+	account := common.HexToAddress(address)
+	balance, err := cli.BalanceAt(ctx, account, nil)
+	if err != nil {
+		xlog.Error("Failed to get account balance", "error", err)
+		return nil, err
+	}
+	fBalance := new(big.Float)
+	fBalance.SetString(balance.String())
+	fBalance = fBalance.Quo(fBalance, big.NewFloat(math.Pow(10, 18)))
+	xlog.Debug("Account balance", "balance", balance)
+	return fBalance, nil
 }
 
 func GetNonce(ctx context.Context, cli *ethclient.Client, pk *ecdsa.PrivateKey) (uint64, error) {

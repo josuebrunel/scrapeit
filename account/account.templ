@@ -107,6 +107,49 @@ templ SignInAndUpView(title string, attr templ.Attributes, signup bool) {
 	}
 }
 
+templ BalanceView(user xsession.XUser) {
+	<div class="stat">
+		<div class="stat-figure text-primary">
+			<i class="fab fa-ethereum text-2xl"></i>
+		</div>
+		<div class="stat-title">Balance</div>
+		<div class="stat-value" id="user-balance">{ user.Get("ethBalance") }</div>
+		<div class="stat-desc">ETH</div>
+	</div>
+}
+
+templ EthAddressView(user xsession.XUser, attr templ.Attributes) {
+	<div class="card-body">
+		<h2 class="card-title mb-4">Your Wallet</h2>
+		@component.Form(templ.Attributes{}) {
+			@component.InputCSRF(view.GetCSRF(ctx))
+			<div class="form-control mb-4">
+				<label class="label">
+					<span class="label-text">Ethereum Address</span>
+				</label>
+				<div class="input-group">
+					<input
+						id="eth-address"
+						name="ethAddress"
+						type="text"
+						placeholder="0x..."
+						class="input input-bordered w-full"
+						value={ user.Get("ethAddress") }
+					/>
+					<button class="btn btn-square" onclick="copyEthAddress()">
+						<i class="fas fa-copy"></i>
+					</button>
+				</div>
+				<div class="label-text-alt mt-1">
+					<button class="btn btn-outline btn-sm" hx-target="#ethAddress" hx-patch="/account/update-data">
+						<i class="fas fa-save mr-1"></i> Save
+					</button>
+				</div>
+			</div>
+		}
+	</div>
+}
+
 templ DashboardView(user xsession.XUser, attr templ.Attributes) {
 	@view.Layout("Dashboard") {
 		<div id="dashboard-page" class="page-transition ">
@@ -136,10 +179,14 @@ templ DashboardView(user xsession.XUser, attr templ.Attributes) {
 									<div class="stat-value" id="active-tasks">0</div>
 									<div class="stat-desc">running now</div>
 								</div>
+								// ETH Balance
+								@BalanceView(user)
 							</div>
 						</div>
 					</div>
-					// apiKey component
+					// Eth Address
+					<div id="ethAddress" class="card bg-base-100 shadow-xl mb-6" hx-get="/account/update-data" hx-target="#ethAddress" hx-trigger="load"></div>
+					// ApiKey component
 					<div id="apiKey" class="card bg-base-100 shadow-xl" hx-get="/account/apikey" hx-target="#apiKey" hx-trigger="load"></div>
 				</div>
 				<div class="md:w-2/3">

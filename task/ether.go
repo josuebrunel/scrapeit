@@ -48,6 +48,10 @@ func NewEtherManager(network, contractAddr string) *EtherManager {
 	}
 }
 
+func (e EtherManager) GetClient() ethclient.Client {
+	return *e.client
+}
+
 func (e *EtherManager) SetDB(db bob.DB) {
 	e.db = db
 }

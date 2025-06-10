@@ -14,7 +14,7 @@ require (
 	github.com/jaswdr/faker/v2 v2.5.0
 	github.com/josuebrunel/gopkg/component v0.0.5
 	github.com/josuebrunel/gopkg/xlog v0.0.1
-	github.com/josuebrunel/gopkg/xsession v0.0.3
+	github.com/josuebrunel/gopkg/xsession v0.0.4
 	github.com/labstack/echo/v5 v5.0.0-20230722203903-ec5b858dab61
 	github.com/lib/pq v1.10.7
 	github.com/libp2p/go-libp2p v0.41.1

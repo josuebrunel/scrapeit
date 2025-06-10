@@ -97,8 +97,10 @@ func (a *App) Start() error {
 	e.GET("/settings", a.Settings())
 	// get Auth backend client
 	authCli := auth.New("scrapeit", "").WithCustomAuthURL(a.AuthBackend)
+	ethCli := a.Manager.GetClient()
 	// mount account
-	account.Mount(e, a.db, authCli)
+	xlog.Info("mounting account")
+	account.Mount(e, a.db, authCli, &ethCli)
 	e.GET("/account/apikey", a.GenerateApiKey(), xsession.LoginRequired("/account/signin"))
 	e.PUT("/account/apikey", a.GenerateApiKey(), xsession.LoginRequired("/account/signin"))
 	xlog.Info("starting server", "addr", a.ListenAddr)
