@@ -6,7 +6,10 @@ import (
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/josuebrunel/gopkg/xlog"
+	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/dialect/psql"
 	"github.com/stephenafamo/bob/dialect/psql/im"
+	"github.com/stephenafamo/bob/dialect/psql/sm"
 )
 
 func (m EtherManager) DBGet(ctx context.Context, id string) (Task, error) {
@@ -60,4 +63,18 @@ func (m EtherManager) Upsert(ctx context.Context, tsk Task) error {
 		return err
 	}
 	return nil
+}
+
+func QueryListByUser(ctx context.Context, db bob.DB, userID string) (models.TaskSlice, error) {
+	uid := uuid.Must(uuid.FromString(userID))
+	query := models.Tasks.Query(
+		sm.Where(psql.Quote("user_id").EQ(psql.Arg(uid))),
+		sm.OrderBy(psql.Quote("created_at")).Desc(),
+	)
+	tt, err := query.All(ctx, db)
+	if err != nil {
+		xlog.Error("Failed to query tasks", "error", err)
+		return nil, err
+	}
+	return tt, nil
 }

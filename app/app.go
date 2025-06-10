@@ -103,6 +103,9 @@ func (a *App) Start() error {
 	account.Mount(e, a.db, authCli, &ethCli)
 	e.GET("/account/apikey", a.GenerateApiKey(), xsession.LoginRequired("/account/signin"))
 	e.PUT("/account/apikey", a.GenerateApiKey(), xsession.LoginRequired("/account/signin"))
+	// mount task
+	xlog.Info("mounting task")
+	task.Mount(context.Background(), e, a.bob)
 	xlog.Info("starting server", "addr", a.ListenAddr)
 	go a.Publisher.ListenContractEvents(context.Background())
 	log.Fatal(e.Start(a.ListenAddr))

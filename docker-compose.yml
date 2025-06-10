@@ -82,7 +82,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:${PORT}/health"
+          "http://localhost:9999/health"
         ]
       timeout: 5s
       interval: 5s
@@ -107,10 +107,15 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
+      blockchain:
+        condition: service_started
       db:
         condition: service_healthy
       auth:
         condition: service_healthy
+      ipfs:
+        condition: service_started
+
 
   publisher:
     container_name: scrapeit-publisher
