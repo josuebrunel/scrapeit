@@ -267,23 +267,7 @@ templ DashboardView(user xsession.XUser, attr templ.Attributes) {
 					<div class="card bg-base-100 shadow-xl">
 						<div class="card-body">
 							<h2 class="card-title mb-4">Recent Activity</h2>
-							<div class="overflow-x-auto">
-								<table class="table table-zebra">
-									<thead>
-										<tr>
-											<th>Task ID</th>
-											<th>Status</th>
-											<th>Created</th>
-										</tr>
-									</thead>
-									<tbody id="recent-tasks">
-										<!-- Recent tasks will be populated here -->
-										<tr>
-											<td colspan="3" class="text-center">Loading...</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
+							<span hx-get="/task?table=true&limit=3" hx-trigger="load"></span>
 							<div class="card-actions justify-end mt-4">
 								<button class="btn btn-ghost btn-sm" hx-target="#content" hx-get="/task">
 									View All <i class="fas fa-arrow-right ml-2"></i>

@@ -8,6 +8,7 @@ import (
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql"
+	"github.com/stephenafamo/bob/dialect/psql/dialect"
 	"github.com/stephenafamo/bob/dialect/psql/im"
 	"github.com/stephenafamo/bob/dialect/psql/sm"
 )
@@ -65,12 +66,16 @@ func (m EtherManager) Upsert(ctx context.Context, tsk Task) error {
 	return nil
 }
 
-func QueryListByUser(ctx context.Context, db bob.DB, userID string) (models.TaskSlice, error) {
+func QueryListByUser(ctx context.Context, db bob.DB, userID string, limit int) (models.TaskSlice, error) {
 	uid := uuid.Must(uuid.FromString(userID))
-	query := models.Tasks.Query(
+	dqm := []bob.Mod[*dialect.SelectQuery]{
 		sm.Where(psql.Quote("user_id").EQ(psql.Arg(uid))),
 		sm.OrderBy(psql.Quote("created_at")).Desc(),
-	)
+	}
+	if limit > 0 {
+		dqm = append(dqm, sm.Limit(limit))
+	}
+	query := models.Tasks.Query(dqm...)
 	tt, err := query.All(ctx, db)
 	if err != nil {
 		xlog.Error("Failed to query tasks", "error", err)

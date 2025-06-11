@@ -71,6 +71,15 @@ templ TableBodyView(tt models.TaskSlice) {
 	</tbody>
 }
 
+templ TableView(tt models.TaskSlice) {
+	<div class="overflow-x-auto">
+		@component.Table(templ.Attributes{"class": "table table-zebra w-full"}) {
+			@TableHeadView()
+			@TableBodyView(tt)
+		}
+	</div>
+}
+
 templ ListView(tt models.TaskSlice) {
 	<div id="history-page" class="page-transition ">
 		<div class="flex justify-between items-center mb-8">
@@ -94,12 +103,7 @@ templ ListView(tt models.TaskSlice) {
 				</button>
 			</div>
 		</div>
-		<div class="overflow-x-auto">
-			@component.Table(templ.Attributes{"class": "table w-full"}) {
-				@TableHeadView()
-				@TableBodyView(tt)
-			}
-		</div>
+		@TableView(tt)
 	</div>
 }
 

@@ -192,7 +192,7 @@ func TableBodyView(tt models.TaskSlice) templ.Component {
 	})
 }
 
-func ListView(tt models.TaskSlice) templ.Component {
+func TableView(tt models.TaskSlice) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -213,7 +213,7 @@ func ListView(tt models.TaskSlice) templ.Component {
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div id=\"history-page\" class=\"page-transition \"><div class=\"flex justify-between items-center mb-8\"><h1 class=\"text-3xl font-bold\">Task History</h1><div class=\"flex gap-4\"><div class=\"form-control\"><div class=\"input-group\"><input type=\"text\" placeholder=\"Search tasks...\" class=\"input input-bordered\" id=\"history-search\"> <button class=\"btn btn-square\" onclick=\"searchTasks()\"><i class=\"fas fa-search\"></i></button></div></div><button class=\"btn btn-primary\" onclick=\"showCreateTaskModal()\"><i class=\"fas fa-plus mr-2\"></i> New Task</button></div></div><div class=\"overflow-x-auto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"overflow-x-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -243,11 +243,48 @@ func ListView(tt models.TaskSlice) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = component.Table(templ.Attributes{"class": "table w-full"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var12), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = component.Table(templ.Attributes{"class": "table table-zebra w-full"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var12), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func ListView(tt models.TaskSlice) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var13 == nil {
+			templ_7745c5c3_Var13 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div id=\"history-page\" class=\"page-transition \"><div class=\"flex justify-between items-center mb-8\"><h1 class=\"text-3xl font-bold\">Task History</h1><div class=\"flex gap-4\"><div class=\"form-control\"><div class=\"input-group\"><input type=\"text\" placeholder=\"Search tasks...\" class=\"input input-bordered\" id=\"history-search\"> <button class=\"btn btn-square\" onclick=\"searchTasks()\"><i class=\"fas fa-search\"></i></button></div></div><button class=\"btn btn-primary\" onclick=\"showCreateTaskModal()\"><i class=\"fas fa-plus mr-2\"></i> New Task</button></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = TableView(tt).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -271,25 +308,25 @@ func DetailView(t models.Task) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var13 == nil {
-			templ_7745c5c3_Var13 = templ.NopComponent
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div id=\"task-detail-page\" class=\"page-transition \"><button class=\"btn btn-ghost mb-6\" hx-target=\"#content\" hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div id=\"task-detail-page\" class=\"page-transition \"><button class=\"btn btn-ghost mb-6\" hx-target=\"#content\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var14 string
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, HandlerNameList))
+		var templ_7745c5c3_Var15 string
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, HandlerNameList))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 108, Col: 101}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 112, Col: 101}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"><i class=\"fas fa-arrow-left mr-2\"></i> Back to History</button><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><h2 class=\"card-title mb-4 flex flex-col md:flex-row gap-2\"><span>Task Details: <span id=\"task-id\">TASK_ID</span></span> <span class=\"badge badge-outline\"><i class=\"fab fa-ethereum mr-1\"></i> <span id=\"task-reward\">0 ETH</span></span></h2><div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6\"><div class=\"stat\"><div class=\"stat-title\">Status</div><div class=\"stat-value text-primary\" id=\"detail-status\">Loading...</div><div class=\"stat-desc\" id=\"detail-progress\"></div></div><div class=\"stat\"><div class=\"stat-title\">Created</div><div class=\"stat-value\" id=\"detail-created\">-</div><div class=\"stat-desc\" id=\"detail-duration\"></div></div><div class=\"stat\"><div class=\"stat-title\">Results</div><div class=\"stat-value\" id=\"detail-results\">-</div><div class=\"stat-desc\" id=\"detail-nodes\">-</div></div></div><div class=\"grid grid-cols-1 md:grid-cols-3 gap-4 mb-6\"><div class=\"stat\"><div class=\"stat-title\"><i class=\"fab fa-ethereum mr-2\"></i> Smart Contract</div><div class=\"stat-value\"><a href=\"#\" onclick=\"window.open('https://etherscan.io/address/' + document.getElementById('task-contract').textContent, '_blank')\" class=\"link\"><div class=\"font-mono text-sm truncate\" id=\"task-contract\">0x000...000</div></a></div><div class=\"stat-desc\">View on Etherscan</div></div><div class=\"stat\"><div class=\"stat-title\"><i class=\"fas fa-user-circle mr-2\"></i> Assigned Node</div><div class=\"stat-value\"><a href=\"#\" onclick=\"window.open('https://etherscan.io/address/' + document.getElementById('task-assignee').textContent, '_blank')\" class=\"link\"><div class=\"font-mono text-sm truncate\" id=\"task-assignee\">0x000...000</div></a></div><div class=\"stat-desc\">ETH address</div></div><div class=\"stat\"><div class=\"stat-title\"><i class=\"fas fa-coins mr-2\"></i> Payment Status</div><div class=\"stat-value\"><span class=\"badge badge-success\" id=\"payment-status\">Paid</span></div><div class=\"stat-desc\" id=\"payment-amount\">0.001 ETH</div></div></div><div class=\"divider\"></div><div class=\"mb-6\"><h3 class=\"text-lg font-medium mb-2\">Request Details</h3><div class=\"mockup-code\"><pre><code id=\"detail-request\">Loading request details...</code></pre></div></div><div class=\"tabs tabs-boxed bg-base-200 mb-4\"><a class=\"tab tab-active\" id=\"results-tab\">Results</a> <a class=\"tab\" id=\"logs-tab\">Logs</a> <a class=\"tab\" id=\"raw-tab\">Raw Data</a></div><div id=\"results-content\"><div class=\"overflow-x-auto\"><table class=\"table w-full\"><thead id=\"results-head\"><!-- Dynamic table head based on selectors --></thead> <tbody id=\"results-body\"><!-- Results will be displayed here --></tbody></table></div></div><div id=\"logs-content\" class=\"\"><div class=\"mockup-window bg-base-200\"><div class=\"h-64 overflow-y-auto p-4 bg-base-100\" id=\"task-logs\">Loading logs...</div></div></div><div id=\"raw-content\" class=\"\"><div class=\"mockup-window bg-base-200\"><div class=\"h-64 overflow-y-auto p-4 bg-base-100\"><pre><code id=\"raw-data\">Loading raw data...</code></pre></div></div></div></div></div><div class=\"flex justify-end gap-4\"><button class=\"btn btn-error btn-outline\" id=\"cancel-task-btn\" onclick=\"confirmCancelTask()\"><i class=\"fas fa-times-circle mr-2\"></i> Cancel Task</button> <button class=\"btn btn-secondary\" onclick=\"downloadResults()\"><i class=\"fas fa-download mr-2\"></i> Download Results</button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"><i class=\"fas fa-arrow-left mr-2\"></i> Back to History</button><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><h2 class=\"card-title mb-4 flex flex-col md:flex-row gap-2\"><span>Task Details: <span id=\"task-id\">TASK_ID</span></span> <span class=\"badge badge-outline\"><i class=\"fab fa-ethereum mr-1\"></i> <span id=\"task-reward\">0 ETH</span></span></h2><div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6\"><div class=\"stat\"><div class=\"stat-title\">Status</div><div class=\"stat-value text-primary\" id=\"detail-status\">Loading...</div><div class=\"stat-desc\" id=\"detail-progress\"></div></div><div class=\"stat\"><div class=\"stat-title\">Created</div><div class=\"stat-value\" id=\"detail-created\">-</div><div class=\"stat-desc\" id=\"detail-duration\"></div></div><div class=\"stat\"><div class=\"stat-title\">Results</div><div class=\"stat-value\" id=\"detail-results\">-</div><div class=\"stat-desc\" id=\"detail-nodes\">-</div></div></div><div class=\"grid grid-cols-1 md:grid-cols-3 gap-4 mb-6\"><div class=\"stat\"><div class=\"stat-title\"><i class=\"fab fa-ethereum mr-2\"></i> Smart Contract</div><div class=\"stat-value\"><a href=\"#\" onclick=\"window.open('https://etherscan.io/address/' + document.getElementById('task-contract').textContent, '_blank')\" class=\"link\"><div class=\"font-mono text-sm truncate\" id=\"task-contract\">0x000...000</div></a></div><div class=\"stat-desc\">View on Etherscan</div></div><div class=\"stat\"><div class=\"stat-title\"><i class=\"fas fa-user-circle mr-2\"></i> Assigned Node</div><div class=\"stat-value\"><a href=\"#\" onclick=\"window.open('https://etherscan.io/address/' + document.getElementById('task-assignee').textContent, '_blank')\" class=\"link\"><div class=\"font-mono text-sm truncate\" id=\"task-assignee\">0x000...000</div></a></div><div class=\"stat-desc\">ETH address</div></div><div class=\"stat\"><div class=\"stat-title\"><i class=\"fas fa-coins mr-2\"></i> Payment Status</div><div class=\"stat-value\"><span class=\"badge badge-success\" id=\"payment-status\">Paid</span></div><div class=\"stat-desc\" id=\"payment-amount\">0.001 ETH</div></div></div><div class=\"divider\"></div><div class=\"mb-6\"><h3 class=\"text-lg font-medium mb-2\">Request Details</h3><div class=\"mockup-code\"><pre><code id=\"detail-request\">Loading request details...</code></pre></div></div><div class=\"tabs tabs-boxed bg-base-200 mb-4\"><a class=\"tab tab-active\" id=\"results-tab\">Results</a> <a class=\"tab\" id=\"logs-tab\">Logs</a> <a class=\"tab\" id=\"raw-tab\">Raw Data</a></div><div id=\"results-content\"><div class=\"overflow-x-auto\"><table class=\"table w-full\"><thead id=\"results-head\"><!-- Dynamic table head based on selectors --></thead> <tbody id=\"results-body\"><!-- Results will be displayed here --></tbody></table></div></div><div id=\"logs-content\" class=\"\"><div class=\"mockup-window bg-base-200\"><div class=\"h-64 overflow-y-auto p-4 bg-base-100\" id=\"task-logs\">Loading logs...</div></div></div><div id=\"raw-content\" class=\"\"><div class=\"mockup-window bg-base-200\"><div class=\"h-64 overflow-y-auto p-4 bg-base-100\"><pre><code id=\"raw-data\">Loading raw data...</code></pre></div></div></div></div></div><div class=\"flex justify-end gap-4\"><button class=\"btn btn-error btn-outline\" id=\"cancel-task-btn\" onclick=\"confirmCancelTask()\"><i class=\"fas fa-times-circle mr-2\"></i> Cancel Task</button> <button class=\"btn btn-secondary\" onclick=\"downloadResults()\"><i class=\"fas fa-download mr-2\"></i> Download Results</button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
