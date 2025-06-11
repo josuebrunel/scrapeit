@@ -102,3 +102,53 @@ function copyApiKey() {
 
     notify('Success', 'API key copied to clipboard!', 'success');
 }
+
+// Add this function to /static/js/app.js
+function switchTab(clickedTabElement) {
+    // Find the parent '.tabs' container of the clicked tab
+    const tabGroup = clickedTabElement.closest('.tabs');
+    if (!tabGroup) {
+        console.error('Tab group (.tabs) not found for clicked element:', clickedTabElement);
+        return;
+    }
+
+    // Get all tab links within this specific tab group
+    const tabLinks = tabGroup.querySelectorAll('.tab');
+
+    // Get the main container for all tab content panels
+    // Based on your HTML, this is <div id="tab-content">
+    const tabContentContainer = document.getElementById('tab-content');
+    if (!tabContentContainer) {
+        console.error('Tab content container (#tab-content) not found.');
+        return;
+    }
+
+    // Get all individual tab content panels.
+    // These panels have IDs like "results-tab-content", "raw-tab-content", etc.
+    const tabPanels = tabContentContainer.querySelectorAll('div[id$="-tab-content"]');
+
+    // Deactivate all tabs (remove 'tab-active' class)
+    tabLinks.forEach(tab => {
+        tab.classList.remove('tab-active');
+    });
+
+    // Hide all tab content panels (add 'hidden' class)
+    tabPanels.forEach(panel => {
+        panel.classList.add('hidden');
+    });
+
+    // Activate the clicked tab
+    clickedTabElement.classList.add('tab-active');
+
+    // Show the corresponding content panel
+    // The clicked tab has an ID like "results-tab".
+    // The corresponding content panel ID is "results-tab-content".
+    const contentPanelId = clickedTabElement.id + '-content';
+    const activePanel = document.getElementById(contentPanelId);
+
+    if (activePanel) {
+        activePanel.classList.remove('hidden');
+    } else {
+        console.error('Could not find tab content panel with ID:', contentPanelId, 'for tab:', clickedTabElement.id);
+    }
+}
