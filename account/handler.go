@@ -189,7 +189,6 @@ func (h Handler) UpdateData() echo.HandlerFunc {
 			xuser = xsession.GetUser(ctx)
 			req   RequestUserData
 		)
-		xlog.Debug("updating user data", "user", xuser)
 		if c.Request().Method == http.MethodGet {
 			return view.Render(c, http.StatusOK, EthAddressView(xuser, templ.Attributes{}), nil)
 		}
@@ -197,15 +196,13 @@ func (h Handler) UpdateData() echo.HandlerFunc {
 			xlog.Error("failed to bind request", "error", err)
 			return view.Render(c, http.StatusOK, EthAddressView(xuser, templ.Attributes{}), nil)
 		}
-		data := map[string]any{DataKeyEthereumAddress: req.EthereumAddress}
-		xlog.Debug("updating user data", "data", data)
-		cli := h.gtc.WithToken(xuser.Token)
-		_, err := cli.UpdateUser(types.UpdateUserRequest{Data: data})
+		addr, err := UserEtherAccountUpsert(ctx, h.db, xuser.ID, req.EthereumAddress)
 		if err != nil {
-			xlog.Error("failed to update user", "error", err)
-			return view.Render(c, http.StatusOK, EthAddressView(xuser, templ.Attributes{}), nil)
+			xlog.Error("failed to upsert user ether account", "error", err)
 		}
-		xuser.Set(DataKeyEthereumAddress, req.EthereumAddress)
+		if addr != nil {
+			xuser.Set(DataKeyEthereumAddress, addr.Address)
+		}
 		xsession.SetUser(c.Request().Context(), xuser)
 		return view.Render(c, http.StatusOK, EthAddressView(xuser, templ.Attributes{}), nil)
 	}
@@ -214,24 +211,16 @@ func (h Handler) UpdateData() echo.HandlerFunc {
 func (h Handler) Dashboard() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var (
-			ctx      = c.Request().Context()
-			xuser    = xsession.GetUser(ctx)
-			planName string
+			ctx   = c.Request().Context()
+			xuser = xsession.GetUser(ctx)
 		)
-		cli := h.gtc.WithToken(xuser.Token)
-		user, err := cli.GetUser()
-		if err != nil {
-			xlog.Error("failed to get user", "error", err)
-			return view.Render(c, http.StatusOK, DashboardView(xuser, templ.Attributes{}), planName)
-		}
-		if v, ok := user.UserMetadata[DataKeyEthereumAddress]; ok {
-			address := v.(string)
-			xuser.Set(DataKeyEthereumAddress, address)
-			balance, _ := etherutil.GetAccountBalance(ctx, h.ethCli, address)
+		if addr, err := UserEtherAccountGet(ctx, h.db, xuser.ID); err == nil {
+			xuser.Set(DataKeyEthereumAddress, addr.Address)
+			balance, _ := etherutil.GetAccountBalance(ctx, h.ethCli, addr.Address)
 			xuser.Set(DataKeyEthereumBalance, balance.String())
 		}
 		xsession.SetUser(c.Request().Context(), xuser)
-		return view.Render(c, http.StatusOK, DashboardView(xuser, templ.Attributes{}), planName)
+		return view.Render(c, http.StatusOK, DashboardView(xuser, templ.Attributes{}), nil)
 	}
 }
 

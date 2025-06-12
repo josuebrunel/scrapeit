@@ -14,11 +14,15 @@ type contextKey string
 var (
 	// Table context
 
-	apiKeyCtx = newContextual[*models.APIKey]("apiKey")
-	taskCtx   = newContextual[*models.Task]("task")
+	apiKeyCtx       = newContextual[*models.APIKey]("apiKey")
+	etherAccountCtx = newContextual[*models.EtherAccount]("etherAccount")
+	taskCtx         = newContextual[*models.Task]("task")
 
 	// Relationship Contexts for api_keys
 	apiKeyWithParentsCascadingCtx = newContextual[bool]("apiKeyWithParentsCascading")
+
+	// Relationship Contexts for ether_accounts
+	etherAccountWithParentsCascadingCtx = newContextual[bool]("etherAccountWithParentsCascading")
 
 	// Relationship Contexts for tasks
 	taskWithParentsCascadingCtx = newContextual[bool]("taskWithParentsCascading")

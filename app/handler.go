@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"scrapeit/pkg/common"
 	"scrapeit/pkg/env"
-	"scrapeit/pkg/etherutil"
 	"scrapeit/pkg/models"
 	"scrapeit/task"
 	"time"
@@ -36,10 +35,10 @@ func (a App) Scrape() echo.HandlerFunc {
 		}
 		xlog.Debug("received request", "url", req.Url)
 		var (
-			pk       = etherutil.MustPrivateKeyFromHex(req.PrivateKey)
 			userID   = c.Get(RequestContextUserID).(string)
+			ethAddr  = c.Get(RequestContextEthAddr).(string)
 			contract = env.Get(env.EtherContractAddrN)
-			tsk      = task.NewTask(userID, etherutil.GetAddress(pk), req.Url)
+			tsk      = task.NewTask(userID, ethAddr, req.Url)
 		)
 		tsk.Contract = contract
 		tsk.Reward = task.RewardDefault
@@ -47,7 +46,7 @@ func (a App) Scrape() echo.HandlerFunc {
 			xlog.Error("failed to upsert task", "error", err)
 			return c.JSON(Status500, Response[task.Task]{Error: err.Error()})
 		}
-		if err := a.Manager.Create(ctx, pk, tsk); err != nil {
+		if err := a.Manager.Create(ctx, a.privateKey, tsk); err != nil {
 			xlog.Error("failed to create task", "error", err)
 			return c.JSON(Status500, Response[task.Task]{Error: err.Error()})
 		}

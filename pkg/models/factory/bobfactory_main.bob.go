@@ -6,8 +6,9 @@ package factory
 import "context"
 
 type Factory struct {
-	baseAPIKeyMods APIKeyModSlice
-	baseTaskMods   TaskModSlice
+	baseAPIKeyMods       APIKeyModSlice
+	baseEtherAccountMods EtherAccountModSlice
+	baseTaskMods         TaskModSlice
 }
 
 func New() *Factory {
@@ -22,6 +23,18 @@ func (f *Factory) NewAPIKey(ctx context.Context, mods ...APIKeyMod) *APIKeyTempl
 	}
 
 	APIKeyModSlice(mods).Apply(ctx, o)
+
+	return o
+}
+
+func (f *Factory) NewEtherAccount(ctx context.Context, mods ...EtherAccountMod) *EtherAccountTemplate {
+	o := &EtherAccountTemplate{f: f}
+
+	if f != nil {
+		f.baseEtherAccountMods.Apply(ctx, o)
+	}
+
+	EtherAccountModSlice(mods).Apply(ctx, o)
 
 	return o
 }
@@ -44,6 +57,14 @@ func (f *Factory) ClearBaseAPIKeyMods() {
 
 func (f *Factory) AddBaseAPIKeyMod(mods ...APIKeyMod) {
 	f.baseAPIKeyMods = append(f.baseAPIKeyMods, mods...)
+}
+
+func (f *Factory) ClearBaseEtherAccountMods() {
+	f.baseEtherAccountMods = nil
+}
+
+func (f *Factory) AddBaseEtherAccountMod(mods ...EtherAccountMod) {
+	f.baseEtherAccountMods = append(f.baseEtherAccountMods, mods...)
 }
 
 func (f *Factory) ClearBaseTaskMods() {

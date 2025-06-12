@@ -21,6 +21,9 @@ var testDB bob.Transactor
 // Make sure the type APIKey runs hooks after queries
 var _ bob.HookableType = &models.APIKey{}
 
+// Make sure the type EtherAccount runs hooks after queries
+var _ bob.HookableType = &models.EtherAccount{}
+
 // Make sure the type Task runs hooks after queries
 var _ bob.HookableType = &models.Task{}
 

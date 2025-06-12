@@ -19,21 +19,30 @@ import (
 )
 
 var TableNames = struct {
-	APIKeys string
-	Tasks   string
+	APIKeys       string
+	EtherAccounts string
+	Tasks         string
 }{
-	APIKeys: "api_keys",
-	Tasks:   "tasks",
+	APIKeys:       "api_keys",
+	EtherAccounts: "ether_accounts",
+	Tasks:         "tasks",
 }
 
 var ColumnNames = struct {
-	APIKeys apiKeyColumnNames
-	Tasks   taskColumnNames
+	APIKeys       apiKeyColumnNames
+	EtherAccounts etherAccountColumnNames
+	Tasks         taskColumnNames
 }{
 	APIKeys: apiKeyColumnNames{
 		APIKey:    "api_key",
 		UserID:    "user_id",
 		CreatedAt: "created_at",
+	},
+	EtherAccounts: etherAccountColumnNames{
+		UserID:    "user_id",
+		Address:   "address",
+		CreatedAt: "created_at",
+		UpdatedAt: "updated_at",
 	},
 	Tasks: taskColumnNames{
 		ID:          "id",
@@ -60,15 +69,18 @@ var (
 )
 
 func Where[Q psql.Filterable]() struct {
-	APIKeys apiKeyWhere[Q]
-	Tasks   taskWhere[Q]
+	APIKeys       apiKeyWhere[Q]
+	EtherAccounts etherAccountWhere[Q]
+	Tasks         taskWhere[Q]
 } {
 	return struct {
-		APIKeys apiKeyWhere[Q]
-		Tasks   taskWhere[Q]
+		APIKeys       apiKeyWhere[Q]
+		EtherAccounts etherAccountWhere[Q]
+		Tasks         taskWhere[Q]
 	}{
-		APIKeys: buildAPIKeyWhere[Q](APIKeyColumns),
-		Tasks:   buildTaskWhere[Q](TaskColumns),
+		APIKeys:       buildAPIKeyWhere[Q](APIKeyColumns),
+		EtherAccounts: buildEtherAccountWhere[Q](EtherAccountColumns),
+		Tasks:         buildTaskWhere[Q](TaskColumns),
 	}
 }
 
