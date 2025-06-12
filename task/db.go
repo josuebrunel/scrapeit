@@ -51,6 +51,7 @@ func (m EtherManager) Upsert(ctx context.Context, tsk Task) error {
 		Contract:    models.NullFrom(tsk.Contract),
 		Input:       models.NullFrom(tsk.Input),
 		RewardWei:   models.NullFrom(DecimalFromString(tsk.Reward)),
+		Paid:        models.NullFrom(tsk.Paid),
 		Output:      models.NullFrom(tsk.Output),
 		Status:      models.NullFrom(string(tsk.Status)),
 		Submitter:   models.NullFrom(tsk.Submitter),
@@ -58,7 +59,7 @@ func (m EtherManager) Upsert(ctx context.Context, tsk Task) error {
 		UpdatedAt:   models.NullFrom(tsk.UpdatedAt),
 	},
 		im.OnConflict("id").DoUpdate(
-			im.SetExcluded("assignee", "output", "status", "transaction", "updated_at"),
+			im.SetExcluded("assignee", "output", "status", "transaction", "paid", "updated_at"),
 		),
 	).One(ctx, m.db)
 	if err != nil {

@@ -38,6 +38,7 @@ type Task struct {
 	Input       string     `json:"input"`
 	Output      string     `json:"output"`
 	Reward      string     `json:"reward"`
+	Paid        bool       `json:"paid"`
 	Status      TaskStatus `json:"status"`
 	Submitter   string     `json:"submitter"`
 	Transaction string     `json:"transaction"`

@@ -63,7 +63,7 @@ templ TableBodyView(tt models.TaskSlice) {
 					</span>
 				</td>
 				<td>{ t.Assignee.V }</td>
-				<td>0.0 </td>
+				<td>{ t.RewardWei.V.String() } Wei</td>
 				<td>{ t.CreatedAt.V.UTC().Format(time.DateTime) }</td>
 				<td class="flex items-center gap-1">
 					<button class="btn btn-xs btn-outline" hx-target="#content" hx-get={ view.Reverse(ctx, HandlerNameDetail, t.ID.String()) }>
@@ -172,22 +172,7 @@ templ DetailView(t models.Task) {
 						</div>
 						<div class="stat-desc">ETH address</div>
 					</div>
-					<div class="stat">
-						<div class="stat-title">
-							<i class="fas fa-coins mr-2"></i>
-							Payment Status
-						</div>
-						<div class="stat-value">
-							<span class="badge badge-success" id="payment-status">Paid</span>
-						</div>
-						<div class="stat-desc" id="payment-amount">
-							if t.Status.V == "completed" {
-								<span>{ t.RewardWei.V.String() } Wei</span>
-							} else {
-								<span>0 Wei</span>
-							}
-						</div>
-					</div>
+					@PaymentStatusView(t)
 				</div>
 				<div class="divider"></div>
 				<div class="tabs tabs-boxed bg-base-200 mb-4">
@@ -213,6 +198,26 @@ templ DetailView(t models.Task) {
 				<i class="fas fa-download mr-2"></i> Download Results
 			</button>
 		</div>
+	</div>
+}
+
+templ PaymentStatusView(t models.Task) {
+	<div class="stat">
+		<div class="stat-title">
+			<i class="fas fa-coins mr-2"></i>
+			Payment Status
+		</div>
+		if t.Paid.V {
+			<div class="stat-value">
+				<span class="badge badge-success" id="payment-status">Paid</span>
+			</div>
+			<div class="stat-desc" id="payment-amount">{ t.RewardWei.V.String() } Wei</div>
+		} else {
+			<div class="stat-value">
+				<span class="badge badge-error" id="payment-status">Pending</span>
+			</div>
+			<div class="stat-desc" id="payment-amount">0.0 Wei</div>
+		}
 	</div>
 }
 

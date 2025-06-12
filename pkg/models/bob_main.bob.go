@@ -53,6 +53,7 @@ var ColumnNames = struct {
 		Contract:    "contract",
 		Input:       "input",
 		Output:      "output",
+		Paid:        "paid",
 		RequestData: "request_data",
 		RewardWei:   "reward_wei",
 		Status:      "status",

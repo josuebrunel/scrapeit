@@ -147,14 +147,10 @@ func (h Handler) SignIn() echo.HandlerFunc {
 			return view.Render(c, http.StatusOK, renderSignIn(c), nil)
 		}
 		user := resp.User
-		xData := map[string]string{
-			DataKeyEthereumAddress: user.UserMetadata[DataKeyEthereumAddress].(string),
-		}
 		xlog.Debug("user authenticated", "user", user, "token", resp.AccessToken)
 		xsession.SetUser(c.Request().Context(), xsession.XUser{
 			ID:    user.ID.String(),
 			Token: resp.AccessToken, Email: user.Email,
-			Data: xData,
 		})
 		toast.NotifySuccess(c, "Signed in successfully")
 		return c.Redirect(http.StatusSeeOther, view.ReverseX(c, HandlerNameDashboard))
@@ -190,6 +186,11 @@ func (h Handler) UpdateData() echo.HandlerFunc {
 			req   RequestUserData
 		)
 		if c.Request().Method == http.MethodGet {
+			if addr, err := UserEtherAccountGet(ctx, h.db, xuser.ID); err == nil {
+				xlog.Debug("user ether account found", "address", addr.Address, "user", xuser.ID)
+				xuser.Set(DataKeyEthereumAddress, addr.Address)
+				xsession.SetUser(c.Request().Context(), xuser)
+			}
 			return view.Render(c, http.StatusOK, EthAddressView(xuser, templ.Attributes{}), nil)
 		}
 		if err := c.Bind(&req); err != nil {
@@ -215,10 +216,12 @@ func (h Handler) Dashboard() echo.HandlerFunc {
 			xuser = xsession.GetUser(ctx)
 		)
 		if addr, err := UserEtherAccountGet(ctx, h.db, xuser.ID); err == nil {
+			xlog.Debug("user ether account found", "address", addr.Address, "user", xuser.ID)
 			xuser.Set(DataKeyEthereumAddress, addr.Address)
 			balance, _ := etherutil.GetAccountBalance(ctx, h.ethCli, addr.Address)
 			xuser.Set(DataKeyEthereumBalance, balance.String())
 		}
+		xlog.Debug("user authenticated", "user", xuser)
 		xsession.SetUser(c.Request().Context(), xuser)
 		return view.Render(c, http.StatusOK, DashboardView(xuser, templ.Attributes{}), nil)
 	}

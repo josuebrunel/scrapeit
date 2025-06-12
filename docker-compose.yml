@@ -32,8 +32,8 @@ services:
       - "8385:8545"
     environment:
       - CHAIN_ID=42
-      - BLOCK_TIME=60
-      - ACCOUNTS=15
+      - BLOCK_TIME=15
+      - ACCOUNTS=10
       - BALANCE=2000000
       - HOST=0.0.0.0
       - DISABLE_CODE_SIZE_LIMIT=true
@@ -47,7 +47,7 @@ services:
     image: postgres
     container_name: scrapeit-db
     env_file:
-      - .env/db.env
+      - .env
     volumes:
       - scrapeit_db:/var/lib/postgresql/data
       - ./init-scripts/db:/docker-entrypoint-initdb.d
@@ -67,13 +67,13 @@ services:
       db:
         condition: service_healthy
     env_file:
-      - .env/auth.env
+      - .env
     ports:
       - "8386:9999"
     networks:
       - scrapeit
     post_start:
-      - command: ["gotrue", "admin", "createuser",  "--admin",  "--confirm", "${APP_ADMIN_EMAIL}",  "${APP_ADMIN_PASSWORD}", "service_role"]
+      - command: ["gotrue", "admin", "createuser",  "--admin",  "--confirm", "admin",  "admin1234", "service_role"]
     healthcheck:
       test:
         [
@@ -96,7 +96,7 @@ services:
       dockerfile: Dockerfile
       target: build
     env_file:
-      - .env/server.env
+      - .env
     ports:
       - "8380:8080"
       - "8381:7654"
@@ -125,7 +125,7 @@ services:
       dockerfile: Dockerfile
       target: publisher
     env_file:
-      - .env/server.env
+      - .env
     ports:
       - "8380:8080"
       - "8381:7654"
@@ -146,8 +146,11 @@ services:
       dockerfile: Dockerfile
       target: subscriber
     environment:
-      - PUB_ROOT_PEERS=http://dev:8080/settings
+      - PUB_ROOT_PEERS=http://dev:8080/
+      - CDP_REMOTE=ws://browser:9222/
       - ETH_PRIVATE_KEY=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
+      - API_KEY=B8lLeX66OGgK4rL2am9NQQSOO2kU8MryHBOjSQGP6O0
+      - VERBOSE_MODE=true
     networks:
       - scrapeit
     extra_hosts:

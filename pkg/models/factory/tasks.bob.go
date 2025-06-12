@@ -47,6 +47,7 @@ type TaskTemplate struct {
 	Contract    func() sql.Null[string]
 	Input       func() sql.Null[string]
 	Output      func() sql.Null[string]
+	Paid        func() sql.Null[bool]
 	RequestData func() sql.Null[types.JSON[json.RawMessage]]
 	RewardWei   func() sql.Null[decimal.Decimal]
 	Status      func() sql.Null[string]
@@ -103,6 +104,10 @@ func (o TaskTemplate) BuildSetter() *models.TaskSetter {
 	if o.Output != nil {
 		val := o.Output()
 		m.Output = &val
+	}
+	if o.Paid != nil {
+		val := o.Paid()
+		m.Paid = &val
 	}
 	if o.RequestData != nil {
 		val := o.RequestData()
@@ -169,6 +174,9 @@ func (o TaskTemplate) Build() *models.Task {
 	}
 	if o.Output != nil {
 		m.Output = o.Output()
+	}
+	if o.Paid != nil {
+		m.Paid = o.Paid()
 	}
 	if o.RequestData != nil {
 		m.RequestData = o.RequestData()
@@ -332,6 +340,7 @@ func (m taskMods) RandomizeAllColumns(f *faker.Faker) TaskMod {
 		TaskMods.RandomContract(f),
 		TaskMods.RandomInput(f),
 		TaskMods.RandomOutput(f),
+		TaskMods.RandomPaid(f),
 		TaskMods.RandomRequestData(f),
 		TaskMods.RandomRewardWei(f),
 		TaskMods.RandomStatus(f),
@@ -716,6 +725,59 @@ func (m taskMods) RandomOutputNotNull(f *faker.Faker) TaskMod {
 
 			val := random_string(f)
 			return sql.Null[string]{V: val, Valid: true}
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m taskMods) Paid(val sql.Null[bool]) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.Paid = func() sql.Null[bool] { return val }
+	})
+}
+
+// Set the Column from the function
+func (m taskMods) PaidFunc(f func() sql.Null[bool]) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.Paid = f
+	})
+}
+
+// Clear any values for the column
+func (m taskMods) UnsetPaid() TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.Paid = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+// The generated value is sometimes null
+func (m taskMods) RandomPaid(f *faker.Faker) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.Paid = func() sql.Null[bool] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_bool(f)
+			return sql.Null[bool]{V: val, Valid: f.Bool()}
+		}
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+// The generated value is never null
+func (m taskMods) RandomPaidNotNull(f *faker.Faker) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.Paid = func() sql.Null[bool] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_bool(f)
+			return sql.Null[bool]{V: val, Valid: true}
 		}
 	})
 }

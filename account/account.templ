@@ -134,7 +134,7 @@ templ EthAddressView(user xsession.XUser, attr templ.Attributes) {
 						type="text"
 						placeholder="0x..."
 						class="input input-bordered w-full"
-						value={ user.Get("ethAddress") }
+						value={ user.Get(DataKeyEthereumAddress) }
 					/>
 					<button class="btn btn-square" onclick="copyEthAddress()">
 						<i class="fas fa-copy"></i>

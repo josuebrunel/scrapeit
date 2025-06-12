@@ -1,6 +1,8 @@
 package app
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"scrapeit/pkg/common"
@@ -9,11 +11,11 @@ import (
 	"scrapeit/task"
 	"time"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/labstack/echo/v5"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql"
-	"github.com/stephenafamo/bob/dialect/psql/sm"
 )
 
 const (
@@ -67,16 +69,32 @@ func (a App) Submit(filters ...bob.Expression) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, Response[task.Task]{Error: err.Error()})
 		}
 		reqTask.UpdatedAt = time.Now().UTC()
-		if exists, _ := models.Tasks.Query(
-			sm.Where(
-				psql.Quote("id").EQ(psql.Arg(id)).And(filters...),
-			),
-		).Exists(ctx, a.bob); !exists {
-			xlog.Error("task not found", "id", id)
-			return c.JSON(404, Response[task.Task]{Error: "task not found"})
+		tsk, err := models.FindTask(ctx, a.bob, uuid.Must(uuid.FromString(id)))
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				xlog.Error("task not found", "id", id)
+				return c.JSON(http.StatusNotFound, Response[task.Task]{Error: "task not found"})
+			}
+			return c.JSON(http.StatusInternalServerError, Response[task.Task]{Error: err.Error()})
+		}
+		switch task.TaskStatus(tsk.Status.V) {
+		case task.Pending:
+			if reqTask.Status != task.Active {
+				xlog.Error("invalid status", "status", reqTask.Status)
+				return c.JSON(http.StatusBadRequest, Response[task.Task]{Error: "invalid status"})
+			}
+		case task.Active:
+			if reqTask.Status != task.Completed && reqTask.Status != task.Failed {
+				xlog.Error("invalid status", "status", reqTask.Status)
+				return c.JSON(http.StatusBadRequest, Response[task.Task]{Error: "invalid status"})
+			}
 		}
 		if err := a.Manager.Upsert(ctx, reqTask); err != nil {
 			xlog.Error("failed to update task", "error", err)
+			return c.JSON(Status500, Response[task.Task]{Error: err.Error()})
+		}
+		if err := a.Manager.Complete(ctx, id, tsk.Assignee.V, reqTask.Output, reqTask.Status == task.Completed, a.privateKey); err != nil {
+			xlog.Error("failed to complete task", "error", err)
 			return c.JSON(Status500, Response[task.Task]{Error: err.Error()})
 		}
 		return c.JSON(http.StatusOK, Response[task.Task]{Data: reqTask})

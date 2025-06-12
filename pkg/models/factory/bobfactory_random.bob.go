@@ -19,6 +19,14 @@ import (
 
 var defaultFaker = faker.New()
 
+func random_bool(f *faker.Faker, limits ...string) bool {
+	if f == nil {
+		f = &defaultFaker
+	}
+
+	return f.Bool()
+}
+
 func random_decimal_Decimal(f *faker.Faker, limits ...string) decimal.Decimal {
 	if f == nil {
 		f = &defaultFaker

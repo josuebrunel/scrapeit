@@ -11,6 +11,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/stephenafamo/bob"
@@ -18,9 +19,8 @@ import (
 
 var Status = map[uint8]TaskStatus{
 	0: Pending,
-	1: Active,
-	2: Completed,
-	3: Failed,
+	1: Completed,
+	2: Failed,
 }
 
 type EtherManager struct {
@@ -52,6 +52,10 @@ func (e EtherManager) GetClient() ethclient.Client {
 	return *e.client
 }
 
+func (e EtherManager) GetDB() bob.DB {
+	return e.db
+}
+
 func (e *EtherManager) SetDB(db bob.DB) {
 	e.db = db
 }
@@ -72,6 +76,24 @@ func (e EtherManager) getAuth(ctx context.Context, pk *ecdsa.PrivateKey) *bind.T
 	return auth
 }
 
+func (e EtherManager) WaitMined(ctx context.Context, tx *types.Transaction) (*types.Receipt, error) {
+	receipt, err := bind.WaitMined(ctx, e.client, tx)
+	if err != nil {
+		xlog.Error("Failed to mine transaction", "error", err)
+		return receipt, err
+	}
+	if receipt.Status != types.ReceiptStatusSuccessful {
+		xlog.Error("Transaction failed",
+			"error", err,
+			"transaction", tx.Hash().Hex(),
+			"status", receipt.Status,
+			"gasUser", receipt.GasUsed,
+		)
+		return receipt, err
+	}
+	return receipt, nil
+}
+
 func (e EtherManager) Create(ctx context.Context, pk *ecdsa.PrivateKey, tsk Task) error {
 	auth := e.getAuth(ctx, pk)
 	if auth == nil {
@@ -88,6 +110,7 @@ func (e EtherManager) Create(ctx context.Context, pk *ecdsa.PrivateKey, tsk Task
 		xlog.Error("Failed to create task", "error", err)
 		return err
 	}
+	e.WaitMined(ctx, tx)
 	xlog.Info("Task created", "tx", tx.Hash().Hex())
 	return nil
 }
@@ -121,7 +144,7 @@ func (e EtherManager) Get(ctx context.Context, id string, pk *ecdsa.PrivateKey) 
 	return tsk, nil
 }
 
-func (e EtherManager) Claim(ctx context.Context, id string, pk *ecdsa.PrivateKey) error {
+func (e EtherManager) Complete(ctx context.Context, id string, assignee string, output string, success bool, pk *ecdsa.PrivateKey) error {
 	auth := e.getAuth(ctx, pk)
 	if auth == nil {
 		return errors.New("failed to create transaction")
@@ -131,50 +154,13 @@ func (e EtherManager) Claim(ctx context.Context, id string, pk *ecdsa.PrivateKey
 		xlog.Error("Failed to instantiate a Token contract", "error", err)
 		return err
 	}
-	tx, err := instance.Claim(auth, id)
-	if err != nil {
-		xlog.Error("Failed to claim task", "error", err)
-		return err
-	}
-
-	xlog.Info("Task claimed", "tx", tx.Hash().Hex(), "id", id, "assignee", pk.PublicKey)
-	return nil
-}
-
-func (e EtherManager) Complete(ctx context.Context, id string, output string, pk *ecdsa.PrivateKey) error {
-	auth := e.getAuth(ctx, pk)
-	if auth == nil {
-		return errors.New("failed to create transaction")
-	}
-	instance, err := contract.NewContract(e.contractAddr, e.client)
-	if err != nil {
-		xlog.Error("Failed to instantiate a Token contract", "error", err)
-		return err
-	}
-	tx, err := instance.Complete(auth, id, output)
+	xlog.Info("Completing task", "id", id, "assignee", assignee, "output", output)
+	tx, err := instance.Complete(auth, id, common.HexToAddress(assignee), output, success)
 	if err != nil {
 		xlog.Error("Failed to complete task", "error", err)
 		return err
 	}
+	e.WaitMined(ctx, tx)
 	xlog.Info("Task completed", "tx", tx.Hash().Hex(), "id", id, "output", output, "assignee", pk.PublicKey)
-	return nil
-}
-
-func (e EtherManager) Fail(ctx context.Context, id string, pk *ecdsa.PrivateKey) error {
-	auth := e.getAuth(ctx, pk)
-	if auth == nil {
-		return errors.New("failed to create transaction")
-	}
-	instance, err := contract.NewContract(e.contractAddr, e.client)
-	if err != nil {
-		xlog.Error("Failed to instantiate a Token contract", "error", err)
-		return err
-	}
-	tx, err := instance.Fail(auth, id)
-	if err != nil {
-		xlog.Error("Failed to fail task", "error", err)
-		return err
-	}
-	xlog.Info("Task failed", "tx", tx.Hash().Hex(), "id", id)
 	return nil
 }

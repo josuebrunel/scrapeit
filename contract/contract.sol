@@ -6,7 +6,6 @@ contract Scraper {
     bool public paused;
     enum Status {
         Pending,
-        Claimed,
         Completed,
         Failed
     }
@@ -17,8 +16,8 @@ contract Scraper {
         string uuid;
         string user_id;
         Status status;
-        address assignee;
-        address submitter;
+        address payable assignee;
+        address payable submitter;
         string input;
         string output;
         uint256 amount;
@@ -28,15 +27,6 @@ contract Scraper {
 
     constructor() {
         owner = msg.sender;
-    }
-
-    modifier isTaskClaimed(string memory _uuid) {
-        Task memory tsk = tasks[_uuid];
-        require(
-            tasks[_uuid].status != Status.Completed,
-            "Task not in Claimed state"
-        );
-        _;
     }
 
     modifier isOwner() {
@@ -56,7 +46,6 @@ contract Scraper {
         string input,
         uint256 amount
     );
-    event TaskClaimed(string uuid, address indexed assignee);
     event TaskProcessed(
         string uuid,
         address indexed assignee,
@@ -75,16 +64,15 @@ contract Scraper {
             tasks[_uuid].submitter == address(0),
             "Task with this UUID already exists"
         );
-        require(tasks[_uuid].status == Status.Pending);
 
         Task memory tsk = Task({
             uuid: _uuid,
             user_id: _user_id,
-            submitter: msg.sender,
+            submitter: payable(msg.sender),
             input: _input,
             output: "",
             status: Status.Pending,
-            assignee: address(0),
+            assignee: payable(address(0)),
             amount: msg.value,
             created_at: block.timestamp,
             updated_at: block.timestamp
@@ -94,55 +82,38 @@ contract Scraper {
         emit TaskCreated(
             tsk.uuid,
             tsk.user_id,
-            msg.sender,
+            tsk.submitter,
             tsk.input,
             msg.value
         );
     }
 
-    function claim(string memory _uuid) external isPaused {
-        require(bytes(_uuid).length > 0, "UUID cannot be empty");
-        Task storage tsk = tasks[_uuid];
-        require(
-            tsk.status == Status.Pending || tsk.status == Status.Failed,
-            "Not pending or failed"
-        );
-        require(
-            tsk.submitter != msg.sender,
-            "Submitter cannot claim their own task"
-        );
-
-        tsk.status = Status.Claimed;
-        tsk.assignee = msg.sender;
-        tsk.updated_at = block.timestamp;
-        emit TaskClaimed(_uuid, msg.sender);
-    }
-
     function complete(
         string memory _uuid,
-        string memory _output
-    ) external isTaskClaimed(_uuid) isPaused {
+        address payable _assignee,
+        string memory _output,
+        bool _success
+    ) external isPaused {
         require(bytes(_uuid).length > 0, "UUID cannot be empty");
         Task storage tsk = tasks[_uuid];
+        require(tsk.status != Status.Completed, "Task already completed");
+        require(_assignee != address(0), "Assignee address cannot be zero");
+        tsk.assignee = _assignee;
 
-        tsk.status = Status.Completed;
-        tsk.output = _output;
+        if (!_success) {
+            tsk.status = Status.Failed;
+        } else {
+            tsk.status = Status.Completed;
+            tsk.output = _output;
+        }
         tsk.updated_at = block.timestamp;
-        emit TaskProcessed(_uuid, msg.sender, Status.Completed, _output);
 
-        // Transfer payment to the assignee
-        (bool success, ) = tsk.assignee.call{value: tsk.amount}("");
-        require(success, "Transfer failed");
-    }
+        if (_success && tsk.amount > 0) {
+            (bool success, ) = tsk.assignee.call{value: tsk.amount}("");
+            require(success, "Transfer failed");
+        }
 
-    function fail(string memory _uuid) external isTaskClaimed(_uuid) isPaused {
-        require(bytes(_uuid).length > 0, "UUID cannot be empty");
-        Task storage tsk = tasks[_uuid];
-
-        tsk.status = Status.Failed;
-        tsk.assignee = address(0); // Reset assignee so task can be claimed again
-        tsk.updated_at = block.timestamp;
-        emit TaskProcessed(_uuid, msg.sender, Status.Failed, "");
+        emit TaskProcessed(_uuid, tsk.assignee, tsk.status, _output);
     }
 
     function setPaused(bool _paused) public isOwner {

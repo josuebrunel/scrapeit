@@ -3,7 +3,6 @@ package etherutil
 import (
 	"context"
 	"crypto/ecdsa"
-	"fmt"
 	"math"
 	"math/big"
 
@@ -50,18 +49,22 @@ func GetAddressFromHexKey(hexKey string) string {
 	return GetAddress(pk)
 }
 
-func GetAccountBalance(ctx context.Context, cli *ethclient.Client, address string) (*big.Float, error) {
+func GetAccountBalance(ctx context.Context, cli *ethclient.Client, address string) (*big.Int, error) {
 	account := common.HexToAddress(address)
 	balance, err := cli.BalanceAt(ctx, account, nil)
 	if err != nil {
 		xlog.Error("Failed to get account balance", "error", err)
 		return nil, err
 	}
+	return balance, nil
+}
+
+func AsEther(wei *big.Int) *big.Float {
 	fBalance := new(big.Float)
-	fBalance.SetString(balance.String())
-	fBalance = fBalance.Quo(fBalance, big.NewFloat(math.Pow(10, 18)))
-	xlog.Debug("Account balance", "balance", balance)
-	return fBalance, nil
+	fBalance.SetString(wei.String())
+	ethValue := new(big.Float).Quo(fBalance, big.NewFloat(math.Pow10(18)))
+	xlog.Debug("Account balance", "balance", ethValue.String(), "unit", "ether")
+	return ethValue
 }
 
 func GetNonce(ctx context.Context, cli *ethclient.Client, pk *ecdsa.PrivateKey) (uint64, error) {
@@ -146,9 +149,16 @@ func BigIntFromString(s string) *big.Int {
 
 func WeiToEtherString(wei *big.Int, dec int) string {
 	if wei == nil || wei.Sign() == 0 {
-		return fmt.Sprintf("%s.*f", dec, 0)
+		return "0.0"
 	}
 	weiFloat := new(big.Float).SetInt(wei)
 	ethFloat := new(big.Float).Quo(weiFloat, big.NewFloat(math.Pow10(dec)))
 	return ethFloat.Text('f', dec)
+}
+
+func Must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

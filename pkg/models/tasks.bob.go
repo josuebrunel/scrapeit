@@ -32,6 +32,7 @@ type Task struct {
 	Contract    sql.Null[string]                      `db:"contract" `
 	Input       sql.Null[string]                      `db:"input" `
 	Output      sql.Null[string]                      `db:"output" `
+	Paid        sql.Null[bool]                        `db:"paid" `
 	RequestData sql.Null[types.JSON[json.RawMessage]] `db:"request_data" `
 	RewardWei   sql.Null[decimal.Decimal]             `db:"reward_wei" `
 	Status      sql.Null[string]                      `db:"status" `
@@ -58,6 +59,7 @@ type taskColumnNames struct {
 	Contract    string
 	Input       string
 	Output      string
+	Paid        string
 	RequestData string
 	RewardWei   string
 	Status      string
@@ -77,6 +79,7 @@ type taskColumns struct {
 	Contract    psql.Expression
 	Input       psql.Expression
 	Output      psql.Expression
+	Paid        psql.Expression
 	RequestData psql.Expression
 	RewardWei   psql.Expression
 	Status      psql.Expression
@@ -103,6 +106,7 @@ func buildTaskColumns(alias string) taskColumns {
 		Contract:    psql.Quote(alias, "contract"),
 		Input:       psql.Quote(alias, "input"),
 		Output:      psql.Quote(alias, "output"),
+		Paid:        psql.Quote(alias, "paid"),
 		RequestData: psql.Quote(alias, "request_data"),
 		RewardWei:   psql.Quote(alias, "reward_wei"),
 		Status:      psql.Quote(alias, "status"),
@@ -120,6 +124,7 @@ type taskWhere[Q psql.Filterable] struct {
 	Contract    psql.WhereNullMod[Q, string]
 	Input       psql.WhereNullMod[Q, string]
 	Output      psql.WhereNullMod[Q, string]
+	Paid        psql.WhereNullMod[Q, bool]
 	RequestData psql.WhereNullMod[Q, types.JSON[json.RawMessage]]
 	RewardWei   psql.WhereNullMod[Q, decimal.Decimal]
 	Status      psql.WhereNullMod[Q, string]
@@ -141,6 +146,7 @@ func buildTaskWhere[Q psql.Filterable](cols taskColumns) taskWhere[Q] {
 		Contract:    psql.WhereNull[Q, string](cols.Contract),
 		Input:       psql.WhereNull[Q, string](cols.Input),
 		Output:      psql.WhereNull[Q, string](cols.Output),
+		Paid:        psql.WhereNull[Q, bool](cols.Paid),
 		RequestData: psql.WhereNull[Q, types.JSON[json.RawMessage]](cols.RequestData),
 		RewardWei:   psql.WhereNull[Q, decimal.Decimal](cols.RewardWei),
 		Status:      psql.WhereNull[Q, string](cols.Status),
@@ -174,6 +180,7 @@ type TaskSetter struct {
 	Contract    *sql.Null[string]                      `db:"contract" `
 	Input       *sql.Null[string]                      `db:"input" `
 	Output      *sql.Null[string]                      `db:"output" `
+	Paid        *sql.Null[bool]                        `db:"paid" `
 	RequestData *sql.Null[types.JSON[json.RawMessage]] `db:"request_data" `
 	RewardWei   *sql.Null[decimal.Decimal]             `db:"reward_wei" `
 	Status      *sql.Null[string]                      `db:"status" `
@@ -182,7 +189,7 @@ type TaskSetter struct {
 }
 
 func (s TaskSetter) SetColumns() []string {
-	vals := make([]string, 0, 13)
+	vals := make([]string, 0, 14)
 	if s.ID != nil {
 		vals = append(vals, "id")
 	}
@@ -213,6 +220,10 @@ func (s TaskSetter) SetColumns() []string {
 
 	if s.Output != nil {
 		vals = append(vals, "output")
+	}
+
+	if s.Paid != nil {
+		vals = append(vals, "paid")
 	}
 
 	if s.RequestData != nil {
@@ -263,6 +274,9 @@ func (s TaskSetter) Overwrite(t *Task) {
 	if s.Output != nil {
 		t.Output = *s.Output
 	}
+	if s.Paid != nil {
+		t.Paid = *s.Paid
+	}
 	if s.RequestData != nil {
 		t.RequestData = *s.RequestData
 	}
@@ -286,7 +300,7 @@ func (s *TaskSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 13)
+		vals := make([]bob.Expression, 14)
 		if s.ID != nil {
 			vals[0] = psql.Arg(*s.ID)
 		} else {
@@ -335,34 +349,40 @@ func (s *TaskSetter) Apply(q *dialect.InsertQuery) {
 			vals[7] = psql.Raw("DEFAULT")
 		}
 
-		if s.RequestData != nil {
-			vals[8] = psql.Arg(*s.RequestData)
+		if s.Paid != nil {
+			vals[8] = psql.Arg(*s.Paid)
 		} else {
 			vals[8] = psql.Raw("DEFAULT")
 		}
 
-		if s.RewardWei != nil {
-			vals[9] = psql.Arg(*s.RewardWei)
+		if s.RequestData != nil {
+			vals[9] = psql.Arg(*s.RequestData)
 		} else {
 			vals[9] = psql.Raw("DEFAULT")
 		}
 
-		if s.Status != nil {
-			vals[10] = psql.Arg(*s.Status)
+		if s.RewardWei != nil {
+			vals[10] = psql.Arg(*s.RewardWei)
 		} else {
 			vals[10] = psql.Raw("DEFAULT")
 		}
 
-		if s.Submitter != nil {
-			vals[11] = psql.Arg(*s.Submitter)
+		if s.Status != nil {
+			vals[11] = psql.Arg(*s.Status)
 		} else {
 			vals[11] = psql.Raw("DEFAULT")
 		}
 
-		if s.Transaction != nil {
-			vals[12] = psql.Arg(*s.Transaction)
+		if s.Submitter != nil {
+			vals[12] = psql.Arg(*s.Submitter)
 		} else {
 			vals[12] = psql.Raw("DEFAULT")
+		}
+
+		if s.Transaction != nil {
+			vals[13] = psql.Arg(*s.Transaction)
+		} else {
+			vals[13] = psql.Raw("DEFAULT")
 		}
 
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
@@ -374,7 +394,7 @@ func (s TaskSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s TaskSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 13)
+	exprs := make([]bob.Expression, 0, 14)
 
 	if s.ID != nil {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -429,6 +449,13 @@ func (s TaskSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "output")...),
 			psql.Arg(s.Output),
+		}})
+	}
+
+	if s.Paid != nil {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "paid")...),
+			psql.Arg(s.Paid),
 		}})
 	}
 

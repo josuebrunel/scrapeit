@@ -31,6 +31,7 @@ create table if not exists tasks (
     contract TEXT,
     input TEXT,
     output TEXT,
+    paid BOOLEAN default false,
     request_data JSONB,
     reward_wei NUMERIC,
     status TEXT,
