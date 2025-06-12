@@ -6,12 +6,15 @@ package factory
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"testing"
 	"time"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jaswdr/faker/v2"
+	"github.com/shopspring/decimal"
 	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/types"
 	models "scrapeit/pkg/models"
 )
 
@@ -44,6 +47,8 @@ type TaskTemplate struct {
 	Contract    func() sql.Null[string]
 	Input       func() sql.Null[string]
 	Output      func() sql.Null[string]
+	RequestData func() sql.Null[types.JSON[json.RawMessage]]
+	RewardWei   func() sql.Null[decimal.Decimal]
 	Status      func() sql.Null[string]
 	Submitter   func() sql.Null[string]
 	Transaction func() sql.Null[string]
@@ -98,6 +103,14 @@ func (o TaskTemplate) BuildSetter() *models.TaskSetter {
 	if o.Output != nil {
 		val := o.Output()
 		m.Output = &val
+	}
+	if o.RequestData != nil {
+		val := o.RequestData()
+		m.RequestData = &val
+	}
+	if o.RewardWei != nil {
+		val := o.RewardWei()
+		m.RewardWei = &val
 	}
 	if o.Status != nil {
 		val := o.Status()
@@ -156,6 +169,12 @@ func (o TaskTemplate) Build() *models.Task {
 	}
 	if o.Output != nil {
 		m.Output = o.Output()
+	}
+	if o.RequestData != nil {
+		m.RequestData = o.RequestData()
+	}
+	if o.RewardWei != nil {
+		m.RewardWei = o.RewardWei()
 	}
 	if o.Status != nil {
 		m.Status = o.Status()
@@ -313,6 +332,8 @@ func (m taskMods) RandomizeAllColumns(f *faker.Faker) TaskMod {
 		TaskMods.RandomContract(f),
 		TaskMods.RandomInput(f),
 		TaskMods.RandomOutput(f),
+		TaskMods.RandomRequestData(f),
+		TaskMods.RandomRewardWei(f),
 		TaskMods.RandomStatus(f),
 		TaskMods.RandomSubmitter(f),
 		TaskMods.RandomTransaction(f),
@@ -695,6 +716,112 @@ func (m taskMods) RandomOutputNotNull(f *faker.Faker) TaskMod {
 
 			val := random_string(f)
 			return sql.Null[string]{V: val, Valid: true}
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m taskMods) RequestData(val sql.Null[types.JSON[json.RawMessage]]) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.RequestData = func() sql.Null[types.JSON[json.RawMessage]] { return val }
+	})
+}
+
+// Set the Column from the function
+func (m taskMods) RequestDataFunc(f func() sql.Null[types.JSON[json.RawMessage]]) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.RequestData = f
+	})
+}
+
+// Clear any values for the column
+func (m taskMods) UnsetRequestData() TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.RequestData = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+// The generated value is sometimes null
+func (m taskMods) RandomRequestData(f *faker.Faker) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.RequestData = func() sql.Null[types.JSON[json.RawMessage]] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_types_JSON_json_RawMessage_(f)
+			return sql.Null[types.JSON[json.RawMessage]]{V: val, Valid: f.Bool()}
+		}
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+// The generated value is never null
+func (m taskMods) RandomRequestDataNotNull(f *faker.Faker) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.RequestData = func() sql.Null[types.JSON[json.RawMessage]] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_types_JSON_json_RawMessage_(f)
+			return sql.Null[types.JSON[json.RawMessage]]{V: val, Valid: true}
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m taskMods) RewardWei(val sql.Null[decimal.Decimal]) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.RewardWei = func() sql.Null[decimal.Decimal] { return val }
+	})
+}
+
+// Set the Column from the function
+func (m taskMods) RewardWeiFunc(f func() sql.Null[decimal.Decimal]) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.RewardWei = f
+	})
+}
+
+// Clear any values for the column
+func (m taskMods) UnsetRewardWei() TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.RewardWei = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+// The generated value is sometimes null
+func (m taskMods) RandomRewardWei(f *faker.Faker) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.RewardWei = func() sql.Null[decimal.Decimal] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_decimal_Decimal(f)
+			return sql.Null[decimal.Decimal]{V: val, Valid: f.Bool()}
+		}
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+// The generated value is never null
+func (m taskMods) RandomRewardWeiNotNull(f *faker.Faker) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.RewardWei = func() sql.Null[decimal.Decimal] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_decimal_Decimal(f)
+			return sql.Null[decimal.Decimal]{V: val, Valid: true}
 		}
 	})
 }

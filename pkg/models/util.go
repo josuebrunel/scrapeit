@@ -2,9 +2,9 @@ package models
 
 import "database/sql"
 
-func NullFrom[T any](t T) *sql.Null[T] {
+func NullFrom[T comparable](t T) *sql.Null[T] {
 	return &sql.Null[T]{
-		Valid: true,
+		Valid: t != *new(T),
 		V:     t,
 	}
 }

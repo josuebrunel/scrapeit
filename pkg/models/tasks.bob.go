@@ -6,10 +6,12 @@ package models
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"io"
 	"time"
 
 	"github.com/gofrs/uuid/v5"
+	"github.com/shopspring/decimal"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql"
 	"github.com/stephenafamo/bob/dialect/psql/dialect"
@@ -17,21 +19,24 @@ import (
 	"github.com/stephenafamo/bob/dialect/psql/sm"
 	"github.com/stephenafamo/bob/dialect/psql/um"
 	"github.com/stephenafamo/bob/expr"
+	"github.com/stephenafamo/bob/types"
 )
 
 // Task is an object representing the database table.
 type Task struct {
-	ID          uuid.UUID           `db:"id,pk" `
-	UserID      uuid.UUID           `db:"user_id" `
-	CreatedAt   sql.Null[time.Time] `db:"created_at" `
-	UpdatedAt   sql.Null[time.Time] `db:"updated_at" `
-	Assignee    sql.Null[string]    `db:"assignee" `
-	Contract    sql.Null[string]    `db:"contract" `
-	Input       sql.Null[string]    `db:"input" `
-	Output      sql.Null[string]    `db:"output" `
-	Status      sql.Null[string]    `db:"status" `
-	Submitter   sql.Null[string]    `db:"submitter" `
-	Transaction sql.Null[string]    `db:"transaction" `
+	ID          uuid.UUID                             `db:"id,pk" `
+	UserID      uuid.UUID                             `db:"user_id" `
+	CreatedAt   sql.Null[time.Time]                   `db:"created_at" `
+	UpdatedAt   sql.Null[time.Time]                   `db:"updated_at" `
+	Assignee    sql.Null[string]                      `db:"assignee" `
+	Contract    sql.Null[string]                      `db:"contract" `
+	Input       sql.Null[string]                      `db:"input" `
+	Output      sql.Null[string]                      `db:"output" `
+	RequestData sql.Null[types.JSON[json.RawMessage]] `db:"request_data" `
+	RewardWei   sql.Null[decimal.Decimal]             `db:"reward_wei" `
+	Status      sql.Null[string]                      `db:"status" `
+	Submitter   sql.Null[string]                      `db:"submitter" `
+	Transaction sql.Null[string]                      `db:"transaction" `
 }
 
 // TaskSlice is an alias for a slice of pointers to Task.
@@ -53,6 +58,8 @@ type taskColumnNames struct {
 	Contract    string
 	Input       string
 	Output      string
+	RequestData string
+	RewardWei   string
 	Status      string
 	Submitter   string
 	Transaction string
@@ -70,6 +77,8 @@ type taskColumns struct {
 	Contract    psql.Expression
 	Input       psql.Expression
 	Output      psql.Expression
+	RequestData psql.Expression
+	RewardWei   psql.Expression
 	Status      psql.Expression
 	Submitter   psql.Expression
 	Transaction psql.Expression
@@ -94,6 +103,8 @@ func buildTaskColumns(alias string) taskColumns {
 		Contract:    psql.Quote(alias, "contract"),
 		Input:       psql.Quote(alias, "input"),
 		Output:      psql.Quote(alias, "output"),
+		RequestData: psql.Quote(alias, "request_data"),
+		RewardWei:   psql.Quote(alias, "reward_wei"),
 		Status:      psql.Quote(alias, "status"),
 		Submitter:   psql.Quote(alias, "submitter"),
 		Transaction: psql.Quote(alias, "transaction"),
@@ -109,6 +120,8 @@ type taskWhere[Q psql.Filterable] struct {
 	Contract    psql.WhereNullMod[Q, string]
 	Input       psql.WhereNullMod[Q, string]
 	Output      psql.WhereNullMod[Q, string]
+	RequestData psql.WhereNullMod[Q, types.JSON[json.RawMessage]]
+	RewardWei   psql.WhereNullMod[Q, decimal.Decimal]
 	Status      psql.WhereNullMod[Q, string]
 	Submitter   psql.WhereNullMod[Q, string]
 	Transaction psql.WhereNullMod[Q, string]
@@ -128,6 +141,8 @@ func buildTaskWhere[Q psql.Filterable](cols taskColumns) taskWhere[Q] {
 		Contract:    psql.WhereNull[Q, string](cols.Contract),
 		Input:       psql.WhereNull[Q, string](cols.Input),
 		Output:      psql.WhereNull[Q, string](cols.Output),
+		RequestData: psql.WhereNull[Q, types.JSON[json.RawMessage]](cols.RequestData),
+		RewardWei:   psql.WhereNull[Q, decimal.Decimal](cols.RewardWei),
 		Status:      psql.WhereNull[Q, string](cols.Status),
 		Submitter:   psql.WhereNull[Q, string](cols.Submitter),
 		Transaction: psql.WhereNull[Q, string](cols.Transaction),
@@ -151,21 +166,23 @@ type taskErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type TaskSetter struct {
-	ID          *uuid.UUID           `db:"id,pk" `
-	UserID      *uuid.UUID           `db:"user_id" `
-	CreatedAt   *sql.Null[time.Time] `db:"created_at" `
-	UpdatedAt   *sql.Null[time.Time] `db:"updated_at" `
-	Assignee    *sql.Null[string]    `db:"assignee" `
-	Contract    *sql.Null[string]    `db:"contract" `
-	Input       *sql.Null[string]    `db:"input" `
-	Output      *sql.Null[string]    `db:"output" `
-	Status      *sql.Null[string]    `db:"status" `
-	Submitter   *sql.Null[string]    `db:"submitter" `
-	Transaction *sql.Null[string]    `db:"transaction" `
+	ID          *uuid.UUID                             `db:"id,pk" `
+	UserID      *uuid.UUID                             `db:"user_id" `
+	CreatedAt   *sql.Null[time.Time]                   `db:"created_at" `
+	UpdatedAt   *sql.Null[time.Time]                   `db:"updated_at" `
+	Assignee    *sql.Null[string]                      `db:"assignee" `
+	Contract    *sql.Null[string]                      `db:"contract" `
+	Input       *sql.Null[string]                      `db:"input" `
+	Output      *sql.Null[string]                      `db:"output" `
+	RequestData *sql.Null[types.JSON[json.RawMessage]] `db:"request_data" `
+	RewardWei   *sql.Null[decimal.Decimal]             `db:"reward_wei" `
+	Status      *sql.Null[string]                      `db:"status" `
+	Submitter   *sql.Null[string]                      `db:"submitter" `
+	Transaction *sql.Null[string]                      `db:"transaction" `
 }
 
 func (s TaskSetter) SetColumns() []string {
-	vals := make([]string, 0, 11)
+	vals := make([]string, 0, 13)
 	if s.ID != nil {
 		vals = append(vals, "id")
 	}
@@ -196,6 +213,14 @@ func (s TaskSetter) SetColumns() []string {
 
 	if s.Output != nil {
 		vals = append(vals, "output")
+	}
+
+	if s.RequestData != nil {
+		vals = append(vals, "request_data")
+	}
+
+	if s.RewardWei != nil {
+		vals = append(vals, "reward_wei")
 	}
 
 	if s.Status != nil {
@@ -238,6 +263,12 @@ func (s TaskSetter) Overwrite(t *Task) {
 	if s.Output != nil {
 		t.Output = *s.Output
 	}
+	if s.RequestData != nil {
+		t.RequestData = *s.RequestData
+	}
+	if s.RewardWei != nil {
+		t.RewardWei = *s.RewardWei
+	}
 	if s.Status != nil {
 		t.Status = *s.Status
 	}
@@ -255,7 +286,7 @@ func (s *TaskSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 11)
+		vals := make([]bob.Expression, 13)
 		if s.ID != nil {
 			vals[0] = psql.Arg(*s.ID)
 		} else {
@@ -304,22 +335,34 @@ func (s *TaskSetter) Apply(q *dialect.InsertQuery) {
 			vals[7] = psql.Raw("DEFAULT")
 		}
 
-		if s.Status != nil {
-			vals[8] = psql.Arg(*s.Status)
+		if s.RequestData != nil {
+			vals[8] = psql.Arg(*s.RequestData)
 		} else {
 			vals[8] = psql.Raw("DEFAULT")
 		}
 
-		if s.Submitter != nil {
-			vals[9] = psql.Arg(*s.Submitter)
+		if s.RewardWei != nil {
+			vals[9] = psql.Arg(*s.RewardWei)
 		} else {
 			vals[9] = psql.Raw("DEFAULT")
 		}
 
-		if s.Transaction != nil {
-			vals[10] = psql.Arg(*s.Transaction)
+		if s.Status != nil {
+			vals[10] = psql.Arg(*s.Status)
 		} else {
 			vals[10] = psql.Raw("DEFAULT")
+		}
+
+		if s.Submitter != nil {
+			vals[11] = psql.Arg(*s.Submitter)
+		} else {
+			vals[11] = psql.Raw("DEFAULT")
+		}
+
+		if s.Transaction != nil {
+			vals[12] = psql.Arg(*s.Transaction)
+		} else {
+			vals[12] = psql.Raw("DEFAULT")
 		}
 
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
@@ -331,7 +374,7 @@ func (s TaskSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s TaskSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 11)
+	exprs := make([]bob.Expression, 0, 13)
 
 	if s.ID != nil {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -386,6 +429,20 @@ func (s TaskSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "output")...),
 			psql.Arg(s.Output),
+		}})
+	}
+
+	if s.RequestData != nil {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "request_data")...),
+			psql.Arg(s.RequestData),
+		}})
+	}
+
+	if s.RewardWei != nil {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "reward_wei")...),
+			psql.Arg(s.RewardWei),
 		}})
 	}
 

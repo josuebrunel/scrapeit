@@ -21,6 +21,7 @@ require (
 	github.com/libp2p/go-libp2p-kad-dht v0.33.1
 	github.com/libp2p/go-libp2p-pubsub v0.13.1
 	github.com/multiformats/go-multiaddr v0.15.0
+	github.com/shopspring/decimal v1.4.0
 	github.com/stephenafamo/bob v0.38.0
 	github.com/supabase-community/auth-go v1.3.2
 )

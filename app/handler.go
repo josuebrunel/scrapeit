@@ -42,6 +42,7 @@ func (a App) Scrape() echo.HandlerFunc {
 			tsk      = task.NewTask(userID, etherutil.GetAddress(pk), req.Url)
 		)
 		tsk.Contract = contract
+		tsk.Reward = task.RewardDefault
 		if err := a.Manager.Upsert(ctx, tsk); err != nil {
 			xlog.Error("failed to upsert task", "error", err)
 			return c.JSON(Status500, Response[task.Task]{Error: err.Error()})

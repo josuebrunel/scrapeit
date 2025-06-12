@@ -180,7 +180,13 @@ templ DetailView(t models.Task) {
 						<div class="stat-value">
 							<span class="badge badge-success" id="payment-status">Paid</span>
 						</div>
-						<div class="stat-desc" id="payment-amount">0.001 ETH</div>
+						<div class="stat-desc" id="payment-amount">
+							if t.Status.V == "completed" {
+								<span>{ t.RewardWei.V.String() } Wei</span>
+							} else {
+								<span>0 Wei</span>
+							}
+						</div>
 					</div>
 				</div>
 				<div class="divider"></div>

@@ -434,7 +434,35 @@ func DetailView(t models.Task) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</div></a></div><div class=\"stat-desc\">ETH address</div></div><div class=\"stat\"><div class=\"stat-title\"><i class=\"fas fa-coins mr-2\"></i> Payment Status</div><div class=\"stat-value\"><span class=\"badge badge-success\" id=\"payment-status\">Paid</span></div><div class=\"stat-desc\" id=\"payment-amount\">0.001 ETH</div></div></div><div class=\"divider\"></div><div class=\"tabs tabs-boxed bg-base-200 mb-4\"><span class=\"tab tab-active\" id=\"results-tab\" onclick=\"switchTab(this)\">Results</span> <span class=\"tab\" id=\"raw-tab\" onclick=\"switchTab(this)\">Raw Data</span> <span class=\"tab\" id=\"request-tab\" onclick=\"switchTab(this)\">Request</span></div><div id=\"tab-content\" class=\"tab-content\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</div></a></div><div class=\"stat-desc\">ETH address</div></div><div class=\"stat\"><div class=\"stat-title\"><i class=\"fas fa-coins mr-2\"></i> Payment Status</div><div class=\"stat-value\"><span class=\"badge badge-success\" id=\"payment-status\">Paid</span></div><div class=\"stat-desc\" id=\"payment-amount\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if t.Status.V == "completed" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var24 string
+			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(t.RewardWei.V.String())
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 185, Col: 38}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, " Wei</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<span>0 Wei</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</div></div></div><div class=\"divider\"></div><div class=\"tabs tabs-boxed bg-base-200 mb-4\"><span class=\"tab tab-active\" id=\"results-tab\" onclick=\"switchTab(this)\">Results</span> <span class=\"tab\" id=\"raw-tab\" onclick=\"switchTab(this)\">Raw Data</span> <span class=\"tab\" id=\"request-tab\" onclick=\"switchTab(this)\">Request</span></div><div id=\"tab-content\" class=\"tab-content\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -450,7 +478,7 @@ func DetailView(t models.Task) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div></div></div><div class=\"flex justify-end gap-4\"><button class=\"btn btn-error btn-outline\" id=\"cancel-task-btn\" onclick=\"confirmCancelTask()\"><i class=\"fas fa-times-circle mr-2\"></i> Cancel Task</button> <button class=\"btn btn-secondary\" onclick=\"downloadResults()\"><i class=\"fas fa-download mr-2\"></i> Download Results</button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</div></div></div><div class=\"flex justify-end gap-4\"><button class=\"btn btn-error btn-outline\" id=\"cancel-task-btn\" onclick=\"confirmCancelTask()\"><i class=\"fas fa-times-circle mr-2\"></i> Cancel Task</button> <button class=\"btn btn-secondary\" onclick=\"downloadResults()\"><i class=\"fas fa-download mr-2\"></i> Download Results</button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -474,25 +502,25 @@ func ResultContentView(t models.Task) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var24 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var24 == nil {
-			templ_7745c5c3_Var24 = templ.NopComponent
+		templ_7745c5c3_Var25 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var25 == nil {
+			templ_7745c5c3_Var25 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<div id=\"results-tab-content\" class=\"tab-content\"><div class=\"overflow-x-auto\"><table class=\"table w-full\"><thead id=\"results-head\"><td>URL</td></thead> <tbody id=\"results-body\"><tr><td>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<div id=\"results-tab-content\" class=\"tab-content\"><div class=\"overflow-x-auto\"><table class=\"table w-full\"><thead id=\"results-head\"><td>URL</td></thead> <tbody id=\"results-body\"><tr><td>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var25 string
-		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(t.Input.V)
+		var templ_7745c5c3_Var26 string
+		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(t.Input.V)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 222, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 228, Col: 21}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</td></tr></tbody></table></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</td></tr></tbody></table></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -516,12 +544,12 @@ func RawContentView(t models.Task) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var26 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var26 == nil {
-			templ_7745c5c3_Var26 = templ.NopComponent
+		templ_7745c5c3_Var27 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var27 == nil {
+			templ_7745c5c3_Var27 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div id=\"raw-tab-content\" class=\"tab-content hidden\"><div class=\"mockup-window bg-base-200\"><div class=\"h-64 overflow-y-auto p-4 bg-base-100\"><pre><code id=\"raw-data\">Loading raw data...</code></pre></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<div id=\"raw-tab-content\" class=\"tab-content hidden\"><div class=\"mockup-window bg-base-200\"><div class=\"h-64 overflow-y-auto p-4 bg-base-100\"><pre><code id=\"raw-data\">Loading raw data...</code></pre></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -545,17 +573,17 @@ func RequestDetailView(t models.Task) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var27 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var27 == nil {
-			templ_7745c5c3_Var27 = templ.NopComponent
+		templ_7745c5c3_Var28 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var28 == nil {
+			templ_7745c5c3_Var28 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div id=\"request-tab-content\" class=\"mb-6 tab-content hidden\"><h3 class=\"text-lg font-medium mb-2\">Request Details</h3><div class=\"mockup-code\"><pre><code id=\"detail-request\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<div id=\"request-tab-content\" class=\"mb-6 tab-content hidden\"><h3 class=\"text-lg font-medium mb-2\">Request Details</h3><div class=\"mockup-code\"><pre><code id=\"detail-request\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var28 string
-		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(func() string {
+		var templ_7745c5c3_Var29 string
+		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(func() string {
 			return string(`
 								{
   									"url": "https://books.toscrape.com",
@@ -570,13 +598,13 @@ func RequestDetailView(t models.Task) templ.Component {
 							`)
 		}())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 259, Col: 9}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 265, Col: 9}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</code></pre></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</code></pre></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

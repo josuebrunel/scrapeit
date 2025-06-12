@@ -77,7 +77,7 @@ func (e EtherManager) Create(ctx context.Context, pk *ecdsa.PrivateKey, tsk Task
 	if auth == nil {
 		return errors.New("failed to create transaction")
 	}
-	auth.Value = big.NewInt(150000)
+	auth.Value = etherutil.BigIntFromString(tsk.Reward)
 	instance, err := contract.NewContract(e.contractAddr, e.client)
 	if err != nil {
 		xlog.Error("Failed to instantiate a Token contract", "error", err)

@@ -3,6 +3,7 @@ package etherutil
 import (
 	"context"
 	"crypto/ecdsa"
+	"fmt"
 	"math"
 	"math/big"
 
@@ -133,4 +134,21 @@ func MustGetAuth(ctx context.Context, cli *ethclient.Client, pk *ecdsa.PrivateKe
 		panic(err)
 	}
 	return auth
+}
+
+func BigIntFromString(s string) *big.Int {
+	i, ok := new(big.Int).SetString(s, 10)
+	if !ok {
+		return nil
+	}
+	return i
+}
+
+func WeiToEtherString(wei *big.Int, dec int) string {
+	if wei == nil || wei.Sign() == 0 {
+		return fmt.Sprintf("%s.*f", dec, 0)
+	}
+	weiFloat := new(big.Float).SetInt(wei)
+	ethFloat := new(big.Float).Quo(weiFloat, big.NewFloat(math.Pow10(dec)))
+	return ethFloat.Text('f', dec)
 }

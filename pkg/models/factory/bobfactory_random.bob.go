@@ -4,15 +4,44 @@
 package factory
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jaswdr/faker/v2"
+	"github.com/shopspring/decimal"
+	"github.com/stephenafamo/bob/types"
 )
 
 var defaultFaker = faker.New()
+
+func random_decimal_Decimal(f *faker.Faker, limits ...string) decimal.Decimal {
+	if f == nil {
+		f = &defaultFaker
+	}
+
+	var precision int64 = 5
+	var scale int64 = 2
+
+	if len(limits) > 0 {
+		precision, _ = strconv.ParseInt(limits[0], 10, 32)
+	}
+
+	if len(limits) > 1 {
+		scale, _ = strconv.ParseInt(limits[1], 10, 32)
+	}
+
+	precisionDecimal, _ := decimal.NewFromInt(10).PowInt32(int32(precision))
+	return decimal.
+		NewFromFloat32(f.Float32(10, -1, 1)).
+		Mul(precisionDecimal).
+		Shift(int32(-1 * scale)).
+		RoundDown(int32(scale))
+}
 
 func random_string(f *faker.Faker, limits ...string) string {
 	if f == nil {
@@ -39,6 +68,23 @@ func random_time_Time(f *faker.Faker, limits ...string) time.Time {
 	min := time.Now().Add(-year)
 	max := time.Now().Add(year)
 	return f.Time().TimeBetween(min, max)
+}
+
+func random_types_JSON_json_RawMessage_(f *faker.Faker, limits ...string) types.JSON[json.RawMessage] {
+	if f == nil {
+		f = &defaultFaker
+	}
+
+	s := &bytes.Buffer{}
+	s.WriteRune('{')
+	for i := range f.IntBetween(1, 5) {
+		if i > 0 {
+			fmt.Fprint(s, ", ")
+		}
+		fmt.Fprintf(s, "%q:%q", f.Lorem().Word(), f.Lorem().Word())
+	}
+	s.WriteRune('}')
+	return types.NewJSON[json.RawMessage](s.Bytes())
 }
 
 func random_uuid_UUID(f *faker.Faker, limits ...string) uuid.UUID {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/josuebrunel/gopkg/xlog"
+	"github.com/shopspring/decimal"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql"
 	"github.com/stephenafamo/bob/dialect/psql/dialect"
@@ -49,6 +50,7 @@ func (m EtherManager) Upsert(ctx context.Context, tsk Task) error {
 		Assignee:    models.NullFrom(tsk.Assignee),
 		Contract:    models.NullFrom(tsk.Contract),
 		Input:       models.NullFrom(tsk.Input),
+		RewardWei:   models.NullFrom(DecimalFromString(tsk.Reward)),
 		Output:      models.NullFrom(tsk.Output),
 		Status:      models.NullFrom(string(tsk.Status)),
 		Submitter:   models.NullFrom(tsk.Submitter),
@@ -82,4 +84,12 @@ func QueryListByUser(ctx context.Context, db bob.DB, userID string, limit int) (
 		return nil, err
 	}
 	return tt, nil
+}
+
+func DecimalFromString(s string) decimal.Decimal {
+	d, err := decimal.NewFromString(s)
+	if err != nil {
+		return decimal.Zero
+	}
+	return d
 }

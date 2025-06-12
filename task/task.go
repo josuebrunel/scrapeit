@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math/big"
 	"time"
 
 	"github.com/gofrs/uuid/v5"
@@ -20,6 +21,7 @@ const (
 
 var (
 	ErrTaskAlreadyClaimed = errors.New("task-already-claimed")
+	RewardDefault         = big.NewInt(150000).String()
 )
 
 type Manager interface {
@@ -35,6 +37,7 @@ type Task struct {
 	Assignee    string     `json:"assignee"`
 	Input       string     `json:"input"`
 	Output      string     `json:"output"`
+	Reward      string     `json:"reward"`
 	Status      TaskStatus `json:"status"`
 	Submitter   string     `json:"submitter"`
 	Transaction string     `json:"transaction"`

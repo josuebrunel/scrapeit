@@ -17,6 +17,8 @@ create table if not exists tasks (
     contract TEXT,
     input TEXT,
     output TEXT,
+    request_data JSONB,
+    reward_wei NUMERIC,
     status TEXT,
     submitter TEXT,
     transaction TEXT

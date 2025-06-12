@@ -6,9 +6,12 @@ package models_test
 import (
 	"database/sql"
 	"database/sql/driver"
+	"encoding/json"
 
 	"github.com/gofrs/uuid/v5"
+	"github.com/shopspring/decimal"
 	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/types"
 	models "scrapeit/pkg/models"
 )
 
@@ -26,3 +29,15 @@ var _ sql.Scanner = (*uuid.UUID)(nil)
 
 // Make sure the type uuid.UUID satisfies database/sql/driver.Valuer
 var _ driver.Valuer = *new(uuid.UUID)
+
+// Make sure the type types.JSON[json.RawMessage] satisfies database/sql.Scanner
+var _ sql.Scanner = (*types.JSON[json.RawMessage])(nil)
+
+// Make sure the type types.JSON[json.RawMessage] satisfies database/sql/driver.Valuer
+var _ driver.Valuer = *new(types.JSON[json.RawMessage])
+
+// Make sure the type decimal.Decimal satisfies database/sql.Scanner
+var _ sql.Scanner = (*decimal.Decimal)(nil)
+
+// Make sure the type decimal.Decimal satisfies database/sql/driver.Valuer
+var _ driver.Valuer = *new(decimal.Decimal)
