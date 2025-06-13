@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"scrapeit/task"
 	"time"
 
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/gofrs/uuid/v5"
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/labstack/echo/v5"
@@ -44,14 +46,27 @@ func (a App) Scrape() echo.HandlerFunc {
 		)
 		tsk.Contract = contract
 		tsk.Reward = task.RewardDefault
-		if err := a.Manager.Upsert(ctx, tsk); err != nil {
+		obj, err := a.Manager.Upsert(ctx, tsk)
+		if err != nil {
 			xlog.Error("failed to upsert task", "error", err)
 			return c.JSON(Status500, Response[task.Task]{Error: err.Error()})
 		}
-		if err := a.Manager.Create(ctx, a.privateKey, tsk); err != nil {
+		tx, err := a.Manager.Create(ctx, a.privateKey, tsk)
+		if err != nil {
 			xlog.Error("failed to create task", "error", err)
-			return c.JSON(Status500, Response[task.Task]{Error: err.Error()})
 		}
+		go func() {
+			gCtx := context.Background()
+			rcpt, err := a.Manager.WaitMined(gCtx, tx)
+			if err != nil || rcpt.Status != types.ReceiptStatusSuccessful {
+				xlog.Error("transaction failed to be mined", "error", err, "transaction", tx.Hash().Hex())
+				return
+			}
+			xlog.Debug("transaction mined", "transaction", tx.Hash().Hex(), "receipt", rcpt.Status)
+			if err := obj.Update(gCtx, a.bob, &models.TaskSetter{OnChain: models.NullFrom(true)}); err != nil {
+				xlog.Error("failed to update task", "error", err)
+			}
+		}()
 		a.Publisher.Publish(ctx, &tsk)
 		return c.JSON(http.StatusOK, Response[task.Task]{Data: tsk})
 	}
@@ -89,14 +104,54 @@ func (a App) Submit(filters ...bob.Expression) echo.HandlerFunc {
 				return c.JSON(http.StatusBadRequest, Response[task.Task]{Error: "invalid status"})
 			}
 		}
-		if err := a.Manager.Upsert(ctx, reqTask); err != nil {
+		obj, err := a.Manager.Upsert(ctx, reqTask)
+		if err != nil {
 			xlog.Error("failed to update task", "error", err)
 			return c.JSON(Status500, Response[task.Task]{Error: err.Error()})
 		}
-		if err := a.Manager.Complete(ctx, id, tsk.Assignee.V, reqTask.Output, reqTask.Status == task.Completed, a.privateKey); err != nil {
-			xlog.Error("failed to complete task", "error", err)
-			return c.JSON(Status500, Response[task.Task]{Error: err.Error()})
-		}
+
+		go func() {
+			gCtx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+			defer cancel()
+			ticker := time.NewTicker(10 * time.Second)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-gCtx.Done():
+					xlog.Error("context done", "error", gCtx.Err())
+					return
+				case <-ticker.C:
+					obj, err := models.FindTask(gCtx, a.bob, obj.ID)
+					if err != nil {
+						xlog.Error("failed to find task", "error", err)
+						return
+					}
+					if !obj.OnChain.V {
+						xlog.Debug("task not on chain", "id", obj.ID.String())
+						continue
+					}
+					tx, err := a.Manager.Complete(gCtx, id, obj.Assignee.V, reqTask.Output, reqTask.Status == task.Completed, a.privateKey)
+					if err != nil {
+						xlog.Error("failed to complete task", "error", err)
+						return
+					}
+					go func() {
+						ctx := context.Background()
+						rcpt, err := a.Manager.WaitMined(ctx, tx)
+						if err != nil || rcpt.Status != types.ReceiptStatusSuccessful {
+							xlog.Error("transaction failed to be mined", "error", err, "transaction", tx.Hash().Hex())
+							return
+						}
+						xlog.Debug("transaction mined", "transaction", tx.Hash().Hex(), "receipt", rcpt.Status)
+						if err := obj.Update(ctx, a.bob, &models.TaskSetter{Paid: models.NullFrom(true)}); err != nil {
+							xlog.Error("failed to update task", "error", err)
+							return
+						}
+					}()
+					return
+				}
+			}
+		}()
 		return c.JSON(http.StatusOK, Response[task.Task]{Data: reqTask})
 	}
 }

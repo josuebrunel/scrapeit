@@ -46,6 +46,7 @@ type TaskTemplate struct {
 	Assignee    func() sql.Null[string]
 	Contract    func() sql.Null[string]
 	Input       func() sql.Null[string]
+	OnChain     func() sql.Null[bool]
 	Output      func() sql.Null[string]
 	Paid        func() sql.Null[bool]
 	RequestData func() sql.Null[types.JSON[json.RawMessage]]
@@ -100,6 +101,10 @@ func (o TaskTemplate) BuildSetter() *models.TaskSetter {
 	if o.Input != nil {
 		val := o.Input()
 		m.Input = &val
+	}
+	if o.OnChain != nil {
+		val := o.OnChain()
+		m.OnChain = &val
 	}
 	if o.Output != nil {
 		val := o.Output()
@@ -171,6 +176,9 @@ func (o TaskTemplate) Build() *models.Task {
 	}
 	if o.Input != nil {
 		m.Input = o.Input()
+	}
+	if o.OnChain != nil {
+		m.OnChain = o.OnChain()
 	}
 	if o.Output != nil {
 		m.Output = o.Output()
@@ -339,6 +347,7 @@ func (m taskMods) RandomizeAllColumns(f *faker.Faker) TaskMod {
 		TaskMods.RandomAssignee(f),
 		TaskMods.RandomContract(f),
 		TaskMods.RandomInput(f),
+		TaskMods.RandomOnChain(f),
 		TaskMods.RandomOutput(f),
 		TaskMods.RandomPaid(f),
 		TaskMods.RandomRequestData(f),
@@ -672,6 +681,59 @@ func (m taskMods) RandomInputNotNull(f *faker.Faker) TaskMod {
 
 			val := random_string(f)
 			return sql.Null[string]{V: val, Valid: true}
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m taskMods) OnChain(val sql.Null[bool]) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.OnChain = func() sql.Null[bool] { return val }
+	})
+}
+
+// Set the Column from the function
+func (m taskMods) OnChainFunc(f func() sql.Null[bool]) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.OnChain = f
+	})
+}
+
+// Clear any values for the column
+func (m taskMods) UnsetOnChain() TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.OnChain = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+// The generated value is sometimes null
+func (m taskMods) RandomOnChain(f *faker.Faker) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.OnChain = func() sql.Null[bool] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_bool(f)
+			return sql.Null[bool]{V: val, Valid: f.Bool()}
+		}
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+// The generated value is never null
+func (m taskMods) RandomOnChainNotNull(f *faker.Faker) TaskMod {
+	return TaskModFunc(func(_ context.Context, o *TaskTemplate) {
+		o.OnChain = func() sql.Null[bool] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_bool(f)
+			return sql.Null[bool]{V: val, Valid: true}
 		}
 	})
 }

@@ -34,17 +34,18 @@ func (m EtherManager) DBGet(ctx context.Context, id string) (Task, error) {
 	}, nil
 }
 
-func (m EtherManager) Upsert(ctx context.Context, tsk Task) error {
+func (m EtherManager) Upsert(ctx context.Context, tsk Task) (*models.Task, error) {
 	var (
-		id  = uuid.Must(uuid.FromString(tsk.ID))
 		err error
+		id  = uuid.Must(uuid.FromString(tsk.ID))
+		obj *models.Task
 		uid uuid.UUID
 	)
 	if tsk.UserID != "" {
 		uid = uuid.Must(uuid.FromString(tsk.UserID))
 	}
 	xlog.Debug("Upserting task", "task", tsk)
-	_, err = models.Tasks.Insert(&models.TaskSetter{
+	obj, err = models.Tasks.Insert(&models.TaskSetter{
 		ID:          &id,
 		UserID:      &uid,
 		Assignee:    models.NullFrom(tsk.Assignee),
@@ -64,9 +65,9 @@ func (m EtherManager) Upsert(ctx context.Context, tsk Task) error {
 	).One(ctx, m.db)
 	if err != nil {
 		xlog.Error("Failed to convert user ID to UUID", "error", err)
-		return err
+		return nil, err
 	}
-	return nil
+	return obj, nil
 }
 
 func QueryListByUser(ctx context.Context, db bob.DB, userID string, limit int) (models.TaskSlice, error) {

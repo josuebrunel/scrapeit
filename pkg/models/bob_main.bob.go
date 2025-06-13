@@ -52,6 +52,7 @@ var ColumnNames = struct {
 		Assignee:    "assignee",
 		Contract:    "contract",
 		Input:       "input",
+		OnChain:     "on_chain",
 		Output:      "output",
 		Paid:        "paid",
 		RequestData: "request_data",

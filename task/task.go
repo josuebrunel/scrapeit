@@ -21,7 +21,7 @@ const (
 
 var (
 	ErrTaskAlreadyClaimed = errors.New("task-already-claimed")
-	RewardDefault         = big.NewInt(150000).String()
+	RewardDefault         = big.NewInt(1500000000000000000).String()
 )
 
 type Manager interface {

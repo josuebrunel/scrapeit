@@ -31,6 +31,7 @@ type Task struct {
 	Assignee    sql.Null[string]                      `db:"assignee" `
 	Contract    sql.Null[string]                      `db:"contract" `
 	Input       sql.Null[string]                      `db:"input" `
+	OnChain     sql.Null[bool]                        `db:"on_chain" `
 	Output      sql.Null[string]                      `db:"output" `
 	Paid        sql.Null[bool]                        `db:"paid" `
 	RequestData sql.Null[types.JSON[json.RawMessage]] `db:"request_data" `
@@ -58,6 +59,7 @@ type taskColumnNames struct {
 	Assignee    string
 	Contract    string
 	Input       string
+	OnChain     string
 	Output      string
 	Paid        string
 	RequestData string
@@ -78,6 +80,7 @@ type taskColumns struct {
 	Assignee    psql.Expression
 	Contract    psql.Expression
 	Input       psql.Expression
+	OnChain     psql.Expression
 	Output      psql.Expression
 	Paid        psql.Expression
 	RequestData psql.Expression
@@ -105,6 +108,7 @@ func buildTaskColumns(alias string) taskColumns {
 		Assignee:    psql.Quote(alias, "assignee"),
 		Contract:    psql.Quote(alias, "contract"),
 		Input:       psql.Quote(alias, "input"),
+		OnChain:     psql.Quote(alias, "on_chain"),
 		Output:      psql.Quote(alias, "output"),
 		Paid:        psql.Quote(alias, "paid"),
 		RequestData: psql.Quote(alias, "request_data"),
@@ -123,6 +127,7 @@ type taskWhere[Q psql.Filterable] struct {
 	Assignee    psql.WhereNullMod[Q, string]
 	Contract    psql.WhereNullMod[Q, string]
 	Input       psql.WhereNullMod[Q, string]
+	OnChain     psql.WhereNullMod[Q, bool]
 	Output      psql.WhereNullMod[Q, string]
 	Paid        psql.WhereNullMod[Q, bool]
 	RequestData psql.WhereNullMod[Q, types.JSON[json.RawMessage]]
@@ -145,6 +150,7 @@ func buildTaskWhere[Q psql.Filterable](cols taskColumns) taskWhere[Q] {
 		Assignee:    psql.WhereNull[Q, string](cols.Assignee),
 		Contract:    psql.WhereNull[Q, string](cols.Contract),
 		Input:       psql.WhereNull[Q, string](cols.Input),
+		OnChain:     psql.WhereNull[Q, bool](cols.OnChain),
 		Output:      psql.WhereNull[Q, string](cols.Output),
 		Paid:        psql.WhereNull[Q, bool](cols.Paid),
 		RequestData: psql.WhereNull[Q, types.JSON[json.RawMessage]](cols.RequestData),
@@ -179,6 +185,7 @@ type TaskSetter struct {
 	Assignee    *sql.Null[string]                      `db:"assignee" `
 	Contract    *sql.Null[string]                      `db:"contract" `
 	Input       *sql.Null[string]                      `db:"input" `
+	OnChain     *sql.Null[bool]                        `db:"on_chain" `
 	Output      *sql.Null[string]                      `db:"output" `
 	Paid        *sql.Null[bool]                        `db:"paid" `
 	RequestData *sql.Null[types.JSON[json.RawMessage]] `db:"request_data" `
@@ -189,7 +196,7 @@ type TaskSetter struct {
 }
 
 func (s TaskSetter) SetColumns() []string {
-	vals := make([]string, 0, 14)
+	vals := make([]string, 0, 15)
 	if s.ID != nil {
 		vals = append(vals, "id")
 	}
@@ -216,6 +223,10 @@ func (s TaskSetter) SetColumns() []string {
 
 	if s.Input != nil {
 		vals = append(vals, "input")
+	}
+
+	if s.OnChain != nil {
+		vals = append(vals, "on_chain")
 	}
 
 	if s.Output != nil {
@@ -271,6 +282,9 @@ func (s TaskSetter) Overwrite(t *Task) {
 	if s.Input != nil {
 		t.Input = *s.Input
 	}
+	if s.OnChain != nil {
+		t.OnChain = *s.OnChain
+	}
 	if s.Output != nil {
 		t.Output = *s.Output
 	}
@@ -300,7 +314,7 @@ func (s *TaskSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 14)
+		vals := make([]bob.Expression, 15)
 		if s.ID != nil {
 			vals[0] = psql.Arg(*s.ID)
 		} else {
@@ -343,46 +357,52 @@ func (s *TaskSetter) Apply(q *dialect.InsertQuery) {
 			vals[6] = psql.Raw("DEFAULT")
 		}
 
-		if s.Output != nil {
-			vals[7] = psql.Arg(*s.Output)
+		if s.OnChain != nil {
+			vals[7] = psql.Arg(*s.OnChain)
 		} else {
 			vals[7] = psql.Raw("DEFAULT")
 		}
 
-		if s.Paid != nil {
-			vals[8] = psql.Arg(*s.Paid)
+		if s.Output != nil {
+			vals[8] = psql.Arg(*s.Output)
 		} else {
 			vals[8] = psql.Raw("DEFAULT")
 		}
 
-		if s.RequestData != nil {
-			vals[9] = psql.Arg(*s.RequestData)
+		if s.Paid != nil {
+			vals[9] = psql.Arg(*s.Paid)
 		} else {
 			vals[9] = psql.Raw("DEFAULT")
 		}
 
-		if s.RewardWei != nil {
-			vals[10] = psql.Arg(*s.RewardWei)
+		if s.RequestData != nil {
+			vals[10] = psql.Arg(*s.RequestData)
 		} else {
 			vals[10] = psql.Raw("DEFAULT")
 		}
 
-		if s.Status != nil {
-			vals[11] = psql.Arg(*s.Status)
+		if s.RewardWei != nil {
+			vals[11] = psql.Arg(*s.RewardWei)
 		} else {
 			vals[11] = psql.Raw("DEFAULT")
 		}
 
-		if s.Submitter != nil {
-			vals[12] = psql.Arg(*s.Submitter)
+		if s.Status != nil {
+			vals[12] = psql.Arg(*s.Status)
 		} else {
 			vals[12] = psql.Raw("DEFAULT")
 		}
 
-		if s.Transaction != nil {
-			vals[13] = psql.Arg(*s.Transaction)
+		if s.Submitter != nil {
+			vals[13] = psql.Arg(*s.Submitter)
 		} else {
 			vals[13] = psql.Raw("DEFAULT")
+		}
+
+		if s.Transaction != nil {
+			vals[14] = psql.Arg(*s.Transaction)
+		} else {
+			vals[14] = psql.Raw("DEFAULT")
 		}
 
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
@@ -394,7 +414,7 @@ func (s TaskSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s TaskSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 14)
+	exprs := make([]bob.Expression, 0, 15)
 
 	if s.ID != nil {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -442,6 +462,13 @@ func (s TaskSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "input")...),
 			psql.Arg(s.Input),
+		}})
+	}
+
+	if s.OnChain != nil {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "on_chain")...),
+			psql.Arg(s.OnChain),
 		}})
 	}
 

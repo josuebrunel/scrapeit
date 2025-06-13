@@ -32,13 +32,10 @@ services:
       - "8385:8545"
     environment:
       - CHAIN_ID=42
+      - BALANCE=100
       - BLOCK_TIME=15
-      - ACCOUNTS=10
-      - BALANCE=2000000
       - HOST=0.0.0.0
-      - DISABLE_CODE_SIZE_LIMIT=true
-      # - GAS_LIMIT=3000000000000000
-      #- DISABLE_BLOCK_GAS_LIMIT=true
+      # - DISABLE_CODE_SIZE_LIMIT=true
     volumes:
       - ./contract:/contract
     networks:

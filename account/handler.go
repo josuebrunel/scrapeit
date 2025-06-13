@@ -218,7 +218,7 @@ func (h Handler) Dashboard() echo.HandlerFunc {
 		if addr, err := UserEtherAccountGet(ctx, h.db, xuser.ID); err == nil {
 			xlog.Debug("user ether account found", "address", addr.Address, "user", xuser.ID)
 			xuser.Set(DataKeyEthereumAddress, addr.Address)
-			balance, _ := etherutil.GetAccountBalance(ctx, h.ethCli, addr.Address)
+			balance := etherutil.AsEther(etherutil.Must(etherutil.GetAccountBalance(ctx, h.ethCli, addr.Address)))
 			xuser.Set(DataKeyEthereumBalance, balance.String())
 		}
 		xlog.Debug("user authenticated", "user", xuser)

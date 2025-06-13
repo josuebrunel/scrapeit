@@ -60,6 +60,7 @@ contract Scraper {
     ) public payable isPaused {
         require(bytes(_uuid).length > 0, "UUID cannot be empty");
         require(msg.value > 0, "Invalid amount");
+        require(msg.sender.balance >= msg.value, "Insufficient balance");
         require(
             tasks[_uuid].submitter == address(0),
             "Task with this UUID already exists"
@@ -96,6 +97,7 @@ contract Scraper {
     ) external isPaused {
         require(bytes(_uuid).length > 0, "UUID cannot be empty");
         Task storage tsk = tasks[_uuid];
+        require(bytes(tsk.uuid).length > 0, "Invalid UUID");
         require(tsk.status != Status.Completed, "Task already completed");
         require(_assignee != address(0), "Assignee address cannot be zero");
         tsk.assignee = _assignee;

@@ -30,6 +30,7 @@ create table if not exists tasks (
     assignee TEXT,
     contract TEXT,
     input TEXT,
+    on_chain BOOLEAN default false,
     output TEXT,
     paid BOOLEAN default false,
     request_data JSONB,

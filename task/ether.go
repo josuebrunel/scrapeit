@@ -94,25 +94,24 @@ func (e EtherManager) WaitMined(ctx context.Context, tx *types.Transaction) (*ty
 	return receipt, nil
 }
 
-func (e EtherManager) Create(ctx context.Context, pk *ecdsa.PrivateKey, tsk Task) error {
+func (e EtherManager) Create(ctx context.Context, pk *ecdsa.PrivateKey, tsk Task) (*types.Transaction, error) {
 	auth := e.getAuth(ctx, pk)
 	if auth == nil {
-		return errors.New("failed to create transaction")
+		return nil, errors.New("failed to create transaction")
 	}
 	auth.Value = etherutil.BigIntFromString(tsk.Reward)
 	instance, err := contract.NewContract(e.contractAddr, e.client)
 	if err != nil {
 		xlog.Error("Failed to instantiate a Token contract", "error", err)
-		return err
+		return nil, err
 	}
 	tx, err := instance.Create(auth, tsk.ID, tsk.UserID, tsk.Input)
 	if err != nil {
 		xlog.Error("Failed to create task", "error", err)
-		return err
+		return nil, err
 	}
-	e.WaitMined(ctx, tx)
 	xlog.Info("Task created", "tx", tx.Hash().Hex())
-	return nil
+	return tx, nil
 }
 
 func (e EtherManager) Get(ctx context.Context, id string, pk *ecdsa.PrivateKey) (Task, error) {
@@ -144,23 +143,22 @@ func (e EtherManager) Get(ctx context.Context, id string, pk *ecdsa.PrivateKey) 
 	return tsk, nil
 }
 
-func (e EtherManager) Complete(ctx context.Context, id string, assignee string, output string, success bool, pk *ecdsa.PrivateKey) error {
+func (e EtherManager) Complete(ctx context.Context, id string, assignee string, output string, success bool, pk *ecdsa.PrivateKey) (*types.Transaction, error) {
 	auth := e.getAuth(ctx, pk)
 	if auth == nil {
-		return errors.New("failed to create transaction")
+		return nil, errors.New("failed to create transaction")
 	}
 	instance, err := contract.NewContract(e.contractAddr, e.client)
 	if err != nil {
 		xlog.Error("Failed to instantiate a Token contract", "error", err)
-		return err
+		return nil, err
 	}
 	xlog.Info("Completing task", "id", id, "assignee", assignee, "output", output)
 	tx, err := instance.Complete(auth, id, common.HexToAddress(assignee), output, success)
 	if err != nil {
 		xlog.Error("Failed to complete task", "error", err)
-		return err
+		return nil, err
 	}
-	e.WaitMined(ctx, tx)
 	xlog.Info("Task completed", "tx", tx.Hash().Hex(), "id", id, "output", output, "assignee", pk.PublicKey)
-	return nil
+	return tx, nil
 }
