@@ -193,12 +193,9 @@ templ DashboardView(user xsession.XUser, attr templ.Attributes) {
 					<div class="card bg-base-100 shadow-xl mb-6">
 						<div class="card-body">
 							<h2 class="card-title mb-4">Quick Start</h2>
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+							<div class="grid grid-cols-1 gap-4 mb-6">
 								<button class="btn btn-outline" hx-target="#content" hx-get="/task">
 									<i class="fas fa-history mr-2"></i> View Task History
-								</button>
-								<button class="btn btn-primary" onclick="showCreateTaskModal()">
-									<i class="fas fa-plus mr-2"></i> Create New Task
 								</button>
 							</div>
 							<div class="divider">OR</div>

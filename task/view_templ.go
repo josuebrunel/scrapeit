@@ -293,7 +293,7 @@ func ListView(tt models.TaskSlice) templ.Component {
 			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div id=\"history-page\" class=\"page-transition \"><div class=\"flex justify-between items-center mb-8\"><h1 class=\"text-3xl font-bold\">Task History</h1><div class=\"flex gap-4\"><div class=\"form-control\"><div class=\"input-group\"><input type=\"text\" placeholder=\"Search tasks...\" class=\"input input-bordered\" id=\"history-search\"> <button class=\"btn btn-square\" onclick=\"searchTasks()\"><i class=\"fas fa-search\"></i></button></div></div><button class=\"btn btn-primary\" onclick=\"showCreateTaskModal()\"><i class=\"fas fa-plus mr-2\"></i> New Task</button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div id=\"history-page\" class=\"page-transition \"><div class=\"flex justify-between items-center mb-8\"><h1 class=\"text-3xl font-bold\">Task History</h1><div class=\"flex gap-4\"><div class=\"form-control\"><div class=\"input-group\"><input type=\"text\" placeholder=\"Search tasks...\" class=\"input input-bordered\" id=\"history-search\"> <button class=\"btn btn-square\" onclick=\"searchTasks()\"><i class=\"fas fa-search\"></i></button></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -337,7 +337,7 @@ func DetailView(t models.Task) templ.Component {
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, HandlerNameList))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 116, Col: 101}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 113, Col: 101}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -350,7 +350,7 @@ func DetailView(t models.Task) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(t.ID.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 122, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 119, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -363,7 +363,7 @@ func DetailView(t models.Task) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(t.Status.V)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 131, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 128, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -376,7 +376,7 @@ func DetailView(t models.Task) templ.Component {
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(t.CreatedAt.V.UTC().Format(time.DateTime))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 135, Col: 93}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 132, Col: 93}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -389,7 +389,7 @@ func DetailView(t models.Task) templ.Component {
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(t.Output.V)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 141, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 138, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -402,7 +402,7 @@ func DetailView(t models.Task) templ.Component {
 		var templ_7745c5c3_Var21 templ.SafeURL
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(GetEtherScanLink(t.Contract.V)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 152, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 149, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -415,7 +415,7 @@ func DetailView(t models.Task) templ.Component {
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(t.Contract.V)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 155, Col: 81}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 152, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -428,7 +428,7 @@ func DetailView(t models.Task) templ.Component {
 		var templ_7745c5c3_Var23 templ.SafeURL
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(GetEtherScanLink(t.Assignee.V)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 167, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 164, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -441,7 +441,7 @@ func DetailView(t models.Task) templ.Component {
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(t.Assignee.V)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 170, Col: 81}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 167, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -512,7 +512,7 @@ func PaymentStatusView(t models.Task) templ.Component {
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(t.RewardWei.V.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 214, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 211, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
@@ -564,7 +564,7 @@ func ResultContentView(t models.Task) templ.Component {
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(t.Input.V)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 233, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 230, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
@@ -648,7 +648,7 @@ func RequestDetailView(t models.Task) templ.Component {
 							`)
 		}())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 270, Col: 9}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `task/view.templ`, Line: 267, Col: 9}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
