@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	URITask         = "/v1/task"
+	URITask         = "/api/v1/task"
 	URITaskClaim    = "/claim"
 	URITaskComplete = "/complete"
 )

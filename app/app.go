@@ -89,7 +89,7 @@ func (a *App) Start() error {
 	e.Static("/static", "static")
 	e.GET("/", func(c echo.Context) error { return view.Render(c, http.StatusOK, Index(), nil) })
 	// TaskV1
-	taskV1 := e.Group("/v1/task", ApiKeyAuthMiddleware(a.bob))
+	taskV1 := e.Group("/api/v1/task", ApiKeyAuthMiddleware(a.bob))
 	taskV1.POST("", a.Scrape())
 	taskV1.PATCH("/:id/claim", a.Claim())
 	taskV1.PATCH("/:id/complete", a.Complete())
