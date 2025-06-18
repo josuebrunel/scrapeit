@@ -246,6 +246,46 @@ func EthAddressView(user xsession.XUser, attr templ.Attributes) templ.Component 
 	})
 }
 
+func SampleAPIRequest() string {
+	return string(`
+	# create a task
+	curl -v -H 'Content-Type: application/json' -H 'Authorization: jY4adtJM8nPtxykros0Ju0TLKcPtlRBuLrNkc7sBpjc' 
+		-d '{"url": "https://propcopy.ai" }' https://scrapions.xyz/api/v1/task | jq
+
+	# then get the result in <data.output> with the task id
+	curl -v -H 'Authorization: jY4adtJM8nPtxykros0Ju0TLKcPtlRBuLrNkc7sBpjc' 
+		https://scrapions.xyz/api/v1/task/43e3d8ce-25bd-4ff8-ae4e-3aabf06e3c46 | jq
+	`)
+}
+
+func SamplePython() string {
+	return string(`
+	# 1. CREATE A TASK
+	import requests
+
+	url = "https://scrapions.xyz/api/v1/task"
+
+	payload = {
+		"url": "https://propcopy.ai"
+	}
+	headers = {
+		"Content-Type": "application/json",
+		"Authorization": "jY4adtJM8nPtxykros0Ju0TLKcPtlRBuLrNkc7sBpjc"
+	}
+	response = requests.post(url, json=payload, headers=headers)
+	print(response.text)
+
+	# 2. GET THE RESULT
+	# then get the result in <data.output> with the task id
+	task_id = response.json().get('id')
+	result_url = f"https://scrapions.xyz/api/v1/task/{task_id}"
+	response = requests.get(result_url, headers=headers)
+	print(response.text)
+	output = response.json().get('data').get('output')
+	print(output)
+	`)
+}
+
 func DashboardView(user xsession.XUser, attr templ.Attributes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -286,7 +326,7 @@ func DashboardView(user xsession.XUser, attr templ.Attributes) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `account/account.templ`, Line: 169, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `account/account.templ`, Line: 209, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -300,7 +340,33 @@ func DashboardView(user xsession.XUser, attr templ.Attributes) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div></div></div><div id=\"ethAddress\" class=\"card bg-base-100 shadow-xl mb-6\" hx-get=\"/account/update-data\" hx-target=\"#ethAddress\" hx-trigger=\"load\"></div><div id=\"apiKey\" class=\"card bg-base-100 shadow-xl\" hx-get=\"/account/apikey\" hx-target=\"#apiKey\" hx-trigger=\"load\"></div></div><div id=\"content\" class=\"md:w-2/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Quick Start</h2><div class=\"grid grid-cols-1 gap-4 mb-6\"><button class=\"btn btn-outline\" hx-target=\"#content\" hx-get=\"/task\"><i class=\"fas fa-history mr-2\"></i> View Task History</button></div><div class=\"divider\">OR</div><h3 class=\"text-lg font-medium mb-2\">Sample API Request</h3><div class=\"mockup-code mb-4\"><pre><code>piece of code here</code></pre></div><div class=\"collapse collapse-plus bg-base-200 mb-2\"><input type=\"checkbox\"><div class=\"collapse-title text-md font-medium\">Node.js Example</div><div class=\"collapse-content\"><pre><code class=\"language-javascript\">code example</code></pre></div></div></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Recent Activity</h2><span hx-get=\"/task?table=true&limit=3\" hx-trigger=\"load\"></span><div class=\"card-actions justify-end mt-4\"><button class=\"btn btn-ghost btn-sm\" hx-target=\"#content\" hx-get=\"/task\">View All <i class=\"fas fa-arrow-right ml-2\"></i></button></div></div></div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div></div></div><div id=\"ethAddress\" class=\"card bg-base-100 shadow-xl mb-6\" hx-get=\"/account/update-data\" hx-target=\"#ethAddress\" hx-trigger=\"load\"></div><div id=\"apiKey\" class=\"card bg-base-100 shadow-xl\" hx-get=\"/account/apikey\" hx-target=\"#apiKey\" hx-trigger=\"load\"></div></div><div id=\"content\" class=\"md:w-2/3\"><div class=\"card bg-base-100 shadow-xl mb-6\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Quick Start</h2><div class=\"grid grid-cols-1 gap-4 mb-6\"><button class=\"btn btn-outline\" hx-target=\"#content\" hx-get=\"/task\"><i class=\"fas fa-history mr-2\"></i> View Task History</button></div><div class=\"divider\">OR</div><h3 class=\"text-lg font-medium mb-2\">Sample API Request</h3><div class=\"mockup-code mb-4\"><pre><code>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(SampleAPIRequest())
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `account/account.templ`, Line: 244, Col: 41}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</code></pre></div><div class=\"collapse collapse-plus bg-base-200 mb-2\"><input type=\"checkbox\"><div class=\"collapse-title text-md font-medium\">Python Example</div><div class=\"collapse-content\"><pre><code class=\"language-python\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var13 string
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(SamplePython())
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `account/account.templ`, Line: 254, Col: 57}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</code></pre></div></div></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title mb-4\">Recent Activity</h2><span hx-get=\"/task?table=true&limit=3\" hx-trigger=\"load\"></span><div class=\"card-actions justify-end mt-4\"><button class=\"btn btn-ghost btn-sm\" hx-target=\"#content\" hx-get=\"/task\">View All <i class=\"fas fa-arrow-right ml-2\"></i></button></div></div></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
