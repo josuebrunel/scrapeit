@@ -84,6 +84,7 @@ func (a App) Submit(filters ...bob.Expression) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, Response[task.Task]{Error: err.Error()})
 		}
 		reqTask.UpdatedAt = time.Now().UTC()
+		reqTask.Assignee = c.Get(RequestContextUserID).(string)
 		tsk, err := models.FindTask(ctx, a.bob, uuid.Must(uuid.FromString(id)))
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
@@ -109,50 +110,67 @@ func (a App) Submit(filters ...bob.Expression) echo.HandlerFunc {
 			xlog.Error("failed to update task", "error", err)
 			return c.JSON(Status500, Response[task.Task]{Error: err.Error()})
 		}
+		xlog.Debug("task updated", "task", reqTask, "obj", obj)
+		if obj.Status.V == string(task.Failed) {
+			return c.JSON(http.StatusOK, Response[task.Task]{Data: reqTask})
+		}
+		if obj.Status.V == string(task.Completed) {
+			xlog.Debug("Launching background process for onchain task completion", "task", reqTask.ID, "status", reqTask.Status)
+			go a.waitForOnChainProcessing(ctx, id, string(reqTask.Status), reqTask.Output)
+		}
+		return c.JSON(http.StatusOK, Response[task.Task]{Data: reqTask})
+	}
+}
 
-		go func() {
-			gCtx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-			defer cancel()
-			ticker := time.NewTicker(10 * time.Second)
-			defer ticker.Stop()
-			for {
-				select {
-				case <-gCtx.Done():
-					xlog.Error("context done", "error", gCtx.Err())
-					return
-				case <-ticker.C:
-					obj, err := models.FindTask(gCtx, a.bob, obj.ID)
-					if err != nil {
-						xlog.Error("failed to find task", "error", err)
-						return
-					}
-					if !obj.OnChain.V {
-						xlog.Debug("task not on chain", "id", obj.ID.String())
-						continue
-					}
-					tx, err := a.Manager.Complete(gCtx, id, obj.Assignee.V, reqTask.Output, reqTask.Status == task.Completed, a.privateKey)
-					if err != nil {
-						xlog.Error("failed to complete task", "error", err)
-						return
-					}
-					go func() {
-						ctx := context.Background()
-						rcpt, err := a.Manager.WaitMined(ctx, tx)
-						if err != nil || rcpt.Status != types.ReceiptStatusSuccessful {
-							xlog.Error("transaction failed to be mined", "error", err, "transaction", tx.Hash().Hex())
-							return
-						}
-						xlog.Debug("transaction mined", "transaction", tx.Hash().Hex(), "receipt", rcpt.Status)
-						if err := obj.Update(ctx, a.bob, &models.TaskSetter{Paid: models.NullFrom(true)}); err != nil {
-							xlog.Error("failed to update task", "error", err)
-							return
-						}
-					}()
+func (a App) waitForOnChainProcessing(ctx context.Context, id, status, output string) {
+	xlog.Debug("Launching background process for onchain task completion", "task", id, "status", status)
+	if status == string(task.Failed) {
+		xlog.Warn("Failed task can't be completed on chain", "task", id, "status", status)
+		return
+	}
+	gCtx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-gCtx.Done():
+			xlog.Error("context done", "error", gCtx.Err())
+			return
+		case <-ticker.C:
+			obj, err := models.FindTask(gCtx, a.bob, uuid.Must(uuid.FromString(id)))
+			if err != nil {
+				xlog.Error("failed to find task", "error", err)
+				return
+			}
+			if !obj.OnChain.V {
+				xlog.Debug("task not on chain", "id", obj.ID.String())
+				continue
+			}
+			if obj.Status.V == string(task.Failed) {
+				xlog.Debug("task on-chain but failed", "id", obj.ID.String())
+				return
+			}
+			tx, err := a.Manager.Complete(gCtx, id, obj.Assignee.V, output, task.TaskStatus(status) == task.Completed, a.privateKey)
+			if err != nil {
+				xlog.Error("failed to complete task", "error", err)
+				return
+			}
+			go func() {
+				ctx := context.Background()
+				rcpt, err := a.Manager.WaitMined(ctx, tx)
+				if err != nil || rcpt.Status != types.ReceiptStatusSuccessful {
+					xlog.Error("transaction failed to be mined", "error", err, "transaction", tx.Hash().Hex())
 					return
 				}
-			}
-		}()
-		return c.JSON(http.StatusOK, Response[task.Task]{Data: reqTask})
+				xlog.Debug("transaction mined", "transaction", tx.Hash().Hex(), "receipt", rcpt.Status)
+				if err := obj.Update(ctx, a.bob, &models.TaskSetter{Paid: models.NullFrom(true)}); err != nil {
+					xlog.Error("failed to update task", "error", err)
+					return
+				}
+			}()
+			return
+		}
 	}
 }
 

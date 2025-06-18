@@ -4,6 +4,7 @@ import "github.com/josuebrunel/gopkg/component"
 import "scrapeit/pkg/models"
 import "time"
 import "scrapeit/pkg/view"
+import "strings"
 
 func GetEtherScanLink(address string) string {
 	return "https://etherscan.io/address/" + address
@@ -125,7 +126,11 @@ templ DetailView(t models.Task) {
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
 					<div class="stat">
 						<div class="stat-title">Status</div>
-						<div class="stat-value text-primary" id="detail-status">{ t.Status.V }</div>
+						if t.Status.V == "completed" {
+							<div class="stat-value text-primary" id="detail-status">{ strings.Title(t.Status.V) }</div>
+						} else {
+							<div class="stat-value text-error" id="detail-status">{ strings.Title(t.Status.V) }</div>
+						}
 					</div>
 					<div class="stat">
 						<div class="stat-title">Created (UTC)</div>
@@ -209,9 +214,14 @@ templ PaymentStatusView(t models.Task) {
 				<span class="badge badge-success" id="payment-status">Paid</span>
 			</div>
 			<div class="stat-desc" id="payment-amount">{ t.RewardWei.V.String() } Wei</div>
+		} else if t.Status.V == "completed" && t.Paid.V == false {
+			<div class="stat-value">
+				<span class="badge badge-info" id="payment-status">Pending</span>
+			</div>
+			<div class="stat-desc" id="payment-amount">{t.RewardWei.V.String() } Wei</div>
 		} else {
 			<div class="stat-value">
-				<span class="badge badge-error" id="payment-status">Pending</span>
+				<span class="badge badge-error" id="payment-status">Cancelled</span>
 			</div>
 			<div class="stat-desc" id="payment-amount">0.0 Wei</div>
 		}
