@@ -66,5 +66,8 @@ build.contract:
 test.int:
 	python3 test-int.py
 
+run.contract:
+	./${BIN_CONTRACT} -private-key=${ETH_PRIVATE_KEY}
+
 run: build
 	./${BIN_SERVER} "scraper"
