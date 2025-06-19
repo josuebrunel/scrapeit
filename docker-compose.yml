@@ -135,6 +135,8 @@ services:
         condition: service_healthy
       auth:
         condition: service_healthy
+      ipfs:
+        condition: service_started
 
   subscriber:
     container_name: scrapeit-subscriber
