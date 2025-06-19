@@ -20,6 +20,8 @@ FROM alpine:latest AS publisher
 RUN  mkdir /opt/scrapeit/
 WORKDIR /opt/scrapeit/
 COPY --from=build  /go/src/app/bin/scrapeit-server /opt/scrapeit/scrapeit-server
+COPY    --from=build /go/src/app/static/ /opt/scrapeit/static/
+
 EXPOSE 8080
 EXPOSE 7654
 CMD [ "./scrapeit-server" ]
