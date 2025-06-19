@@ -24,7 +24,6 @@ func (a App) MigrateDown() {
 }
 
 func (a App) MigrateUp() {
-	defer a.db.Close()
 	goose.SetBaseFS(embedMigrations)
 	if err := goose.SetDialect("postgres"); err != nil {
 		panic(err)
