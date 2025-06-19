@@ -66,7 +66,6 @@ func (m Manager) Update(ctx context.Context, url string, tsk task.Task) error {
 }
 
 func (m Manager) Claim(ctx context.Context, tsk task.Task) error {
-	tsk.Assignee = m.Address
 	tsk.Status = task.Active
 	return m.Update(ctx, m.GetEndpoint(tsk.ID, URITaskClaim), tsk)
 }

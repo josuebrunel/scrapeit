@@ -10,6 +10,7 @@ import (
 	"scrapeit/pkg/env"
 	"scrapeit/pkg/models"
 	"scrapeit/task"
+	"slices"
 	"time"
 
 	"github.com/ethereum/go-ethereum/core/types"
@@ -24,6 +25,12 @@ const (
 	Status200 = http.StatusOK
 	Status400 = http.StatusBadRequest
 	Status500 = http.StatusInternalServerError
+)
+
+var (
+	ErrInvalidAssigneeAddress = errors.New("invalid assignee address")
+	ErrInvalidStatus          = errors.New("invalid request")
+	ErrTaskNotFound           = errors.New("task not found")
 )
 
 func (a App) Scrape() echo.HandlerFunc {
@@ -77,6 +84,7 @@ func (a App) Submit(filters ...bob.Expression) echo.HandlerFunc {
 		var (
 			ctx     = c.Request().Context()
 			id      = c.PathParam("id")
+			ethAddr = c.Get(RequestContextEthAddr).(string)
 			reqTask task.Task
 		)
 		if err := c.Bind(&reqTask); err != nil {
@@ -84,25 +92,29 @@ func (a App) Submit(filters ...bob.Expression) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, Response[task.Task]{Error: err.Error()})
 		}
 		reqTask.UpdatedAt = time.Now().UTC()
-		reqTask.Assignee = c.Get(RequestContextUserID).(string)
+		reqTask.Assignee = ethAddr
 		tsk, err := models.FindTask(ctx, a.bob, uuid.Must(uuid.FromString(id)))
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				xlog.Error("task not found", "id", id)
-				return c.JSON(http.StatusNotFound, Response[task.Task]{Error: "task not found"})
+				return c.JSON(http.StatusNotFound, Response[task.Task]{Error: ErrTaskNotFound.Error()})
 			}
 			return c.JSON(http.StatusInternalServerError, Response[task.Task]{Error: err.Error()})
+		}
+		if slices.Contains([]string{string(task.Completed), string(task.Active)}, tsk.Status.V) && tsk.Assignee.V != ethAddr {
+			xlog.Error("invalid assignee", "assignee", reqTask.Assignee)
+			return c.JSON(http.StatusBadRequest, Response[task.Task]{Error: ErrInvalidAssigneeAddress.Error()})
 		}
 		switch task.TaskStatus(tsk.Status.V) {
 		case task.Pending:
 			if reqTask.Status != task.Active {
 				xlog.Error("invalid status", "status", reqTask.Status)
-				return c.JSON(http.StatusBadRequest, Response[task.Task]{Error: "invalid status"})
+				return c.JSON(http.StatusBadRequest, Response[task.Task]{Error: ErrInvalidStatus.Error()})
 			}
 		case task.Active:
 			if reqTask.Status != task.Completed && reqTask.Status != task.Failed {
 				xlog.Error("invalid status", "status", reqTask.Status)
-				return c.JSON(http.StatusBadRequest, Response[task.Task]{Error: "invalid status"})
+				return c.JSON(http.StatusBadRequest, Response[task.Task]{Error: ErrInvalidStatus.Error()})
 			}
 		}
 		obj, err := a.Manager.Upsert(ctx, reqTask)
