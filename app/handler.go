@@ -17,6 +17,7 @@ import (
 	"github.com/gofrs/uuid/v5"
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/labstack/echo/v5"
+	"github.com/multiformats/go-multiaddr"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql"
 )
@@ -226,17 +227,12 @@ func (a App) Result() echo.HandlerFunc {
 func (a App) Settings() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		peerID := a.Publisher.Node.ID.String()
-		addr := func() []string {
-			var r = []string{}
-			for _, a := range a.Publisher.Node.Host.Addrs() {
-				r = append(r, fmt.Sprintf("%s/p2p/%s", a.String(), peerID))
-			}
-			return r
-		}
+		addr := getRootPeerAddr(peerID, a.Publisher.Node.Host.Addrs())
+
 		return c.JSON(http.StatusOK, Response[env.Settings]{Data: env.Settings{
 			Peer: env.Peer{
 				ID:    peerID,
-				Addrs: addr(),
+				Addrs: addr,
 				Ipfs:  env.Get(env.IpfsAddrN),
 				Topic: env.Get(env.PubTopicN),
 			},
@@ -246,4 +242,19 @@ func (a App) Settings() echo.HandlerFunc {
 			},
 		}})
 	}
+}
+
+func getRootPeerAddr(peerID string, addrs []multiaddr.Multiaddr) []string {
+	var (
+		r     = []string{}
+		proxy = env.Get(env.PubProxyN)
+	)
+	if proxy != "" {
+		r = append(r, fmt.Sprintf("%s/p2p/%s", proxy, peerID))
+		return r
+	}
+	for _, a := range addrs {
+		r = append(r, fmt.Sprintf("%s/p2p/%s", a.String(), peerID))
+	}
+	return r
 }

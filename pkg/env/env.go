@@ -23,6 +23,7 @@ const (
 	PubTopicN          = "PUB_TOPIC"
 	PubTopicV          = "scraping"
 	PubPeersRoot       = "PUB_ROOT_PEERS"
+	PubProxyN          = "PUB_PROXY"
 	CDPRemoteN         = "CDP_REMOTE"
 	IpfsAddrN          = "IPFS_ADDR"
 	EtherAddrN         = "ETH_NETWORK"
