@@ -38,6 +38,7 @@ type Task struct {
 	Input       string     `json:"input"`
 	Output      string     `json:"output"`
 	Reward      string     `json:"reward"`
+	RewardUnit  string     `json:"reward_unit"`
 	Paid        bool       `json:"paid"`
 	Status      TaskStatus `json:"status"`
 	Submitter   string     `json:"submitter"`
@@ -49,13 +50,14 @@ type Task struct {
 
 func NewTask(client, submitter, input string) Task {
 	return Task{
-		ID:        uuid.Must(uuid.NewV4()).String(),
-		UserID:    client,
-		Submitter: submitter,
-		Input:     input,
-		Status:    Pending,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		ID:         uuid.Must(uuid.NewV4()).String(),
+		UserID:     client,
+		Submitter:  submitter,
+		Input:      input,
+		RewardUnit: "wei",
+		Status:     Pending,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
 	}
 }
 
