@@ -227,6 +227,23 @@ func (h Handler) Dashboard() echo.HandlerFunc {
 	}
 }
 
+func (h Handler) SinOut() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var (
+			ctx   = c.Request().Context()
+			xuser = xsession.GetUser(ctx)
+		)
+		cli := h.gtc.WithToken(xuser.Token)
+		if err := cli.Logout(); err != nil {
+			xlog.Error("failed to logout user", "error", err)
+			return c.Redirect(http.StatusSeeOther, view.ReverseX(c, HandlerNameDashboard, xuser.ID))
+		}
+		xsession.DeleteUser(ctx)
+		toast.NotifySuccess(c, "Signed out successfully")
+		return c.Redirect(http.StatusSeeOther, view.ReverseX(c, HandlerNameSignIn))
+	}
+}
+
 // AuthErrorResponse defines the structure for the JSON part of the error message.
 type AuthErrorResponse struct {
 	Code      int    `json:"code"`

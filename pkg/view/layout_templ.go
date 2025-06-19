@@ -158,7 +158,7 @@ func NavigationBar() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if xsession.IsAuthenticated(ctx) {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<li id=\"nav-dashboard\"><a href=\"/account/\">Dashboard</a></li><li id=\"nav-history\"><a hx-target=\"#content\" hx-get=\"/task\">History</a></li><li id=\"nav-dashboard\"><a href=\"/account/logout\">Sign out</a></li>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<li id=\"nav-dashboard\"><a href=\"/account/\">Dashboard</a></li><li id=\"nav-history\"><a hx-target=\"#content\" hx-get=\"/task\">History</a></li><li id=\"nav-dashboard\"><a href=\"/account/signout\">Sign out</a></li>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
