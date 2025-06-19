@@ -8,7 +8,10 @@ package view
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/josuebrunel/gopkg/component"
+import (
+	"github.com/josuebrunel/gopkg/component"
+	"github.com/josuebrunel/gopkg/xsession"
+)
 
 const AppName = "Scrapions"
 
@@ -150,7 +153,22 @@ func NavigationBar() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Navigation bar --><nav class=\"navbar bg-primary text-primary-content shadow-lg\"><div class=\"flex-1\"><button class=\"btn btn-ghost normal-case text-xl\" onclick=\"showPage('landing-page')\"><i class=\"fas fa-spider mr-2\"></i> Scrapions</button></div><div class=\"flex-none\"><ul class=\"menu menu-horizontal px-1\" id=\"nav-menu\"><li class=\"hidden\" id=\"nav-docs\"><a onclick=\"showPage('landing-page')\">Home</a></li><li class=\"hidden\" id=\"nav-features\"><a onclick=\"showPage('landing-page')\">Features</a></li><li class=\"hidden\" id=\"nav-dashboard\"><button onclick=\"showPage('dashboard-page')\">Dashboard</button></li><li class=\"hidden\" id=\"nav-history\"><button onclick=\"showPage('history-page')\">History</button></li><li class=\"hidden\" id=\"nav-login\"><button onclick=\"showPage('auth-page')\">Login</button></li><li class=\"hidden\" id=\"nav-signup\"><button class=\"btn btn-accent\" onclick=\"showPage('auth-page', 'signup')\">Sign Up</button></li><li class=\"hidden\" id=\"nav-profile\"><div class=\"dropdown dropdown-end\"><label tabindex=\"0\" class=\"btn btn-ghost btn-circle avatar\"><div class=\"w-10 rounded-full bg-accent text-accent-content flex items-center justify-center\"><i class=\"fas fa-user text-xl\"></i></div></label><ul tabindex=\"0\" class=\"mt-3 p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52 text-base-content\"><li><a onclick=\"showPage('dashboard-page')\">Dashboard</a></li><li><a onclick=\"showPage('history-page')\">Task History</a></li><li><a onclick=\"logout()\">Logout</a></li></ul></div></li></ul></div></nav>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Navigation bar --><nav class=\"navbar bg-primary text-primary-content shadow-lg\"><div class=\"flex-1\"><a class=\"btn btn-ghost normal-case text-xl\" href=\"/\"><i class=\"fas fa-spider mr-2\"></i> Scrapions</a></div><div class=\"flex-none\"><ul class=\"menu menu-horizontal px-1\" id=\"nav-menu\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if xsession.IsAuthenticated(ctx) {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<li id=\"nav-dashboard\"><a href=\"/account/\">Dashboard</a></li><li id=\"nav-history\"><a hx-target=\"#content\" hx-get=\"/task\">History</a></li><li id=\"nav-dashboard\"><a href=\"/account/logout\">Sign out</a></li>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<li id=\"nav-login\"><a href=\"/account/signin\">Sign In</a></li><li id=\"nav-signup\"><a href=\"/account/signup\">Sign Up</a></li>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</ul></div></nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -179,7 +197,7 @@ func Main() templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<main class=\"p-4 md:p-8\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<main class=\"p-4 md:p-8\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -187,7 +205,7 @@ func Main() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -216,7 +234,7 @@ func Footer() templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<!-- Footer --><footer class=\"footer p-10 bg-neutral text-neutral-content\"><div><span class=\"footer-title\"><i class=\"fas fa-spider mr-2\"></i> Scrapions</span> <a class=\"link link-hover\">About</a> <a class=\"link link-hover\">Documentation</a> <a class=\"link link-hover\">API Reference</a> <a class=\"link link-hover\">Pricing</a></div><div><span class=\"footer-title\">Legal</span> <a class=\"link link-hover\">Terms of use</a> <a class=\"link link-hover\">Privacy policy</a> <a class=\"link link-hover\">Cookie policy</a></div><div><span class=\"footer-title\">Contact</span> <a class=\"link link-hover\">Twitter</a> <a class=\"link link-hover\">Discord</a> <a class=\"link link-hover\">support@scrapions.io</a></div></footer>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<!-- Footer --><footer class=\"footer p-10 bg-neutral text-neutral-content\"><div><span class=\"footer-title\"><i class=\"fas fa-spider mr-2\"></i> Scrapions</span> <a class=\"link link-hover\">About</a> <a class=\"link link-hover\">Documentation</a> <a class=\"link link-hover\">API Reference</a> <a class=\"link link-hover\">Pricing</a></div><div><span class=\"footer-title\">Legal</span> <a class=\"link link-hover\">Terms of use</a> <a class=\"link link-hover\">Privacy policy</a> <a class=\"link link-hover\">Cookie policy</a></div><div><span class=\"footer-title\">Contact</span> <a class=\"link link-hover\">Twitter</a> <a class=\"link link-hover\">Discord</a> <a class=\"link link-hover\">support@scrapions.io</a></div></footer>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -261,7 +279,7 @@ func Layout(title string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -293,7 +311,7 @@ func Layout(title string) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -301,7 +319,7 @@ func Layout(title string) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -327,7 +345,7 @@ func Layout(title string) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -335,7 +353,7 @@ func Layout(title string) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " <script src=\"https://unpkg.com/htmx.org@latest\"></script> <script>\n                    htmx.config.globalViewTransitions = true;\n                </script>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " <script src=\"https://unpkg.com/htmx.org@latest\"></script> <script>\n                    htmx.config.globalViewTransitions = true;\n                </script>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

@@ -1,6 +1,9 @@
 package view
 
-import "github.com/josuebrunel/gopkg/component"
+import (
+	"github.com/josuebrunel/gopkg/component"
+	"github.com/josuebrunel/gopkg/xsession"
+)
 
 const AppName = "Scrapions"
 
@@ -53,47 +56,22 @@ templ NavigationBar() {
 	<!-- Navigation bar -->
 	<nav class="navbar bg-primary text-primary-content shadow-lg">
 		<div class="flex-1">
-			<button class="btn btn-ghost normal-case text-xl" onclick="showPage('landing-page')">
+			<a class="btn btn-ghost normal-case text-xl" href="/">
 				<i class="fas fa-spider mr-2"></i>
 				Scrapions
-			</button>
+			</a>
 		</div>
 		<div class="flex-none">
 			<ul class="menu menu-horizontal px-1" id="nav-menu">
-				<li class="hidden" id="nav-docs"><a onclick="showPage('landing-page')">Home</a></li>
-				<li class="hidden" id="nav-features"><a onclick="showPage('landing-page')">Features</a></li>
-				<li class="hidden" id="nav-dashboard">
-					<button
-						onclick="showPage('dashboard-page')"
-					>Dashboard</button>
-				</li>
-				<li class="hidden" id="nav-history"><button onclick="showPage('history-page')">History</button></li>
-				<li class="hidden" id="nav-login"><button onclick="showPage('auth-page')">Login</button></li>
-				<li class="hidden" id="nav-signup">
-					<button
-						class="btn btn-accent"
-						onclick="showPage('auth-page', 'signup')"
-					>Sign Up</button>
-				</li>
-				<li class="hidden" id="nav-profile">
-					<div class="dropdown dropdown-end">
-						<label tabindex="0" class="btn btn-ghost btn-circle avatar">
-							<div
-								class="w-10 rounded-full bg-accent text-accent-content flex items-center justify-center"
-							>
-								<i class="fas fa-user text-xl"></i>
-							</div>
-						</label>
-						<ul
-							tabindex="0"
-							class="mt-3 p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52 text-base-content"
-						>
-							<li><a onclick="showPage('dashboard-page')">Dashboard</a></li>
-							<li><a onclick="showPage('history-page')">Task History</a></li>
-							<li><a onclick="logout()">Logout</a></li>
-						</ul>
-					</div>
-				</li>
+				
+				if xsession.IsAuthenticated(ctx) {
+				    <li id="nav-dashboard"> <a href="/account/">Dashboard</a></li>
+				    <li id="nav-history"><a hx-target="#content" hx-get="/task">History</a></li>
+				    <li id="nav-dashboard"> <a href="/account/logout">Sign out</a></li>
+				} else {
+					<li id="nav-login"><a href="/account/signin">Sign In</a></li>
+					<li id="nav-signup"><a href="/account/signup">Sign Up</a></li>
+				}
 			</ul>
 		</div>
 	</nav>
