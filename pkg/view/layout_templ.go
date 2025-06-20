@@ -153,7 +153,7 @@ func NavigationBar() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Navigation bar --><nav class=\"navbar bg-primary text-primary-content shadow-lg\"><div class=\"flex-1\"><a class=\"btn btn-ghost normal-case text-xl\" href=\"/\"><i class=\"fas fa-spider mr-2\"></i> Scrapions</a></div><div class=\"flex-none\"><ul class=\"menu menu-horizontal px-1\" id=\"nav-menu\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Navigation bar --><nav class=\"navbar bg-primary text-primary-content shadow-lg\"><div class=\"flex-1\"><a class=\"btn btn-ghost normal-case text-xl\" href=\"/\"><i class=\"fas fa-spider mr-2\"></i> Scrapions <span class=\"badge badge-secondary\">POC</span></a></div><div class=\"flex-none\"><ul class=\"menu menu-horizontal px-1\" id=\"nav-menu\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -59,15 +59,15 @@ templ NavigationBar() {
 			<a class="btn btn-ghost normal-case text-xl" href="/">
 				<i class="fas fa-spider mr-2"></i>
 				Scrapions
+				<span class="badge badge-secondary">POC</span>
 			</a>
 		</div>
 		<div class="flex-none">
 			<ul class="menu menu-horizontal px-1" id="nav-menu">
-				
 				if xsession.IsAuthenticated(ctx) {
-				    <li id="nav-dashboard"> <a href="/account/">Dashboard</a></li>
-				    <li id="nav-history"><a hx-target="#content" hx-get="/task">History</a></li>
-				    <li id="nav-dashboard"> <a href="/account/signout">Sign out</a></li>
+					<li id="nav-dashboard"><a href="/account/">Dashboard</a></li>
+					<li id="nav-history"><a hx-target="#content" hx-get="/task">History</a></li>
+					<li id="nav-dashboard"><a href="/account/signout">Sign out</a></li>
 				} else {
 					<li id="nav-login"><a href="/account/signin">Sign In</a></li>
 					<li id="nav-signup"><a href="/account/signup">Sign Up</a></li>
