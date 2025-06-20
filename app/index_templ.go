@@ -65,7 +65,7 @@ func Hero() templ.Component {
 	})
 }
 
-func HowItWorks() templ.Component {
+func Video() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -86,7 +86,36 @@ func HowItWorks() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"my-20\"><h2 class=\"text-3xl font-bold text-center mb-12\">How Scrapions Works</h2><div class=\"grid grid-cols-1 md:grid-cols-3 gap-8\"><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body items-center text-center\"><div class=\"w-16 h-16 rounded-full bg-primary text-primary-content flex items-center justify-center mb-4\"><i class=\"fas fa-key text-2xl\"></i></div><h3 class=\"card-title mb-2\">Create Tasks with ETH</h3><p>Fund tasks using Ethereum. Our smart contract manages payments to node operators when they complete your scraping jobs.</p></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body items-center text-center\"><div class=\"w-16 h-16 rounded-full bg-secondary text-secondary-content flex items-center justify-center mb-4\"><i class=\"fas fa-code text-2xl\"></i></div><h3 class=\"card-title mb-2\">Make API Calls</h3><p>Send your scraping requests through our simple REST API. Our swarm of scrapers will handle all the complexity.</p></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body items-center text-center\"><div class=\"w-16 h-16 rounded-full bg-accent text-accent-content flex items-center justify-center mb-4\"><i class=\"fas fa-database text-2xl\"></i></div><h3 class=\"card-title mb-2\">Get Your Data</h3><p>Retrieve structured data from our decentralized storage. Monitor progress and history through your dashboard.</p></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"my-12 text-center\"><h2 class=\"text-3xl font-bold mb-8\">See It In Action</h2><div class=\"aspect-w-16 aspect-h-9 max-w-4xl mx-auto\"><iframe class=\"w-full h-96 rounded-lg shadow-xl\" src=\"https://www.youtube.com/embed/alzOb3jv7Hg\" title=\"Scrapions Platform Demo\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe></div><p class=\"mt-4 text-lg opacity-80\">Watch our quick demo to see how Scrapions works</p></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func HowItWorks() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"my-20\"><h2 class=\"text-3xl font-bold text-center mb-12\">How Scrapions Works</h2><div class=\"grid grid-cols-1 md:grid-cols-3 gap-8\"><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body items-center text-center\"><div class=\"w-16 h-16 rounded-full bg-primary text-primary-content flex items-center justify-center mb-4\"><i class=\"fas fa-key text-2xl\"></i></div><h3 class=\"card-title mb-2\">Create Tasks with ETH</h3><p>Fund tasks using Ethereum. Our smart contract manages payments to node operators when they complete your scraping jobs.</p></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body items-center text-center\"><div class=\"w-16 h-16 rounded-full bg-secondary text-secondary-content flex items-center justify-center mb-4\"><i class=\"fas fa-code text-2xl\"></i></div><h3 class=\"card-title mb-2\">Make API Calls</h3><p>Send your scraping requests through our simple REST API. Our swarm of scrapers will handle all the complexity.</p></div></div><div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body items-center text-center\"><div class=\"w-16 h-16 rounded-full bg-accent text-accent-content flex items-center justify-center mb-4\"><i class=\"fas fa-database text-2xl\"></i></div><h3 class=\"card-title mb-2\">Get Your Data</h3><p>Retrieve structured data from our decentralized storage. Monitor progress and history through your dashboard.</p></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -110,12 +139,12 @@ func CTA() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"my-20 bg-primary/10 p-8 rounded-2xl\"><h2 class=\"text-3xl font-bold text-center mb-8\">Why Choose Scrapions?</h2><div class=\"grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto\"><div class=\"flex gap-4\"><div class=\"text-primary mt-1\"><i class=\"fas fa-shield-alt text-2xl\"></i></div><div><h3 class=\"text-xl font-bold mb-2\">Blockchain-Powered</h3><p class=\"text-base-content/80\">Built on Ethereum with automated payments via smart contract for verifiable, trustless task execution.</p></div></div><div class=\"flex gap-4\"><div class=\"text-primary mt-1\"><i class=\"fas fa-bolt text-2xl\"></i></div><div><h3 class=\"text-xl font-bold mb-2\">Fast Results</h3><p class=\"text-base-content/80\">Parallel scraping across multiple nodes means you get your data faster than traditional services.</p></div></div><div class=\"flex gap-4\"><div class=\"text-primary mt-1\"><i class=\"fas fa-lock text-2xl\"></i></div><div><h3 class=\"text-xl font-bold mb-2\">Private & Secure</h3><p class=\"text-base-content/80\">Your data is encrypted and only accessible to you. We never store or sell your scraped data.</p></div></div><div class=\"flex gap-4\"><div class=\"text-primary mt-1\"><i class=\"fas fa-chart-line text-2xl\"></i></div><div><h3 class=\"text-xl font-bold mb-2\">Scalable Infrastructure</h3><p class=\"text-base-content/80\">Our network automatically scales to handle your scraping load, from small jobs to enterprise-level tasks.</p></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"my-20 bg-primary/10 p-8 rounded-2xl\"><h2 class=\"text-3xl font-bold text-center mb-8\">Why Choose Scrapions?</h2><div class=\"grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto\"><div class=\"flex gap-4\"><div class=\"text-primary mt-1\"><i class=\"fas fa-shield-alt text-2xl\"></i></div><div><h3 class=\"text-xl font-bold mb-2\">Blockchain-Powered</h3><p class=\"text-base-content/80\">Built on Ethereum with automated payments via smart contract for verifiable, trustless task execution.</p></div></div><div class=\"flex gap-4\"><div class=\"text-primary mt-1\"><i class=\"fas fa-bolt text-2xl\"></i></div><div><h3 class=\"text-xl font-bold mb-2\">Fast Results</h3><p class=\"text-base-content/80\">Parallel scraping across multiple nodes means you get your data faster than traditional services.</p></div></div><div class=\"flex gap-4\"><div class=\"text-primary mt-1\"><i class=\"fas fa-lock text-2xl\"></i></div><div><h3 class=\"text-xl font-bold mb-2\">Private & Secure</h3><p class=\"text-base-content/80\">Your data is encrypted and only accessible to you. We never store or sell your scraped data.</p></div></div><div class=\"flex gap-4\"><div class=\"text-primary mt-1\"><i class=\"fas fa-chart-line text-2xl\"></i></div><div><h3 class=\"text-xl font-bold mb-2\">Scalable Infrastructure</h3><p class=\"text-base-content/80\">Our network automatically scales to handle your scraping load, from small jobs to enterprise-level tasks.</p></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -139,12 +168,12 @@ func Index() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var6 == nil {
-			templ_7745c5c3_Var6 = templ.NopComponent
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var7 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var8 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -156,11 +185,15 @@ func Index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div id=\"landing-page\" class=\"page-transition\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div id=\"landing-page\" class=\"page-transition\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = Hero().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = Video().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -172,13 +205,13 @@ func Index() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = view.Layout("Scrapions").Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = view.Layout("Scrapions").Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
