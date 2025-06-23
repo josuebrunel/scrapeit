@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"scrapeit/contract"
 	"scrapeit/pkg/etherutil"
-	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -105,7 +104,7 @@ func (e EtherManager) Create(ctx context.Context, pk *ecdsa.PrivateKey, tsk Task
 		xlog.Error("Failed to instantiate a Token contract", "error", err)
 		return nil, err
 	}
-	tx, err := instance.Create(auth, tsk.ID, tsk.UserID, tsk.Input)
+	tx, err := instance.Create(auth, s2b32(tsk.ID), tsk.Input)
 	if err != nil {
 		xlog.Error("Failed to create task", "error", err)
 		return nil, err
@@ -125,20 +124,17 @@ func (e EtherManager) Get(ctx context.Context, id string, pk *ecdsa.PrivateKey) 
 	tx, err := instance.Tasks(&bind.CallOpts{
 		From:    auth.From,
 		Context: ctx,
-	}, id)
+	}, s2b32(id))
 	if err != nil {
 		xlog.Error("Failed to get task", "error", err)
 		return tsk, err
 	}
 	tsk = Task{
-		ID:        tx.Uuid,
 		Assignee:  tx.Assignee.String(),
 		Submitter: tx.Submitter.String(),
-		Input:     tx.Input,
-		Output:    tx.Output,
+		Input:     b322s(tx.InputHash),
+		Output:    b322s(tx.OutputHash),
 		Status:    TaskStatus(Status[tx.Status]),
-		CreatedAt: time.Unix(tx.CreatedAt.Int64(), 0).UTC(),
-		UpdatedAt: time.Unix(tx.UpdatedAt.Int64(), 0).UTC(),
 	}
 	return tsk, nil
 }
@@ -154,7 +150,7 @@ func (e EtherManager) Complete(ctx context.Context, id string, assignee string, 
 		return nil, err
 	}
 	xlog.Info("Completing task", "id", id, "assignee", assignee, "output", output)
-	tx, err := instance.Complete(auth, id, common.HexToAddress(assignee), output, success)
+	tx, err := instance.Complete(auth, s2b32(id), common.HexToAddress(assignee), output, success)
 	if err != nil {
 		xlog.Error("Failed to complete task", "error", err)
 		return nil, err
@@ -162,3 +158,16 @@ func (e EtherManager) Complete(ctx context.Context, id string, assignee string, 
 	xlog.Info("Task completed", "tx", tx.Hash().Hex(), "id", id, "output", output, "assignee", pk.PublicKey)
 	return tx, nil
 }
+
+func str2byte32(s string) [32]byte {
+	var b [32]byte
+	copy(b[:], s)
+	return b
+}
+
+func byte322str(b [32]byte) string {
+	return string(b[:])
+}
+
+var s2b32 = str2byte32
+var b322s = byte322str

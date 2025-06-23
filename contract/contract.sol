@@ -1,28 +1,31 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.2 <0.9.0;
 
+/**
+ * @title Scraper
+ * @dev A contract to manage decentralized scraping tasks. This version is highly
+ * optimized for gas efficiency by minimizing on-chain storage.
+ */
 contract Scraper {
     address public owner;
     bool public paused;
+
     enum Status {
         Pending,
         Completed,
         Failed
     }
 
-    mapping(string => Task) public tasks;
+    // Using bytes32 for the mapping key is much more gas-efficient than string.
+    mapping(bytes32 => Task) public tasks;
 
     struct Task {
-        string uuid;
-        string user_id;
-        Status status;
+        address payable submitter; // 20 bytes
         address payable assignee;
-        address payable submitter;
-        string input;
-        string output;
-        uint256 amount;
-        uint256 created_at;
-        uint256 updated_at;
+        Status status; // 1 byte
+        uint256 amount; // 32 bytes
+        bytes32 inputHash; // 32 bytes
+        bytes32 outputHash; // 32 bytes
     }
 
     constructor() {
@@ -40,84 +43,84 @@ contract Scraper {
     }
 
     event TaskCreated(
-        string uuid,
-        string user_id,
+        bytes32 indexed uuid,
         address indexed submitter,
         string input,
         uint256 amount
     );
+
     event TaskProcessed(
-        string uuid,
+        bytes32 indexed uuid,
         address indexed assignee,
         Status status,
         string output
     );
 
+    /**
+     * @dev Creates a new scraping task.
+     * @param _uuid A unique identifier for the task, as bytes32.
+     * @param _input The data for the task (e.g., a URL to scrape). The contract will store its hash.
+     */
     function create(
-        string memory _uuid,
-        string memory _user_id,
+        bytes32 _uuid,
         string memory _input
-    ) public payable isPaused {
-        require(bytes(_uuid).length > 0, "UUID cannot be empty");
+    ) external payable isPaused {
+        require(_uuid != bytes32(0), "UUID cannot be empty");
         require(msg.value > 0, "Invalid amount");
-        require(msg.sender.balance >= msg.value, "Insufficient balance");
         require(
             tasks[_uuid].submitter == address(0),
             "Task with this UUID already exists"
         );
 
-        Task memory tsk = Task({
-            uuid: _uuid,
-            user_id: _user_id,
+        tasks[_uuid] = Task({
             submitter: payable(msg.sender),
-            input: _input,
-            output: "",
-            status: Status.Pending,
             assignee: payable(address(0)),
+            status: Status.Pending,
             amount: msg.value,
-            created_at: block.timestamp,
-            updated_at: block.timestamp
+            inputHash: keccak256(bytes(_input)),
+            outputHash: bytes32(0)
         });
 
-        tasks[tsk.uuid] = tsk;
-        emit TaskCreated(
-            tsk.uuid,
-            tsk.user_id,
-            tsk.submitter,
-            tsk.input,
-            msg.value
-        );
+        emit TaskCreated(_uuid, msg.sender, _input, msg.value);
     }
 
+    /**
+     * @dev Marks a task as complete or failed and pays the assignee.
+     * @param _uuid The UUID of the task to complete.
+     * @param _assignee The address of the node that performed the work.
+     * @param _output The result of the scraping task. The contract will store its hash.
+     * @param _success Whether the task was successful.
+     */
     function complete(
-        string memory _uuid,
+        bytes32 _uuid,
         address payable _assignee,
         string memory _output,
         bool _success
     ) external isPaused {
-        require(bytes(_uuid).length > 0, "UUID cannot be empty");
         Task storage tsk = tasks[_uuid];
-        require(bytes(tsk.uuid).length > 0, "Invalid UUID");
-        require(tsk.status != Status.Completed, "Task already completed");
+        require(tsk.submitter != address(0), "Invalid UUID");
+        require(tsk.status == Status.Pending, "Task not pending");
         require(_assignee != address(0), "Assignee address cannot be zero");
         tsk.assignee = _assignee;
 
-        if (!_success) {
-            tsk.status = Status.Failed;
-        } else {
+        if (_success) {
             tsk.status = Status.Completed;
-            tsk.output = _output;
-        }
-        tsk.updated_at = block.timestamp;
-
-        if (_success && tsk.amount > 0) {
-            (bool success, ) = tsk.assignee.call{value: tsk.amount}("");
-            require(success, "Transfer failed");
+            tsk.outputHash = keccak256(bytes(_output));
+            if (tsk.amount > 0) {
+                (bool sent, ) = _assignee.call{value: tsk.amount}("");
+                require(sent, "Transfer failed");
+            }
+        } else {
+            tsk.status = Status.Failed;
         }
 
         emit TaskProcessed(_uuid, tsk.assignee, tsk.status, _output);
     }
 
+    /**
+     * @dev Allows the owner to pause or unpause the contract.
+     * @param _paused The desired pause state.
+     */
     function setPaused(bool _paused) public isOwner {
         paused = _paused;
     }

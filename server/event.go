@@ -30,7 +30,7 @@ func (s Server) ListenContractEvents(ctx context.Context) {
 	watchOpts := &bind.WatchOpts{Context: ctx, Start: nil}
 
 	taskCreatedEvents := make(chan *contract.ContractTaskCreated)
-	subCreated, err := filterer.WatchTaskCreated(watchOpts, taskCreatedEvents, nil)
+	subCreated, err := filterer.WatchTaskCreated(watchOpts, taskCreatedEvents, nil, nil)
 	if err != nil {
 		xlog.Error("Error while watching task created events", "error", err)
 		panic(err)
@@ -38,7 +38,7 @@ func (s Server) ListenContractEvents(ctx context.Context) {
 	defer subCreated.Unsubscribe()
 
 	taskProcessedEvents := make(chan *contract.ContractTaskProcessed)
-	subProcessed, err := filterer.WatchTaskProcessed(watchOpts, taskProcessedEvents, nil)
+	subProcessed, err := filterer.WatchTaskProcessed(watchOpts, taskProcessedEvents, nil, nil)
 	if err != nil {
 		xlog.Error("Error while watching task processed events", "error", err)
 		panic(err)
