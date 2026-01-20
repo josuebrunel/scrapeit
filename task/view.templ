@@ -1,7 +1,7 @@
 package task
 
 import "github.com/josuebrunel/gopkg/component"
-import "scrapeit/pkg/models"
+import "scrapeit/pkg/db/models"
 import "time"
 import "scrapeit/pkg/view"
 import "strings"
@@ -57,15 +57,15 @@ templ TableBodyView(tt models.TaskSlice) {
 		for _, t := range tt {
 			<tr class="hover">
 				<td>{ t.ID.String() }</td>
-				<td>{ t.Input.V }</td>
+				<td>{ t.Input.GetOrZero() }</td>
 				<td>
-					<span class={ statusBadge[t.Status.V] }>
-						{ t.Status.V }
+					<span class={ statusBadge[t.Status.GetOrZero()] }>
+						{ t.Status.GetOrZero() }
 					</span>
 				</td>
-				<td>{ t.Assignee.V }</td>
-				<td>{ t.RewardWei.V.String() } Wei</td>
-				<td>{ t.CreatedAt.V.UTC().Format(time.DateTime) }</td>
+				<td>{ t.Assignee.GetOrZero() }</td>
+				<td>{ t.RewardWei.GetOrZero().String() } Wei</td>
+				<td>{ t.CreatedAt.GetOrZero().UTC().Format(time.DateTime) }</td>
 				<td class="flex items-center gap-1">
 					<button class="btn btn-xs btn-outline" hx-target="#content" hx-get={ view.Reverse(ctx, HandlerNameDetail, t.ID.String()) }>
 						<i class="fas fa-eye"></i>View
@@ -126,21 +126,21 @@ templ DetailView(t models.Task) {
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
 					<div class="stat">
 						<div class="stat-title">Status</div>
-						if t.Status.V == "completed" {
-							<div class="stat-value text-primary" id="detail-status">{ strings.Title(t.Status.V) }</div>
+						if t.Status.GetOrZero() == "completed" {
+							<div class="stat-value text-primary" id="detail-status">{ strings.Title(t.Status.GetOrZero()) }</div>
 						} else {
-							<div class="stat-value text-error" id="detail-status">{ strings.Title(t.Status.V) }</div>
+							<div class="stat-value text-error" id="detail-status">{ strings.Title(t.Status.GetOrZero()) }</div>
 						}
 					</div>
 					<div class="stat">
 						<div class="stat-title">Created (UTC)</div>
-						<div class="stat-value" id="detail-created">{ t.CreatedAt.V.UTC().Format(time.DateTime) }</div>
+						<div class="stat-value" id="detail-created">{ t.CreatedAt.GetOrZero().UTC().Format(time.DateTime) }</div>
 						<div class="stat-desc" id="detail-duration"></div>
 					</div>
 					<div class="stat">
 						<div class="stat-title">Result</div>
 						<div class="stat-value" id="detail-results">CID</div>
-						<div class="stat-desc" id="detail-nodes">{ t.Output.V }</div>
+						<div class="stat-desc" id="detail-nodes">{ t.Output.GetOrZero() }</div>
 					</div>
 				</div>
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -151,10 +151,10 @@ templ DetailView(t models.Task) {
 						</div>
 						<div class="stat-value">
 							<a
-								href={ templ.SafeURL(GetEtherScanLink(t.Contract.V)) }
+								href={ templ.SafeURL(GetEtherScanLink(t.Contract.GetOrZero())) }
 								class="link"
 							>
-								<div class="font-mono text-sm truncate" id="task-contract">{ t.Contract.V }</div>
+								<div class="font-mono text-sm truncate" id="task-contract">{ t.Contract.GetOrZero() }</div>
 							</a>
 						</div>
 						<div class="stat-desc">View on Etherscan</div>
@@ -166,10 +166,10 @@ templ DetailView(t models.Task) {
 						</div>
 						<div class="stat-value">
 							<a
-								href={ templ.SafeURL(GetEtherScanLink(t.Assignee.V)) }
+								href={ templ.SafeURL(GetEtherScanLink(t.Assignee.GetOrZero())) }
 								class="link"
 							>
-								<div class="font-mono text-sm truncate" id="task-assignee">{ t.Assignee.V }</div>
+								<div class="font-mono text-sm truncate" id="task-assignee">{ t.Assignee.GetOrZero() }</div>
 							</a>
 						</div>
 						<div class="stat-desc">ETH address</div>
@@ -209,16 +209,16 @@ templ PaymentStatusView(t models.Task) {
 			<i class="fas fa-coins mr-2"></i>
 			Payment Status
 		</div>
-		if t.Paid.V {
+		if t.Paid.GetOrZero() {
 			<div class="stat-value">
 				<span class="badge badge-success" id="payment-status">Paid</span>
 			</div>
-			<div class="stat-desc" id="payment-amount">{ t.RewardWei.V.String() } Wei</div>
-		} else if t.Status.V == "completed" && t.Paid.V == false {
+			<div class="stat-desc" id="payment-amount">{ t.RewardWei.GetOrZero().String() } Wei</div>
+		} else if t.Status.GetOrZero() == "completed" && t.Paid.GetOrZero() == false {
 			<div class="stat-value">
 				<span class="badge badge-info" id="payment-status">Pending</span>
 			</div>
-			<div class="stat-desc" id="payment-amount">{t.RewardWei.V.String() } Wei</div>
+			<div class="stat-desc" id="payment-amount">{ t.RewardWei.GetOrZero().String() } Wei</div>
 		} else {
 			<div class="stat-value">
 				<span class="badge badge-error" id="payment-status">Cancelled</span>
@@ -237,7 +237,7 @@ templ ResultContentView(t models.Task) {
 				</thead>
 				<tbody id="results-body">
 					<tr>
-						<td>{ t.Input.V }</td>
+						<td>{ t.Input.GetOrZero() }</td>
 					</tr>
 				</tbody>
 			</table>

@@ -1,6 +1,34 @@
 psql:
   dsn: postgres://postgres:postgres@db:5432/scrapeit?sslmode=disable
-  output: pkg/models
+  output: pkg/db/models
   wipe: true
   except:
     "/.*goose.*/":
+    "/.*river.*/":
+plugins:
+  dbinfo:
+    disabled: true
+    pkgname: "models"
+    destination: "pkg/db/dbinfo"
+  dberrors:
+    disabled: true
+    pkgname: "models"
+    destination: "pkg/db/dberrors"
+  enums:
+    disabled: false
+    pkgname: "models"
+    destination: "pkg/db/enums"
+  models:
+    disabled: false
+    pkgname: "models"
+    destination: "pkg/db/models"
+  factory:
+    disabled: false
+    pkgname: "models"
+    destination: "pkg/db/factory"
+  where:
+    disabled: false
+  loaders:
+    disabled: false
+  joins:
+    disabled: false

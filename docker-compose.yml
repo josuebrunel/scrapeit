@@ -1,17 +1,25 @@
 services:
   browser:
-      container_name: scrapeit-browser
-      image: chromedp/headless-shell
-      ports:
-        - "8387:9222"
-      networks:
-        - scrapeit
-      healthcheck:
-        test: ["CMD", "wget", "--no-verbose", "--tries=3", "--spider", "http://localhost:9222/json/version"]
-        interval: 30s
-        timeout: 5s
-        retries: 3
-      restart: unless-stopped
+    container_name: scrapeit-browser
+    image: chromedp/headless-shell
+    ports:
+      - "8387:9222"
+    networks:
+      - scrapeit
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=3",
+          "--spider",
+          "http://localhost:9222/json/version",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
   ipfs:
     container_name: scrapeit-ipfs
     image: ipfs/go-ipfs
@@ -33,7 +41,7 @@ services:
     environment:
       - CHAIN_ID=42
       - BALANCE=100
-      - BLOCK_TIME=15
+      - BLOCK_TIME=60
       - HOST=0.0.0.0
       # - DISABLE_CODE_SIZE_LIMIT=true
     volumes:
@@ -46,7 +54,7 @@ services:
     env_file:
       - .env
     volumes:
-      - scrapeit_db:/var/lib/postgresql/data
+      - scrapeit_db:/var/lib/postgresql/
       - ./init-scripts/db:/docker-entrypoint-initdb.d
     ports:
       - "8382:5432"
@@ -70,7 +78,17 @@ services:
     networks:
       - scrapeit
     post_start:
-      - command: ["gotrue", "admin", "createuser",  "--admin",  "--confirm", "admin",  "admin1234", "service_role"]
+      - command:
+          [
+            "gotrue",
+            "admin",
+            "createuser",
+            "--admin",
+            "--confirm",
+            "admin",
+            "admin1234",
+            "service_role",
+          ]
     healthcheck:
       test:
         [
@@ -79,7 +97,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:9999/health"
+          "http://localhost:9999/health",
         ]
       timeout: 5s
       interval: 5s
@@ -112,7 +130,6 @@ services:
         condition: service_healthy
       ipfs:
         condition: service_started
-
 
   publisher:
     container_name: scrapeit-publisher

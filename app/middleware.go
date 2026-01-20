@@ -2,7 +2,7 @@ package app
 
 import (
 	"net/http"
-	"scrapeit/pkg/models"
+	"scrapeit/pkg/db/models"
 
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/labstack/echo/v5"
@@ -21,7 +21,7 @@ var (
 
 func ApiKeyAuthMiddleware(db bob.DB) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			var (
 				ctx = c.Request().Context()
 				ak  = c.Request().Header.Get("Authorization")

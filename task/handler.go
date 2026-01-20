@@ -3,7 +3,7 @@ package task
 import (
 	"context"
 	"net/http"
-	"scrapeit/pkg/models"
+	"scrapeit/pkg/db/models"
 	"scrapeit/pkg/view"
 	"strconv"
 
@@ -47,7 +47,7 @@ func Mount(ctx context.Context, e *echo.Echo, db bob.DB) {
 }
 
 func (h Handler) List() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		var (
 			ctx   = c.Request().Context()
 			user  = xsession.GetUser(ctx)
@@ -67,10 +67,10 @@ func (h Handler) List() echo.HandlerFunc {
 }
 
 func (h Handler) Detail() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		var (
 			ctx = c.Request().Context()
-			id  = uuid.Must(uuid.FromString(c.PathParam("id")))
+			id  = uuid.Must(uuid.FromString(c.Param("id")))
 		)
 		t, err := models.FindTask(ctx, h.db, id)
 		if err != nil {
