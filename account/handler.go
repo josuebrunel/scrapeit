@@ -38,14 +38,14 @@ const (
 )
 
 var (
-	renderSignUp = func(c echo.Context) templ.Component {
+	renderSignUp = func(c *echo.Context) templ.Component {
 		return SignInAndUpView(
 			"Sign Up",
 			templ.Attributes{"method": http.MethodPost, "action": view.ReverseX(c, HandlerNameSignUp)},
 			true,
 		)
 	}
-	renderSignIn = func(c echo.Context) templ.Component {
+	renderSignIn = func(c *echo.Context) templ.Component {
 		return SignInAndUpView(
 			"Sign In",
 			templ.Attributes{"method": http.MethodPost, "action": view.ReverseX(c, HandlerNameSignIn)},
@@ -104,7 +104,7 @@ func (h Handler) SudoAdmin() auth.Client {
 }
 
 func (h Handler) SignUp() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		if c.Request().Method == http.MethodGet {
 			return view.Render(c, http.StatusOK, renderSignUp(c), nil)
 		}
@@ -126,7 +126,7 @@ func (h Handler) SignUp() echo.HandlerFunc {
 }
 
 func (h Handler) SignIn() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		if c.Request().Method == http.MethodGet {
 			if xsession.IsAuthenticated(c.Request().Context()) {
 				toast.NotifyInfo(c, "You are already signed in")
@@ -158,7 +158,7 @@ func (h Handler) SignIn() echo.HandlerFunc {
 }
 
 func (h Handler) SignOut() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		if c.Request().Method != http.MethodGet {
 			return view.Render(c, http.StatusOK, renderSignIn(c), nil)
 		}
@@ -179,7 +179,7 @@ type RequestUserData struct {
 }
 
 func (h Handler) UpdateData() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		var (
 			ctx   = c.Request().Context()
 			xuser = xsession.GetUser(ctx)
@@ -188,7 +188,7 @@ func (h Handler) UpdateData() echo.HandlerFunc {
 		if c.Request().Method == http.MethodGet {
 			if addr, err := UserEtherAccountGet(ctx, h.db, xuser.ID); err == nil {
 				xlog.Debug("user ether account found", "address", addr.Address, "user", xuser.ID)
-				xuser.Set(DataKeyEthereumAddress, addr.Address)
+				xuser.SetData(DataKeyEthereumAddress, addr.Address)
 				xsession.SetUser(c.Request().Context(), xuser)
 			}
 			return view.Render(c, http.StatusOK, EthAddressView(xuser, templ.Attributes{}), nil)
@@ -202,7 +202,7 @@ func (h Handler) UpdateData() echo.HandlerFunc {
 			xlog.Error("failed to upsert user ether account", "error", err)
 		}
 		if addr != nil {
-			xuser.Set(DataKeyEthereumAddress, addr.Address)
+			xuser.SetData(DataKeyEthereumAddress, addr.Address)
 		}
 		xsession.SetUser(c.Request().Context(), xuser)
 		return view.Render(c, http.StatusOK, EthAddressView(xuser, templ.Attributes{}), nil)
@@ -210,16 +210,16 @@ func (h Handler) UpdateData() echo.HandlerFunc {
 }
 
 func (h Handler) Dashboard() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		var (
 			ctx   = c.Request().Context()
 			xuser = xsession.GetUser(ctx)
 		)
 		if addr, err := UserEtherAccountGet(ctx, h.db, xuser.ID); err == nil {
 			xlog.Debug("user ether account found", "address", addr.Address, "user", xuser.ID)
-			xuser.Set(DataKeyEthereumAddress, addr.Address)
+			xuser.SetData(DataKeyEthereumAddress, addr.Address)
 			balance := etherutil.AsEther(etherutil.Must(etherutil.GetAccountBalance(ctx, h.ethCli, addr.Address)))
-			xuser.Set(DataKeyEthereumBalance, balance.String())
+			xuser.SetData(DataKeyEthereumBalance, balance.String())
 		}
 		xlog.Debug("user authenticated", "user", xuser)
 		xsession.SetUser(c.Request().Context(), xuser)
@@ -228,7 +228,7 @@ func (h Handler) Dashboard() echo.HandlerFunc {
 }
 
 func (h Handler) SinOut() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		var (
 			ctx   = c.Request().Context()
 			xuser = xsession.GetUser(ctx)

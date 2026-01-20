@@ -7,12 +7,13 @@ import (
 	"fmt"
 	"net/http"
 	"scrapeit/pkg/common"
+	"scrapeit/pkg/db/models"
 	"scrapeit/pkg/env"
-	"scrapeit/pkg/models"
 	"scrapeit/task"
 	"slices"
 	"time"
 
+	"github.com/aarondl/opt/omitnull"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/gofrs/uuid/v5"
 	"github.com/josuebrunel/gopkg/xlog"
@@ -35,7 +36,7 @@ var (
 )
 
 func (a App) Scrape() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		var (
 			req Request
 			ctx = c.Request().Context()
@@ -71,7 +72,7 @@ func (a App) Scrape() echo.HandlerFunc {
 				return
 			}
 			xlog.Debug("transaction mined", "transaction", tx.Hash().Hex(), "receipt", rcpt.Status)
-			if err := obj.Update(gCtx, a.bob, &models.TaskSetter{OnChain: models.NullFrom(true)}); err != nil {
+			if err := obj.Update(gCtx, a.bob, &models.TaskSetter{OnChain: omitnull.From(true)}); err != nil {
 				xlog.Error("failed to update task", "error", err)
 			}
 		}()
@@ -81,10 +82,11 @@ func (a App) Scrape() echo.HandlerFunc {
 }
 
 func (a App) Submit(filters ...bob.Expression) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		var (
-			ctx     = c.Request().Context()
-			id      = c.PathParam("id")
+			ctx = c.Request().Context()
+			id  = c.Param("id")
+
 			ethAddr = c.Get(RequestContextEthAddr).(string)
 			reqTask task.Task
 		)
@@ -102,11 +104,11 @@ func (a App) Submit(filters ...bob.Expression) echo.HandlerFunc {
 			}
 			return c.JSON(http.StatusInternalServerError, Response[task.Task]{Error: err.Error()})
 		}
-		if slices.Contains([]string{string(task.Completed), string(task.Active)}, tsk.Status.V) && tsk.Assignee.V != ethAddr {
+		if slices.Contains([]string{string(task.Completed), string(task.Active)}, tsk.Status.GetOrZero()) && tsk.Assignee.GetOrZero() != ethAddr {
 			xlog.Error("invalid assignee", "assignee", reqTask.Assignee)
 			return c.JSON(http.StatusBadRequest, Response[task.Task]{Error: ErrInvalidAssigneeAddress.Error()})
 		}
-		switch task.TaskStatus(tsk.Status.V) {
+		switch task.TaskStatus(tsk.Status.GetOrZero()) {
 		case task.Pending:
 			if reqTask.Status != task.Active {
 				xlog.Error("invalid status", "status", reqTask.Status)
@@ -124,10 +126,10 @@ func (a App) Submit(filters ...bob.Expression) echo.HandlerFunc {
 			return c.JSON(Status500, Response[task.Task]{Error: err.Error()})
 		}
 		xlog.Debug("task updated", "task", reqTask, "obj", obj)
-		if obj.Status.V == string(task.Failed) {
+		if obj.Status.GetOrZero() == string(task.Failed) {
 			return c.JSON(http.StatusOK, Response[task.Task]{Data: reqTask})
 		}
-		if obj.Status.V == string(task.Completed) {
+		if obj.Status.GetOrZero() == string(task.Completed) {
 			xlog.Debug("Launching background process for onchain task completion", "task", reqTask.ID, "status", reqTask.Status)
 			go a.waitForOnChainProcessing(ctx, id, string(reqTask.Status), reqTask.Output)
 		}
@@ -156,15 +158,15 @@ func (a App) waitForOnChainProcessing(ctx context.Context, id, status, output st
 				xlog.Error("failed to find task", "error", err)
 				return
 			}
-			if !obj.OnChain.V {
+			if !obj.OnChain.GetOrZero() {
 				xlog.Debug("task not on chain", "id", obj.ID.String())
 				continue
 			}
-			if obj.Status.V == string(task.Failed) {
+			if obj.Status.GetOrZero() == string(task.Failed) {
 				xlog.Debug("task on-chain but failed", "id", obj.ID.String())
 				return
 			}
-			tx, err := a.Manager.Complete(gCtx, id, obj.Assignee.V, output, task.TaskStatus(status) == task.Completed, a.privateKey)
+			tx, err := a.Manager.Complete(gCtx, id, obj.Assignee.GetOrZero(), output, task.TaskStatus(status) == task.Completed, a.privateKey)
 			if err != nil {
 				xlog.Error("failed to complete task", "error", err)
 				return
@@ -177,7 +179,7 @@ func (a App) waitForOnChainProcessing(ctx context.Context, id, status, output st
 					return
 				}
 				xlog.Debug("transaction mined", "transaction", tx.Hash().Hex(), "receipt", rcpt.Status)
-				if err := obj.Update(ctx, a.bob, &models.TaskSetter{Paid: models.NullFrom(true)}); err != nil {
+				if err := obj.Update(ctx, a.bob, &models.TaskSetter{Paid: omitnull.From(true)}); err != nil {
 					xlog.Error("failed to update task", "error", err)
 					return
 				}
@@ -196,10 +198,10 @@ func (a App) Complete() echo.HandlerFunc {
 }
 
 func (a App) Result() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		var (
 			ctx = c.Request().Context()
-			id  = c.PathParam("id")
+			id  = c.Param("id")
 		)
 		tsk, err := a.Manager.DBGet(ctx, id)
 		if err != nil {
@@ -225,7 +227,7 @@ func (a App) Result() echo.HandlerFunc {
 }
 
 func (a App) Settings() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		peerID := a.Publisher.Node.ID.String()
 		addr := getRootPeerAddr(peerID, a.Publisher.Node.Host.Addrs())
 

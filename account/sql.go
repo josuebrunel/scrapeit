@@ -2,9 +2,10 @@ package account
 
 import (
 	"context"
-	"scrapeit/pkg/models"
+	"scrapeit/pkg/db/models"
 	"time"
 
+	"github.com/aarondl/opt/omit"
 	"github.com/gofrs/uuid/v5"
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/stephenafamo/bob"
@@ -23,8 +24,8 @@ func UserEtherAccountGet(ctx context.Context, db bob.DB, userID string) (*models
 func UserEtherAccountUpsert(ctx context.Context, db bob.DB, userID, address string) (*models.EtherAccount, error) {
 	uid := uuid.Must(uuid.FromString(userID))
 	addr, err := models.EtherAccounts.Insert(&models.EtherAccountSetter{
-		UserID:  &uid,
-		Address: &address,
+		UserID:  omit.From(uid),
+		Address: omit.From(address),
 	}, im.OnConflict("user_id").DoUpdate(
 		im.SetExcluded("address"),
 		im.SetCol("updated_at").ToArg(time.Now().UTC()),

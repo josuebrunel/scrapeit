@@ -2,8 +2,10 @@ package task
 
 import (
 	"context"
-	"scrapeit/pkg/models"
+	"scrapeit/pkg/db/models"
 
+	"github.com/aarondl/opt/omit"
+	"github.com/aarondl/opt/omitnull"
 	"github.com/gofrs/uuid/v5"
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/shopspring/decimal"
@@ -22,15 +24,15 @@ func (m EtherManager) DBGet(ctx context.Context, id string) (Task, error) {
 	}
 	return Task{
 		ID:          tsk.ID.String(),
-		Assignee:    tsk.Assignee.V,
-		Submitter:   tsk.Submitter.V,
-		Contract:    tsk.Contract.V,
-		Transaction: tsk.Transaction.V,
-		Input:       tsk.Input.V,
-		Output:      tsk.Output.V,
-		Status:      TaskStatus(tsk.Status.V),
-		CreatedAt:   tsk.CreatedAt.V,
-		UpdatedAt:   tsk.UpdatedAt.V,
+		Assignee:    tsk.Assignee.GetOrZero(),
+		Submitter:   tsk.Submitter.GetOrZero(),
+		Contract:    tsk.Contract.GetOrZero(),
+		Transaction: tsk.Transaction.GetOrZero(),
+		Input:       tsk.Input.GetOrZero(),
+		Output:      tsk.Output.GetOrZero(),
+		Status:      TaskStatus(tsk.Status.GetOrZero()),
+		CreatedAt:   tsk.CreatedAt.GetOrZero(),
+		UpdatedAt:   tsk.UpdatedAt.GetOrZero(),
 	}, nil
 }
 
@@ -46,18 +48,18 @@ func (m EtherManager) Upsert(ctx context.Context, tsk Task) (*models.Task, error
 	}
 	xlog.Debug("Upserting task", "task", tsk)
 	obj, err = models.Tasks.Insert(&models.TaskSetter{
-		ID:          &id,
-		UserID:      &uid,
-		Assignee:    models.NullFrom(tsk.Assignee),
-		Contract:    models.NullFrom(tsk.Contract),
-		Input:       models.NullFrom(tsk.Input),
-		RewardWei:   models.NullFrom(DecimalFromString(tsk.Reward)),
-		Paid:        models.NullFrom(tsk.Paid),
-		Output:      models.NullFrom(tsk.Output),
-		Status:      models.NullFrom(string(tsk.Status)),
-		Submitter:   models.NullFrom(tsk.Submitter),
-		Transaction: models.NullFrom(tsk.Transaction),
-		UpdatedAt:   models.NullFrom(tsk.UpdatedAt),
+		ID:          omit.From(id),
+		UserID:      omit.From(uid),
+		Assignee:    omitnull.From(tsk.Assignee),
+		Contract:    omitnull.From(tsk.Contract),
+		Input:       omitnull.From(tsk.Input),
+		RewardWei:   omitnull.From(DecimalFromString(tsk.Reward)),
+		Paid:        omitnull.From(tsk.Paid),
+		Output:      omitnull.From(tsk.Output),
+		Status:      omitnull.From(string(tsk.Status)),
+		Submitter:   omitnull.From(tsk.Submitter),
+		Transaction: omitnull.From(tsk.Transaction),
+		UpdatedAt:   omitnull.From(tsk.UpdatedAt),
 	},
 		im.OnConflict("id").DoUpdate(
 			im.SetExcluded("assignee", "output", "status", "transaction", "paid", "updated_at"),

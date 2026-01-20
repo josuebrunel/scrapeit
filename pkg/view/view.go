@@ -17,8 +17,8 @@ type (
 
 var xc xcontextkey = "xcontext"
 
-func Render(ctx echo.Context, status int, tpl templ.Component, data any) error {
-	ctx.Response().Writer.WriteHeader(status)
+func Render(ctx *echo.Context, status int, tpl templ.Component, data any) error {
+	ctx.Response().WriteHeader(status)
 
 	var csrf string
 	if v := ctx.Get("csrf"); v != nil {
@@ -33,7 +33,7 @@ func Render(ctx echo.Context, status int, tpl templ.Component, data any) error {
 		"data":    data,
 	})
 
-	err := tpl.Render(cx, ctx.Response().Writer)
+	err := tpl.Render(cx, ctx.Response())
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, "failed to render response template")
 	}
@@ -59,7 +59,7 @@ func Reverse(cx context.Context, name string, values ...any) string {
 	return path
 }
 
-func ReverseX(c echo.Context, name string, values ...any) string {
+func ReverseX(c *echo.Context, name string, values ...any) string {
 	path, err := c.Echo().Router().Routes().Reverse(name, values...)
 	if err != nil {
 		xlog.Error("error while reversing route", "name", name, "values", values, "error", err)

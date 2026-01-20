@@ -5,9 +5,10 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"net/http"
-	"scrapeit/pkg/models"
+	"scrapeit/pkg/db/models"
 	"scrapeit/pkg/view"
 
+	"github.com/aarondl/opt/omit"
 	"github.com/gofrs/uuid/v5"
 	"github.com/josuebrunel/gopkg/xlog"
 	"github.com/josuebrunel/gopkg/xsession"
@@ -30,7 +31,7 @@ func generateApiKey() (string, error) {
 }
 
 func (a App) GenerateApiKey() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		var (
 			ctx    = c.Request().Context()
 			user   = xsession.GetUser(ctx)
@@ -77,8 +78,8 @@ func apiKeyUpsert(ctx context.Context, db bob.DB, userID string) (*models.APIKey
 	}
 	uid, _ := uuid.FromString(userID)
 	apiKey, err := models.APIKeys.Insert(&models.APIKeySetter{
-		APIKey: &key,
-		UserID: &uid,
+		APIKey: omit.From(key),
+		UserID: omit.From(uid),
 	}, im.OnConflict("user_id").DoUpdate(im.SetExcluded("api_key"))).One(ctx, db)
 	if err != nil {
 		xlog.Error("Error creating API key", "userID", userID, "error", err)

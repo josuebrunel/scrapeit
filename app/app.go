@@ -82,12 +82,12 @@ func (a *App) Close() {
 
 func (a *App) Start() error {
 	e := echo.New()
-	e.Use(middleware.Logger())
+	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 	e.Use(xsession.LoadAndSave(xsession.SessionManager))
 	e.Static("/static", "static")
-	e.GET("/", func(c echo.Context) error { return view.Render(c, http.StatusOK, Index(), nil) })
+	e.GET("/", func(c *echo.Context) error { return view.Render(c, http.StatusOK, Index(), nil) })
 	// TaskV1
 	taskV1 := e.Group("/api/v1/task", ApiKeyAuthMiddleware(a.bob))
 	taskV1.POST("", a.Scrape())

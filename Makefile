@@ -13,7 +13,6 @@ GOOSE_MIGRATION_DIR=app/migrations
 
 deps:
 	apt update && apt upgrade -y && apt install protobuf-compiler -y
-	go get "github.com/labstack/echo/v5@v5.0.0-20230722203903-ec5b858dab61"
 	go install github.com/a-h/templ/cmd/templ@latest
 	go get github.com/a-h/templ@latest
 	go get github.com/stephenafamo/bob@latest
