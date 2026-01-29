@@ -84,7 +84,7 @@ func (a *App) Start() error {
 	e := echo.New()
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
-	e.Use(middleware.CORS())
+	e.Use(middleware.CORS("*"))
 	e.Use(xsession.LoadAndSave(xsession.SessionManager))
 	e.Static("/static", "static")
 	e.GET("/", func(c *echo.Context) error { return view.Render(c, http.StatusOK, Index(), nil) })

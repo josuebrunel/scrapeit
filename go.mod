@@ -16,7 +16,7 @@ require (
 	github.com/josuebrunel/gopkg/component v0.0.5
 	github.com/josuebrunel/gopkg/xlog v0.0.1
 	github.com/josuebrunel/gopkg/xsession v0.1.0
-	github.com/labstack/echo/v5 v5.0.0
+	github.com/labstack/echo/v5 v5.0.1
 	github.com/lib/pq v1.10.9
 	github.com/libp2p/go-libp2p v0.46.0
 	github.com/libp2p/go-libp2p-kad-dht v0.37.0
