@@ -10,7 +10,7 @@ ADD     . /go/src/app
 ENV 	GOCACHE=/root/.cache/go-build
 RUN 	--mount=type=cache,target="/root/.cache/go-build"
 RUN     make deps
-# RUN     make build
+RUN     make build
 EXPOSE  8080 
 EXPOSE  7654
 
@@ -31,3 +31,4 @@ RUN  mkdir /opt/scrapeit/
 WORKDIR /opt/scrapeit/
 COPY --from=build  /go/src/app/bin/scrapeit-client /opt/scrapeit/scrapeit-client
 CMD [ "./scrapeit-client" ]
+

@@ -1,0 +1,22 @@
+# The main domain or IP for your deployment. 
+# Defaults to localhost if SITE_ADDRESS environment variable is not provided.
+{$SITE_ADDRESS:localhost} {
+    # Proxy requests starting with /auth/ or /login or /signup to the GoTrue service
+    # Alternatively, you could use a dedicated subdomain block like:
+    # auth.{$SITE_ADDRESS:localhost} {
+    #     reverse_proxy auth:9999
+    # }
+    
+    # If the application config expects GoTrue at the root path of the subdomain, 
+    # it's best to use the dedicated subdomain as shown above.
+    # However, if your frontend handles the routing properly:
+    handle /auth/* {
+        uri strip_prefix /auth
+        reverse_proxy auth:9999
+    }
+
+    # Everything else goes to the main application server (publisher)
+    handle {
+        reverse_proxy publisher:8080
+    }
+}
